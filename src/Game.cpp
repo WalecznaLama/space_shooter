@@ -31,15 +31,22 @@ Game::Game() {
         std::cerr << "Failed to load font\n";
     }
 
-    // set up fps text
+    // set up fps and killCounter text
     fpsText.setFont(font);
     fpsText.setCharacterSize(20);  // in pixels
     fpsText.setFillColor(sf::Color::White);
     fpsText.setPosition(10, 10);  // top left corner
 
+    killCounterText.setFont(font);
+    killCounterText.setCharacterSize(40);  // in pixels
+    killCounterText.setFillColor(sf::Color::Red);
+    killCounterText.setPosition(10, window.getSize().y - 50);  // top right corner
+
+
     player.init(window.getSize(), playerTexture);
     player_bullet_speed = 0.9f;
     enemy_bullet_speed = 0.6f;
+    kill_counter = 0;
 }
 
 void Game::run() {
@@ -71,6 +78,7 @@ void Game::update() {
     fpsText.setString("FPS: " + std::to_string(static_cast<int>(fps)));
     clock_fps.restart();
 
+
     for (int i = enemies.size() - 1; i >= 0; --i) {
         Enemy& enemy = enemies[i];
         enemy.update();
@@ -83,6 +91,7 @@ void Game::update() {
                 // collision occurred, destroy the enemy and the bullet
                 enemies.erase(enemies.begin() + i);
                 playerBullets.erase(playerBullets.begin() + j);
+                kill_counter++;
                 break;  // enemy is destroyed, no need to check other bullets
             }
         }
@@ -95,6 +104,8 @@ void Game::update() {
             enemyBullets.emplace_back(enemy.getPosition(), enemyBulletTexture);
         }
     }
+
+    killCounterText.setString("Score: " + std::to_string(kill_counter));
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && player.canShoot()) {
         playerBullets.emplace_back(player.getPosition(), playerBulletTexture);
@@ -130,6 +141,7 @@ void Game::render() {
     player.draw(window);
 
     window.draw(fpsText);  // draw the fps text
+    window.draw(killCounterText);  // draw the killCounter text
     window.display();
 }
 

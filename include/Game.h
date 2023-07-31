@@ -31,9 +31,11 @@ private:
 
     sf::Font font;
     sf::Text fpsText;
+    sf::Text killCounterText;
 
     float player_bullet_speed;
     float enemy_bullet_speed;
+    uint kill_counter;
 };
 
 #endif //SPACE_SHOOTER_GAME_H
