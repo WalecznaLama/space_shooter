@@ -2,16 +2,16 @@
 
 Player::Player() = default;
 
-void Player::init(const sf::Vector2u& windowSize) {
-    if (!texture.loadFromFile("resources/player.png")) {
-        // handle error
-    }
+void Player::init(const sf::Vector2u& windowSize, const sf::Texture& texture) {
+
     sprite.setTexture(texture);
 
     // set initial position at the bottom of the screen
     float x = windowSize.x / 2 - texture.getSize().x / 2;
     float y = windowSize.y - texture.getSize().y;
     sprite.setPosition(x, y);
+
+    texture_size = texture.getSize();  // save texture size
 }
 
 void Player::draw(sf::RenderWindow& window) const {
@@ -19,7 +19,7 @@ void Player::draw(sf::RenderWindow& window) const {
 }
 
 void Player::update(const sf::Vector2u& windowSize) {
-    float speed = 0.02f; // adjust as needed
+    float speed = 0.8f; // adjust as needed
 
     sf::Vector2f movement(0.f, 0.f);
 
@@ -50,5 +50,19 @@ void Player::update(const sf::Vector2u& windowSize) {
     if (position.y > windowSize.y - size.y) position.y = windowSize.y - size.y;
 
     sprite.setPosition(position);
+}
+
+sf::Vector2f Player::getPosition() {
+    sf::Vector2f position = sprite.getPosition();
+    return {position.x + texture_size.x / 2, position.y + texture_size.y / 2};
+}
+
+bool Player::canShoot() {
+    sf::Time elapsed = shootClock.getElapsedTime();
+    if (elapsed.asSeconds() >= 0.5f) {  // shoot every 0.5 seconds
+        shootClock.restart();
+        return true;
+    }
+    return false;
 }
 
