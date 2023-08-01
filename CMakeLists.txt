@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(include)
 
 add_executable(space_shooter src/main.cpp src/Player.cpp src/Enemy.cpp src/Bullet.cpp src/Game.cpp
-                             src/AssetManager.cpp)
+                             src/AssetManager.cpp src/PassiveObject.cpp src/Powerup.cpp)
 
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR})
 

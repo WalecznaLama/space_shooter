@@ -1,11 +1,11 @@
 #include "Enemy.h"
 
 Enemy::Enemy(const sf::Vector2u& windowSize, const sf::Texture& texture) {
-
     sprite.setTexture(texture);
 
     // set initial position at a random position at the top of the screen
-    auto x = (float)(random() % windowSize.x);
+    std::srand(std::time(nullptr));
+    auto x = (float)(std::rand() % windowSize.x);
     sprite.setPosition(x, 0);
 
 }

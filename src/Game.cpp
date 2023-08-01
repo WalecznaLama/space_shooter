@@ -4,7 +4,8 @@ Game::Game() {
     window.create(sf::VideoMode(800, 600), "Space Shooter");
 
     // limit the framerate to 300 frames per second
-    window.setFramerateLimit(300);
+    framerate = 300;
+    window.setFramerateLimit(framerate);
 
     // load textures
     backgroundTexture = assets.loadTexture("resources/space.png");
@@ -12,6 +13,7 @@ Game::Game() {
     enemyTexture = assets.loadTexture("resources/enemy.png");
     playerBulletTexture = assets.loadTexture("resources/player_bullet.png");
     enemyBulletTexture = assets.loadTexture("resources/enemy_bullet.png");
+    powerupTexture = assets.loadTexture("resources/powerup1.png");
 
     // load font
     font = assets.loadFont("resources/Roboto-Medium.ttf");
@@ -28,11 +30,13 @@ Game::Game() {
     killCounterText.setFont(font);
     killCounterText.setCharacterSize(40);  // in pixels
     killCounterText.setFillColor(sf::Color::Red);
-    killCounterText.setPosition(10, window.getSize().y - 50);  // top right corner
+    killCounterText.setPosition(10, window.getSize().y - 50);  // bottom left corner
 
     player.init(window.getSize(), playerTexture);
     player_bullet_speed = 0.9f;
     enemy_bullet_speed = 0.6f;
+
+//    std::srand(std::time(nullptr));
 }
 
 void Game::run() {
@@ -49,11 +53,17 @@ void Game::run() {
 }
 
 void Game::update() {
-    static sf::Clock clock;
-    sf::Time elapsed = clock.getElapsedTime();
-    if (elapsed.asSeconds() >= 3.0f) {  // every 3 seconds spawn enemy
+    static sf::Clock enemySpawnClock;
+    sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
+    if (elapsed_enemy.asSeconds() >= 3.0f) {  // every 3 seconds spawn enemy
         enemies.emplace_back(window.getSize(), enemyTexture);
-        clock.restart();
+        enemySpawnClock.restart();
+    }
+    static sf::Clock powerupSpawnClock;
+    sf::Time elapsed_powerup = powerupSpawnClock.getElapsedTime();
+    if (elapsed_powerup.asSeconds() >= 5.0f) {  // every 5 seconds spawn powerup
+        powerups.emplace_back(window.getSize(), powerupTexture);
+        powerupSpawnClock.restart();
     }
 
     // update fps text
@@ -62,7 +72,6 @@ void Game::update() {
     float fps = 1.f / elapsed_fps.asSeconds();
     fpsText.setString("FPS: " + std::to_string(static_cast<int>(fps)));
     clock_fps.restart();
-
 
     updateEnemies();
     checkBulletEnemyCollisions();
@@ -75,23 +84,8 @@ void Game::update() {
         playerBullets.emplace_back(player.getPosition(), playerBulletTexture);
     }
 
-    for (int i = playerBullets.size() - 1; i >= 0; --i) {
-        Bullet& bullet = playerBullets[i];
-        bullet.update(-player_bullet_speed);
-
-        if (bullet.getPosition().y < 0) {
-            playerBullets.erase(playerBullets.begin() + i);
-        }
-    }
-
-    for (int i = enemyBullets.size() - 1; i >= 0; --i) {
-        Bullet& bullet = enemyBullets[i];
-        bullet.update(enemy_bullet_speed);
-
-        if (bullet.getPosition().y > window.getSize().y) {
-            enemyBullets.erase(enemyBullets.begin() + i);
-        }
-    }
+    bullets_update();
+    powerups_update();
 
     player.update(window.getSize());
     checkPlayerCollision();
@@ -100,9 +94,10 @@ void Game::update() {
 void Game::render() {
     window.clear();
     window.draw(backgroundSprite);  // draw the background
-    for (const Enemy& enemy : enemies)  enemy.draw(window);
+    for (const Enemy& enemy : enemies)          enemy.draw(window);
+    for (const Powerup& powerup : powerups)     powerup.draw(window);
     for (const Bullet& bullet : playerBullets)  bullet.draw(window);
-    for (const Bullet& bullet : enemyBullets)  bullet.draw(window);
+    for (const Bullet& bullet : enemyBullets)   bullet.draw(window);
     player.draw(window);
 
     window.draw(fpsText);  // draw the fps text
@@ -188,6 +183,37 @@ void Game::enemiesShoot() {
     for (auto& enemy : enemies) {
         if (enemy.canShoot()) {
             enemyBullets.emplace_back(enemy.getPosition(), enemyBulletTexture);
+        }
+    }
+}
+
+void Game::bullets_update() {
+    for (int i = playerBullets.size() - 1; i >= 0; --i) {
+        Bullet& bullet = playerBullets[i];
+        bullet.update(-player_bullet_speed);
+
+        if (bullet.getPosition().y < 0) {
+            playerBullets.erase(playerBullets.begin() + i);
+        }
+    }
+
+    for (int i = enemyBullets.size() - 1; i >= 0; --i) {
+        Bullet& bullet = enemyBullets[i];
+        bullet.update(enemy_bullet_speed);
+
+        if (bullet.getPosition().y > window.getSize().y) {
+            enemyBullets.erase(enemyBullets.begin() + i);
+        }
+    }
+}
+
+void Game::powerups_update() {
+    for (int i = powerups.size() - 1; i >=0; --i) {
+        Powerup& powerup = powerups[i];
+        powerup.update(0.2, 0.2, 100);
+
+        if(powerup.getPosition().y > window.getSize().y) {
+            powerups.erase(powerups.begin() + i);
         }
     }
 }

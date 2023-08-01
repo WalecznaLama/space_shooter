@@ -6,6 +6,7 @@
 #include "Enemy.h"
 #include "Bullet.h"
 #include "AssetManager.h"
+#include "Powerup.h"
 
 class Game {
 public:
@@ -22,16 +23,22 @@ private:
     void removeEnemiesOffScreen();
     void enemiesShoot();
 
+    void bullets_update();
+    void powerups_update();
+
+
     sf::RenderWindow window;
     AssetManager assets;
     Player player;
     std::vector<Enemy> enemies;
     std::vector<Bullet> playerBullets;
     std::vector<Bullet> enemyBullets;
+    std::vector<Powerup> powerups;
     sf::Texture playerTexture;
     sf::Texture enemyTexture;
     sf::Texture playerBulletTexture;
     sf::Texture enemyBulletTexture;
+    sf::Texture powerupTexture;
 
     sf::Texture backgroundTexture;
     sf::Sprite backgroundSprite;
@@ -44,6 +51,7 @@ private:
     float enemy_bullet_speed;
     uint kill_counter = 0;
     bool is_game_over = false;
+    int framerate;
 };
 
 #endif //SPACE_SHOOTER_GAME_H
