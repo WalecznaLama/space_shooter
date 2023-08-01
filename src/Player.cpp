@@ -10,8 +10,6 @@ void Player::init(const sf::Vector2u& windowSize, const sf::Texture& texture) {
     float x = windowSize.x / 2 - texture.getSize().x / 2;
     float y = windowSize.y - texture.getSize().y;
     sprite.setPosition(x, y);
-
-    texture_size = texture.getSize();  // save texture size
 }
 
 void Player::draw(sf::RenderWindow& window) const {
@@ -54,7 +52,8 @@ void Player::update(const sf::Vector2u& windowSize) {
 
 sf::Vector2f Player::getPosition() {
     sf::Vector2f position = sprite.getPosition();
-    return {position.x + texture_size.x / 2, position.y + texture_size.y / 2};
+    sf::Vector2u texture_size = sprite.getTexture()->getSize();
+    return {position.x + texture_size.x / 2.f, position.y + texture_size.y / 2.f};
 }
 
 bool Player::canShoot() {
@@ -64,5 +63,9 @@ bool Player::canShoot() {
         return true;
     }
     return false;
+}
+
+const sf::Sprite &Player::getSprite() const {
+    return sprite;
 }
 

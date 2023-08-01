@@ -11,11 +11,11 @@ public:
     void update(const sf::Vector2u& windowSize);
     sf::Vector2f getPosition();
     bool canShoot();
+    const sf::Sprite& getSprite() const;
 
 private:
     sf::Sprite sprite;
     sf::Clock shootClock;
-    sf::Vector2u texture_size;
 };
 
 #endif //SPACE_SHOOTER_PLAYER_H

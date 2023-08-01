@@ -5,9 +5,9 @@ Enemy::Enemy(const sf::Vector2u& windowSize, const sf::Texture& texture) {
     sprite.setTexture(texture);
 
     // set initial position at a random position at the top of the screen
-    auto x = (float)(rand() % windowSize.x);
+    auto x = (float)(random() % windowSize.x);
     sprite.setPosition(x, 0);
-    texture_size = texture.getSize();  // save texture size
+
 }
 
 void Enemy::draw(sf::RenderWindow& window) const {
@@ -21,7 +21,8 @@ void Enemy::update() {
 
 sf::Vector2f Enemy::getPosition() {
     sf::Vector2f position = sprite.getPosition();
-    return {position.x + texture_size.x / 2, position.y + texture_size.y / 2};
+    sf::Vector2u texture_size = sprite.getTexture()->getSize();
+    return {position.x + texture_size.x / 2.f, position.y + texture_size.y / 2.f};
 }
 
 bool Enemy::canShoot() {

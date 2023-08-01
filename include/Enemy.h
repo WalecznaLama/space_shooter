@@ -14,7 +14,6 @@ public:
 
 private:
     sf::Sprite sprite;
-    sf::Vector2u texture_size;
     sf::Clock shootClock;
 };
 

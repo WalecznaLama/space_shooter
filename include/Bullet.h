@@ -8,7 +8,6 @@ public:
     Bullet(const sf::Vector2f& position, const sf::Texture& texture);
     void draw(sf::RenderWindow& window) const;
     void update(float dy);
-    sf::Vector2u texture_size;
     sf::Vector2f getPosition();
     const sf::Sprite& getSprite() const;
 
