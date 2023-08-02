@@ -68,13 +68,6 @@ void Game::update() {
 
     killCounterText.setString("Score: " + std::to_string(kill_counter));
 
-//    for (auto& enemy : enemies) {
-//        enemy.update(enemy_speed.x, enemy_speed.y, player.getSprite().getPosition(), playerBullets);
-//        if (!enemy.alive) {
-//            // jak usunąć enemy z wektora paine komputerze w tym miejscu
-//        }
-//    }
-
     for (auto it = enemies.rbegin(); it != enemies.rend(); /* no increment here */) {
         it->update(enemy_speed.x, enemy_speed.y, player.getSprite().getPosition(), playerBullets);
         if (!it->isAlive()) {
@@ -183,8 +176,7 @@ void Game::powerups_update() {
 
         if (playerBounds.intersects(powerupBounds)){
             powerups.erase(powerups.begin() + i);
-//            player_speed
-                //TODO powerups stuff
+            player.setRotationAcceleration(player.getRotationAcceleration() * 1.2);
         }
 
     }

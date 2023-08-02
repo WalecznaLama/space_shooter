@@ -19,11 +19,15 @@ public:
     void userMovement(const sf::Vector2f& speed, sf::Time elapsed);
     bool isALive();
 
+    void setRotationAcceleration(float rotationAcceleration);
+    float getRotationAcceleration() const;
+
 private:
     sf::Sprite sprite;
     sf::Clock shootClock;
     sf::Clock updateClock;
     float current_dx = 0;
+    float rotation_acceleration;
     bool alive = true;
 };
 

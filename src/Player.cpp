@@ -9,8 +9,10 @@ void Player::init(const sf::Vector2u& windowSize, const sf::Texture& texture) {
     // set initial position at the bottom of the screen
     float x = windowSize.x / 2 - texture.getSize().x / 2;
     float y = windowSize.y - texture.getSize().y;
+
     sprite.setPosition(x, y);
     sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
+    rotation_acceleration = 30;
 }
 
 void Player::draw(sf::RenderWindow& window) const {
@@ -85,12 +87,11 @@ void Player::userMovement(const sf::Vector2f& speed, sf::Time elapsed) {
     sf::Vector2f movement(0.f, 0.f);
     float rotation_degrees = 30;
     float rotation = 0;
-    float dx_multipler = 30;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        current_dx -= speed.x/elapsed.asMicroseconds()*dx_multipler;
+        current_dx -= speed.x / elapsed.asMicroseconds() * rotation_acceleration;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        current_dx += speed.x/elapsed.asMicroseconds()*dx_multipler;
+        current_dx += speed.x / elapsed.asMicroseconds() * rotation_acceleration;
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
@@ -111,4 +112,12 @@ void Player::userMovement(const sf::Vector2f& speed, sf::Time elapsed) {
 
 bool Player::isALive() {
     return alive;
+}
+
+void Player::setRotationAcceleration(float rotationAcceleration) {
+    rotation_acceleration = rotationAcceleration;
+}
+
+float Player::getRotationAcceleration() const {
+    return rotation_acceleration;
 }
