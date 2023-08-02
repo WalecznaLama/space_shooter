@@ -6,9 +6,10 @@
 class Powerup : public PassiveObject {
 public:
     Powerup(const sf::Vector2u& windowSize, const sf::Texture& texture);
-    void update(float dx, float dy, float d_range);
+    void update(const float& speed) override;
 
 private:
+    float d_range;
     float d_from_spawn;
     bool going_right;
 };

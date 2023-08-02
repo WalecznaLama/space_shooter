@@ -47,8 +47,8 @@ private:
     sf::Text fpsText;
     sf::Text killCounterText;
 
-    float player_speed;
-    float enemy_speed;
+    sf::Vector2f player_speed;
+    sf::Vector2f enemy_speed;
     float player_bullet_speed;
     float enemy_bullet_speed;
     float shoot_time_player;

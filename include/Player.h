@@ -8,7 +8,7 @@ public:
     Player();
     void init(const sf::Vector2u& windowSize, const sf::Texture& texture);
     void draw(sf::RenderWindow& window) const;
-    void update(const sf::Vector2u& windowSize, float speed);
+    void update(const sf::Vector2u& windowSize, const sf::Vector2f& speed);
     sf::Vector2f getPosition();
     bool canShoot(float time_to_shoot);
     const sf::Sprite& getSprite() const;

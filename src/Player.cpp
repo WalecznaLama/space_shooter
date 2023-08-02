@@ -10,30 +10,36 @@ void Player::init(const sf::Vector2u& windowSize, const sf::Texture& texture) {
     float x = windowSize.x / 2 - texture.getSize().x / 2;
     float y = windowSize.y - texture.getSize().y;
     sprite.setPosition(x, y);
+    sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
 }
 
 void Player::draw(sf::RenderWindow& window) const {
     window.draw(sprite);
 }
 
-void Player::update(const sf::Vector2u& windowSize, float speed) {
+void Player::update(const sf::Vector2u& windowSize, const sf::Vector2f& speed) {
     sf::Vector2f movement(0.f, 0.f);
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        movement.y -= speed;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-        movement.y += speed;
-    }
+    float rotation_degrees = 10;
+    float rotation = 0;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        movement.x -= speed;
+        movement.x -= speed.x;
+        rotation = -rotation_degrees;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        movement.x += speed;
+        movement.x += speed.x;
+        rotation = rotation_degrees;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        movement.y -= speed.y;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        movement.y += speed.y;
+        rotation *= -1.;
     }
 
     // apply the movement
     sprite.move(movement);
+    sprite.setRotation(rotation);
 
     // keep the player inside the screen bounds
     sf::Vector2f position = sprite.getPosition();
@@ -49,9 +55,7 @@ void Player::update(const sf::Vector2u& windowSize, float speed) {
 }
 
 sf::Vector2f Player::getPosition() {
-    sf::Vector2f position = sprite.getPosition();
-    sf::Vector2u texture_size = sprite.getTexture()->getSize();
-    return {position.x + texture_size.x / 2.f, position.y + texture_size.y / 2.f};
+    return sprite.getPosition();
 }
 
 bool Player::canShoot(float time_to_shoot) {

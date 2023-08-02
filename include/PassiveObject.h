@@ -6,7 +6,7 @@
 class PassiveObject {
 public:
     virtual void draw(sf::RenderWindow& window) const;
-    virtual void update(float dy);
+    virtual void update(const float &speed) = 0;
     virtual sf::Vector2f getPosition();
     virtual const sf::Sprite& getSprite() const;
 

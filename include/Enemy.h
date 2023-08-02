@@ -7,7 +7,7 @@ class Enemy {
 public:
     Enemy(const sf::Vector2u& windowSize,  const sf::Texture& texture);
     void draw(sf::RenderWindow& window) const;
-    void update(float speed);
+    void update(float dx, float speed, sf::Vector2f player_position);
     sf::Vector2f getPosition();
     bool canShoot(float time_to_shoot);
     const sf::Sprite& getSprite() const;

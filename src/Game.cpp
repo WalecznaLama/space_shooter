@@ -33,8 +33,8 @@ Game::Game() {
     killCounterText.setPosition(10, window.getSize().y - 50);  // bottom left corner
 
     player.init(window.getSize(), playerTexture);
-    player_speed = 1.8f;
-    enemy_speed = 0.8f;
+    player_speed = sf::Vector2f(1.8f, 1.5f);
+    enemy_speed = sf::Vector2f(0.8f, 0.1f);
     player_bullet_speed = 1.8f;
     enemy_bullet_speed = 1.2f;
     shoot_time_player = 0.2f;
@@ -86,7 +86,8 @@ void Game::update() {
 
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && player.canShoot(shoot_time_player))
-        playerBullets.emplace_back(player.getPosition(), playerBulletTexture);
+        playerBullets.emplace_back(player.getPosition(), playerBulletTexture,
+                                   player.getSprite().getRotation());
 
     bullets_update();
     powerups_update();
@@ -158,7 +159,7 @@ void Game::gameOver() {
 
 void Game::updateEnemies() {
     for (auto& enemy : enemies) {
-        enemy.update(enemy_speed);
+        enemy.update(enemy_speed.x, enemy_speed.y, player.getSprite().getPosition());
     }
 }
 
@@ -186,7 +187,8 @@ void Game::removeEnemiesOffScreen() {
 void Game::enemiesShoot() {
     for (auto& enemy : enemies) {
         if (enemy.canShoot(shoot_time_enemy)) {
-            enemyBullets.emplace_back(enemy.getPosition(), enemyBulletTexture);
+            enemyBullets.emplace_back(enemy.getPosition(), enemyBulletTexture,
+                                      enemy.getSprite().getRotation());
         }
     }
 }
@@ -214,7 +216,7 @@ void Game::bullets_update() {
 void Game::powerups_update() {
     for (int i = powerups.size() - 1; i >=0; --i) {
         Powerup& powerup = powerups[i];
-        powerup.update(0.2, 0.2, 100);
+        powerup.update(0.4);
 
         if(powerup.getPosition().y > window.getSize().y) {
             powerups.erase(powerups.begin() + i);
