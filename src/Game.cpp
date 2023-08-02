@@ -4,7 +4,7 @@ Game::Game() {
     window.create(sf::VideoMode(800, 600), "Space Shooter");
 
     // limit the framerate to 300 frames per second
-    framerate = 300;
+    framerate = 150;
     window.setFramerateLimit(framerate);
 
     // load textures
@@ -33,8 +33,12 @@ Game::Game() {
     killCounterText.setPosition(10, window.getSize().y - 50);  // bottom left corner
 
     player.init(window.getSize(), playerTexture);
-    player_bullet_speed = 0.9f;
-    enemy_bullet_speed = 0.6f;
+    player_speed = 1.8f;
+    enemy_speed = 0.8f;
+    player_bullet_speed = 1.8f;
+    enemy_bullet_speed = 1.2f;
+    shoot_time_player = 0.2f;
+    shoot_time_enemy = 2.0f;
 
 //    std::srand(std::time(nullptr));
 }
@@ -73,31 +77,31 @@ void Game::update() {
     fpsText.setString("FPS: " + std::to_string(static_cast<int>(fps)));
     clock_fps.restart();
 
+    killCounterText.setString("Score: " + std::to_string(kill_counter));
+
     updateEnemies();
     checkBulletEnemyCollisions();
     removeEnemiesOffScreen();
     enemiesShoot();
 
-    killCounterText.setString("Score: " + std::to_string(kill_counter));
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && player.canShoot()) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && player.canShoot(shoot_time_player))
         playerBullets.emplace_back(player.getPosition(), playerBulletTexture);
-    }
 
     bullets_update();
     powerups_update();
 
-    player.update(window.getSize());
+    player.update(window.getSize(), player_speed);
     checkPlayerCollision();
 }
 
 void Game::render() {
     window.clear();
     window.draw(backgroundSprite);  // draw the background
-    for (const Enemy& enemy : enemies)          enemy.draw(window);
     for (const Powerup& powerup : powerups)     powerup.draw(window);
     for (const Bullet& bullet : playerBullets)  bullet.draw(window);
     for (const Bullet& bullet : enemyBullets)   bullet.draw(window);
+    for (const Enemy& enemy : enemies)          enemy.draw(window);
     player.draw(window);
 
     window.draw(fpsText);  // draw the fps text
@@ -154,7 +158,7 @@ void Game::gameOver() {
 
 void Game::updateEnemies() {
     for (auto& enemy : enemies) {
-        enemy.update();
+        enemy.update(enemy_speed);
     }
 }
 
@@ -181,7 +185,7 @@ void Game::removeEnemiesOffScreen() {
 
 void Game::enemiesShoot() {
     for (auto& enemy : enemies) {
-        if (enemy.canShoot()) {
+        if (enemy.canShoot(shoot_time_enemy)) {
             enemyBullets.emplace_back(enemy.getPosition(), enemyBulletTexture);
         }
     }

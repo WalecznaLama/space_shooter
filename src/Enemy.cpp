@@ -14,8 +14,7 @@ void Enemy::draw(sf::RenderWindow& window) const {
     window.draw(sprite);
 }
 
-void Enemy::update() {
-    float speed = 0.3f;  // adjust as needed
+void Enemy::update(float speed) {
     sprite.move(0, speed);
 }
 
@@ -25,10 +24,19 @@ sf::Vector2f Enemy::getPosition() {
     return {position.x + texture_size.x / 2.f, position.y + texture_size.y / 2.f};
 }
 
-bool Enemy::canShoot() {
+bool Enemy::canShoot(float time_to_shoot) {
     sf::Time elapsed = shootClock.getElapsedTime();
-    if (elapsed.asSeconds() >= 3.0f) {  // shoot every 3 seconds
+    float interval;
+
+    if (!first_shot_fired) {
+        interval = time_to_shoot / 10.f;  // shoot after 0.2 seconds when the enemy spawns
+    } else {
+        interval = time_to_shoot;  // afterward, shoot every 2 seconds
+    }
+
+    if (elapsed.asSeconds() >= interval) {
         shootClock.restart();
+        first_shot_fired = true;
         return true;
     }
     return false;

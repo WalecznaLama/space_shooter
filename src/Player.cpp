@@ -16,9 +16,7 @@ void Player::draw(sf::RenderWindow& window) const {
     window.draw(sprite);
 }
 
-void Player::update(const sf::Vector2u& windowSize) {
-    float speed = 0.8f; // adjust as needed
-
+void Player::update(const sf::Vector2u& windowSize, float speed) {
     sf::Vector2f movement(0.f, 0.f);
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
@@ -56,9 +54,9 @@ sf::Vector2f Player::getPosition() {
     return {position.x + texture_size.x / 2.f, position.y + texture_size.y / 2.f};
 }
 
-bool Player::canShoot() {
+bool Player::canShoot(float time_to_shoot) {
     sf::Time elapsed = shootClock.getElapsedTime();
-    if (elapsed.asSeconds() >= 0.5f) {  // shoot every 0.5 seconds
+    if (elapsed.asSeconds() >= time_to_shoot) {  // shoot every 0.5 seconds
         shootClock.restart();
         return true;
     }

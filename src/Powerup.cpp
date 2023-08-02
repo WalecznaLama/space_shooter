@@ -9,15 +9,6 @@ Powerup::Powerup(const sf::Vector2u& windowSize,const sf::Texture& texture) {
     std::srand(std::time(nullptr));
     auto x = (float)(std::rand() % windowSize.x);
 
-    // Skalowanie do nowego rozmiaru
-    float targetWidth = 40.0f;
-    float targetHeight = 40.0f;
-    // Obliczenie współczynnika skalowania
-    float scaleX = targetWidth / texture.getSize().x;
-    float scaleY = targetHeight / texture.getSize().y;
-    // Zastosowanie skalowania
-    sprite.setScale(scaleX, scaleY);
-
     sprite.setPosition(x, 0);
 }
 

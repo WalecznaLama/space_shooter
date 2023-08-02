@@ -47,8 +47,12 @@ private:
     sf::Text fpsText;
     sf::Text killCounterText;
 
+    float player_speed;
+    float enemy_speed;
     float player_bullet_speed;
     float enemy_bullet_speed;
+    float shoot_time_player;
+    float shoot_time_enemy;
     uint kill_counter = 0;
     bool is_game_over = false;
     int framerate;
