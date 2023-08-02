@@ -7,32 +7,21 @@ Game::Game() {
     framerate = 150;
     window.setFramerateLimit(framerate);
 
-    // load textures
-    backgroundTexture = assets.loadTexture("resources/space.png");
-    playerTexture = assets.loadTexture("resources/player.png");
-    enemyTexture = assets.loadTexture("resources/enemy.png");
-    playerBulletTexture = assets.loadTexture("resources/player_bullet.png");
-    enemyBulletTexture = assets.loadTexture("resources/enemy_bullet.png");
-    powerupTexture = assets.loadTexture("resources/powerup1.png");
-
-    // load font
-    font = assets.loadFont("resources/Roboto-Medium.ttf");
-
     // set the texture to the sprite
-    backgroundSprite.setTexture(backgroundTexture);
+    backgroundSprite.setTexture(assets.backgroundTexture);
 
     // set up fps and killCounter text
-    fpsText.setFont(font);
+    fpsText.setFont(assets.font);
     fpsText.setCharacterSize(20);  // in pixels
     fpsText.setFillColor(sf::Color::White);
     fpsText.setPosition(10, 10);  // top left corner
 
-    killCounterText.setFont(font);
+    killCounterText.setFont(assets.font);
     killCounterText.setCharacterSize(40);  // in pixels
     killCounterText.setFillColor(sf::Color::Red);
     killCounterText.setPosition(10, window.getSize().y - 50);  // bottom left corner
 
-    player.init(window.getSize(), playerTexture);
+    player.init(window.getSize(), assets.playerTexture);
     player_speed = sf::Vector2f(1.8f, 1.5f);
     enemy_speed = sf::Vector2f(0.8f, 0.1f);
     player_bullet_speed = 1.8f;
@@ -52,7 +41,7 @@ void Game::run() {
         update();
         render();
 
-        if (is_game_over) gameOver();
+        if (!player.player_alive) gameOver();
     }
 }
 
@@ -60,13 +49,13 @@ void Game::update() {
     static sf::Clock enemySpawnClock;
     sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
     if (elapsed_enemy.asSeconds() >= 3.0f) {  // every 3 seconds spawn enemy
-        enemies.emplace_back(window.getSize(), enemyTexture);
+        enemies.emplace_back(window.getSize(), assets.enemyTexture);
         enemySpawnClock.restart();
     }
     static sf::Clock powerupSpawnClock;
     sf::Time elapsed_powerup = powerupSpawnClock.getElapsedTime();
     if (elapsed_powerup.asSeconds() >= 9.0f) {  // every 9 seconds spawn powerup
-        powerups.emplace_back(window.getSize(), powerupTexture);
+        powerups.emplace_back(window.getSize(), assets.powerupTexture);
         powerupSpawnClock.restart();
     }
 
@@ -86,14 +75,13 @@ void Game::update() {
 
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && player.canShoot(shoot_time_player))
-        playerBullets.emplace_back(player.getPosition(), playerBulletTexture,
+        playerBullets.emplace_back(player.getPosition(), assets.playerBulletTexture,
                                    player.getSprite().getRotation());
 
     bullets_update();
     powerups_update();
 
-    player.update(window.getSize(), player_speed);
-    checkPlayerCollision();
+    player.update(window.getSize(), player_speed, enemies, enemyBullets);
 }
 
 void Game::render() {
@@ -110,34 +98,11 @@ void Game::render() {
     window.display();
 }
 
-void Game::checkPlayerCollision() {
-    sf::FloatRect playerBounds = player.getSprite().getGlobalBounds();
 
-    for (const auto& enemy : enemies) {
-        sf::FloatRect enemyBounds = enemy.getSprite().getGlobalBounds();
-
-        if (playerBounds.intersects(enemyBounds)) {
-            // Player and enemy have collided
-            is_game_over = true;
-            return;
-        }
-    }
-
-    for (const auto& bullet : enemyBullets) {
-        sf::FloatRect bulletBounds = bullet.getSprite().getGlobalBounds();
-
-        if (playerBounds.intersects(bulletBounds)) {
-            // Player and bullet have collided
-            is_game_over = true;
-            return;
-        }
-    }
-
-}
 
 void Game::gameOver() {
     sf::Text gameOverText;
-    gameOverText.setFont(font);
+    gameOverText.setFont(assets.font);
     gameOverText.setString("Game Over!\nFinal Score: " + std::to_string(kill_counter));
     gameOverText.setCharacterSize(24);
     gameOverText.setFillColor(sf::Color::Red);
@@ -188,7 +153,7 @@ void Game::removeEnemiesOffScreen() {
 void Game::enemiesShoot() {
     for (auto& enemy : enemies) {
         if (enemy.canShoot(shoot_time_enemy)) {
-            enemyBullets.emplace_back(enemy.getPosition(), enemyBulletTexture,
+            enemyBullets.emplace_back(enemy.getPosition(), assets.enemyBulletTexture,
                                       enemy.getSprite().getRotation());
         }
     }

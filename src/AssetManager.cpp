@@ -1,6 +1,8 @@
 #include "AssetManager.h"
 
-AssetManager::AssetManager() = default;
+AssetManager::AssetManager() {
+    init();
+}
 
 
 sf::Texture &AssetManager::loadTexture(const std::string &filename) {
@@ -17,10 +19,23 @@ sf::Texture &AssetManager::loadTexture(const std::string &filename) {
 }
 
 sf::Font &AssetManager::loadFont(const std::string &filename) {
-    auto& font = fonts[filename];
-    if (!font.loadFromFile(filename)) {
+    auto& _font = fonts[filename];
+    if (!_font.loadFromFile(filename)) {
         std::cerr << "Failed to load font\n";
         std::exit(1);
     }
-    return font;
+    return _font;
+}
+
+void AssetManager::init() {
+    // load textures
+    backgroundTexture = loadTexture("resources/space.png");
+    playerTexture = loadTexture("resources/player.png");
+    enemyTexture = loadTexture("resources/enemy.png");
+    playerBulletTexture = loadTexture("resources/player_bullet.png");
+    enemyBulletTexture = loadTexture("resources/enemy_bullet.png");
+    powerupTexture = loadTexture("resources/powerup1.png");
+
+    // load font
+    font = loadFont("resources/Roboto-Medium.ttf");
 }

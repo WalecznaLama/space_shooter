@@ -16,7 +16,6 @@ public:
 private:
     void update();
     void render();
-    void checkPlayerCollision();
     void gameOver();
     void updateEnemies();
     void checkBulletEnemyCollisions();
@@ -34,16 +33,9 @@ private:
     std::vector<Bullet> playerBullets;
     std::vector<Bullet> enemyBullets;
     std::vector<Powerup> powerups;
-    sf::Texture playerTexture;
-    sf::Texture enemyTexture;
-    sf::Texture playerBulletTexture;
-    sf::Texture enemyBulletTexture;
-    sf::Texture powerupTexture;
 
-    sf::Texture backgroundTexture;
     sf::Sprite backgroundSprite;
 
-    sf::Font font;
     sf::Text fpsText;
     sf::Text killCounterText;
 
@@ -54,7 +46,6 @@ private:
     float shoot_time_player;
     float shoot_time_enemy;
     uint kill_counter = 0;
-    bool is_game_over = false;
     int framerate;
 };
 

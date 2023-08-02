@@ -17,7 +17,8 @@ void Player::draw(sf::RenderWindow& window) const {
     window.draw(sprite);
 }
 
-void Player::update(const sf::Vector2u& windowSize, const sf::Vector2f& speed) {
+void Player::update(const sf::Vector2u& windowSize,const sf::Vector2f& speed,
+                    const std::vector<Enemy>& enemies, const std::vector<Bullet>& enemyBullets) {
     sf::Vector2f movement(0.f, 0.f);
     float rotation_degrees = 10;
     float rotation = 0;
@@ -52,6 +53,7 @@ void Player::update(const sf::Vector2u& windowSize, const sf::Vector2f& speed) {
     if (position.y > windowSize.y - size.y) position.y = windowSize.y - size.y;
 
     sprite.setPosition(position);
+    checkPlayerCollision(enemies, enemyBullets);
 }
 
 sf::Vector2f Player::getPosition() {
@@ -71,3 +73,27 @@ const sf::Sprite &Player::getSprite() const {
     return sprite;
 }
 
+void Player::checkPlayerCollision(const std::vector<Enemy>& enemies, const std::vector<Bullet>& enemyBullets) {
+    sf::FloatRect playerBounds = sprite.getGlobalBounds();
+
+    for (const auto& enemy : enemies) {
+        sf::FloatRect enemyBounds = enemy.getSprite().getGlobalBounds();
+
+        if (playerBounds.intersects(enemyBounds)) {
+            // Player and enemy have collided
+            player_alive = false;
+            return;
+        }
+    }
+
+    for (const auto& bullet : enemyBullets) {
+        sf::FloatRect bulletBounds = bullet.getSprite().getGlobalBounds();
+
+        if (playerBounds.intersects(bulletBounds)) {
+            // Player and bullet have collided
+            player_alive = false;
+            return;
+        }
+    }
+
+}
