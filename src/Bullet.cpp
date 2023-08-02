@@ -6,7 +6,6 @@ Bullet::Bullet(const sf::Vector2f& position, const sf::Texture& texture, const f
     sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
 
     init_angle = angle;
-
 }
 
 void Bullet::update(const float &speed) {

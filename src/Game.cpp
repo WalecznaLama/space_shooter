@@ -65,7 +65,7 @@ void Game::update() {
     }
     static sf::Clock powerupSpawnClock;
     sf::Time elapsed_powerup = powerupSpawnClock.getElapsedTime();
-    if (elapsed_powerup.asSeconds() >= 5.0f) {  // every 5 seconds spawn powerup
+    if (elapsed_powerup.asSeconds() >= 9.0f) {  // every 9 seconds spawn powerup
         powerups.emplace_back(window.getSize(), powerupTexture);
         powerupSpawnClock.restart();
     }
@@ -132,6 +132,7 @@ void Game::checkPlayerCollision() {
             return;
         }
     }
+
 }
 
 void Game::gameOver() {
@@ -214,13 +215,22 @@ void Game::bullets_update() {
 }
 
 void Game::powerups_update() {
+    sf::FloatRect playerBounds = player.getSprite().getGlobalBounds();
+
     for (int i = powerups.size() - 1; i >=0; --i) {
         Powerup& powerup = powerups[i];
         powerup.update(0.4);
+        sf::FloatRect powerupBounds = powerup.getSprite().getGlobalBounds();
 
-        if(powerup.getPosition().y > window.getSize().y) {
+        // remove off screen
+        if(powerup.getPosition().y > window.getSize().y)    powerups.erase(powerups.begin() + i);
+
+        if (playerBounds.intersects(powerupBounds)){
             powerups.erase(powerups.begin() + i);
+//            player_speed
+                //TODO powerups stuff
         }
+
     }
 }
 
