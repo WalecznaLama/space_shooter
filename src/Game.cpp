@@ -22,7 +22,7 @@ Game::Game() {
     killCounterText.setPosition(10, window.getSize().y - 50);  // bottom left corner
 
     player.init(window.getSize(), assets.playerTexture);
-    player_speed = sf::Vector2f(1.8f, 1.5f);
+    player_speed = sf::Vector2f(1.8f, 0.0001f);
     enemy_speed = sf::Vector2f(0.8f, 0.1f);
     player_bullet_speed = 1.8f;
     enemy_bullet_speed = 1.2f;
@@ -41,7 +41,7 @@ void Game::run() {
         update();
         render();
 
-        if (!player.player_alive) gameOver();
+        if (!player.alive) gameOver();
     }
 }
 
@@ -68,11 +68,31 @@ void Game::update() {
 
     killCounterText.setString("Score: " + std::to_string(kill_counter));
 
-    updateEnemies();
-    checkBulletEnemyCollisions();
-    removeEnemiesOffScreen();
-    enemiesShoot();
+//    for (auto& enemy : enemies) {
+//        enemy.update(enemy_speed.x, enemy_speed.y, player.getSprite().getPosition(), playerBullets);
+//        if (!enemy.alive) {
+//            // jak usunąć enemy z wektora paine komputerze w tym miejscu
+//        }
+//    }
 
+    for (auto it = enemies.rbegin(); it != enemies.rend(); /* no increment here */) {
+        it->update(enemy_speed.x, enemy_speed.y, player.getSprite().getPosition(), playerBullets);
+        if (!it->alive) {
+            if (it->killed_by_player) kill_counter++;
+            // Convert reverse iterator to base (which will be one position forward in terms of direct iterator)
+            auto directIt = it.base();
+            // Move to the actual element in terms of direct iterator
+            --directIt;
+            // Erase the element and get the new iterator
+            directIt = enemies.erase(directIt);
+            // Convert the direct iterator back to reverse iterator
+            it = std::reverse_iterator<decltype(directIt)>(directIt);
+        } else {
+            ++it;
+        }
+    }
+
+    enemiesShoot();
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && player.canShoot(shoot_time_player))
         playerBullets.emplace_back(player.getPosition(), assets.playerBulletTexture,
@@ -98,8 +118,6 @@ void Game::render() {
     window.display();
 }
 
-
-
 void Game::gameOver() {
     sf::Text gameOverText;
     gameOverText.setFont(assets.font);
@@ -120,33 +138,6 @@ void Game::gameOver() {
         window.clear();
         window.draw(gameOverText);
         window.display();
-    }
-}
-
-void Game::updateEnemies() {
-    for (auto& enemy : enemies) {
-        enemy.update(enemy_speed.x, enemy_speed.y, player.getSprite().getPosition());
-    }
-}
-
-void Game::checkBulletEnemyCollisions() {
-    for (int i = enemies.size() - 1; i >= 0; --i) {
-        for (int j = playerBullets.size() - 1; j >= 0; --j) {
-            if (enemies[i].getSprite().getGlobalBounds().intersects(playerBullets[j].getSprite().getGlobalBounds())) {
-                enemies.erase(enemies.begin() + i);
-                playerBullets.erase(playerBullets.begin() + j);
-                kill_counter++;
-                break;
-            }
-        }
-    }
-}
-
-void Game::removeEnemiesOffScreen() {
-    for (int i = enemies.size() - 1; i >= 0; --i) {
-        if (enemies[i].getPosition().y > window.getSize().y) {
-            enemies.erase(enemies.begin() + i);
-        }
     }
 }
 

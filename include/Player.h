@@ -16,11 +16,14 @@ public:
     bool canShoot(float time_to_shoot);
     const sf::Sprite& getSprite() const;
     void checkPlayerCollision(const std::vector<Enemy>& enemies, const std::vector<Bullet>& enemyBullets);
+    void userMovement(const sf::Vector2f& speed, sf::Time elapsed);
 
-    bool player_alive = true;
+    bool alive = true;
 private:
     sf::Sprite sprite;
     sf::Clock shootClock;
+    sf::Clock updateClock;
+    float current_dx = 0;
 };
 
 #endif //SPACE_SHOOTER_PLAYER_H

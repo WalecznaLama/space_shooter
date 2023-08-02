@@ -17,14 +17,11 @@ private:
     void update();
     void render();
     void gameOver();
-    void updateEnemies();
-    void checkBulletEnemyCollisions();
-    void removeEnemiesOffScreen();
+
     void enemiesShoot();
 
     void bullets_update();
     void powerups_update();
-
 
     sf::RenderWindow window;
     AssetManager assets;

@@ -19,28 +19,11 @@ void Player::draw(sf::RenderWindow& window) const {
 
 void Player::update(const sf::Vector2u& windowSize,const sf::Vector2f& speed,
                     const std::vector<Enemy>& enemies, const std::vector<Bullet>& enemyBullets) {
-    sf::Vector2f movement(0.f, 0.f);
-    float rotation_degrees = 10;
-    float rotation = 0;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        movement.x -= speed.x;
-        rotation = -rotation_degrees;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        movement.x += speed.x;
-        rotation = rotation_degrees;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        movement.y -= speed.y;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-        movement.y += speed.y;
-        rotation *= -1.;
-    }
+    sf::Time elapsed = updateClock.getElapsedTime();
+    updateClock.restart();
 
-    // apply the movement
-    sprite.move(movement);
-    sprite.setRotation(rotation);
+    userMovement(speed, elapsed);
+
 
     // keep the player inside the screen bounds
     sf::Vector2f position = sprite.getPosition();
@@ -81,7 +64,7 @@ void Player::checkPlayerCollision(const std::vector<Enemy>& enemies, const std::
 
         if (playerBounds.intersects(enemyBounds)) {
             // Player and enemy have collided
-            player_alive = false;
+            alive = false;
             return;
         }
     }
@@ -91,9 +74,37 @@ void Player::checkPlayerCollision(const std::vector<Enemy>& enemies, const std::
 
         if (playerBounds.intersects(bulletBounds)) {
             // Player and bullet have collided
-            player_alive = false;
+            alive = false;
             return;
         }
     }
 
+}
+
+void Player::userMovement(const sf::Vector2f& speed, sf::Time elapsed) {
+    sf::Vector2f movement(0.f, 0.f);
+    float rotation_degrees = 30;
+    float rotation = 0;
+    float dx_multipler = 30;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+        current_dx -= speed.x/elapsed.asMicroseconds()*dx_multipler;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+        current_dx += speed.x/elapsed.asMicroseconds()*dx_multipler;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        movement.y -= speed.y;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        movement.y += speed.y;
+        rotation *= -1.;
+    }
+    current_dx = std::clamp(current_dx, -speed.x, speed.x);
+    movement.x = current_dx;
+    rotation = (current_dx / speed.x) * rotation_degrees;
+
+    // apply the movement
+    sprite.move(movement);
+    sprite.setRotation(rotation);
 }
