@@ -108,3 +108,7 @@ void Player::userMovement(const sf::Vector2f& speed, sf::Time elapsed) {
     sprite.move(movement);
     sprite.setRotation(rotation);
 }
+
+bool Player::isALive() {
+    return alive;
+}

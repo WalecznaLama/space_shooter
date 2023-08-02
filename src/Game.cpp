@@ -41,7 +41,7 @@ void Game::run() {
         update();
         render();
 
-        if (!player.alive) gameOver();
+        if (!player.isALive()) gameOver();
     }
 }
 
@@ -77,8 +77,8 @@ void Game::update() {
 
     for (auto it = enemies.rbegin(); it != enemies.rend(); /* no increment here */) {
         it->update(enemy_speed.x, enemy_speed.y, player.getSprite().getPosition(), playerBullets);
-        if (!it->alive) {
-            if (it->killed_by_player) kill_counter++;
+        if (!it->isAlive()) {
+            if (it->isKilledByPlayer()) kill_counter++;
             // Convert reverse iterator to base (which will be one position forward in terms of direct iterator)
             auto directIt = it.base();
             // Move to the actual element in terms of direct iterator

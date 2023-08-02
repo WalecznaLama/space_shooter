@@ -17,13 +17,14 @@ public:
     const sf::Sprite& getSprite() const;
     void checkPlayerCollision(const std::vector<Enemy>& enemies, const std::vector<Bullet>& enemyBullets);
     void userMovement(const sf::Vector2f& speed, sf::Time elapsed);
+    bool isALive();
 
-    bool alive = true;
 private:
     sf::Sprite sprite;
     sf::Clock shootClock;
     sf::Clock updateClock;
     float current_dx = 0;
+    bool alive = true;
 };
 
 #endif //SPACE_SHOOTER_PLAYER_H

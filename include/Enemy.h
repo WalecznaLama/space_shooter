@@ -13,11 +13,12 @@ public:
     sf::Vector2f getPosition();
     bool canShoot(float time_to_shoot);
     const sf::Sprite& getSprite() const;
-
-    bool alive = true;
-    bool killed_by_player = false;
+    bool isAlive();
+    bool isKilledByPlayer();
 
 private:
+    bool alive = true;
+    bool killed_by_player = false;
     sf::Sprite sprite;
     sf::Clock shootClock;
     bool first_shot_fired = false;

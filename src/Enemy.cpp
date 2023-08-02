@@ -69,3 +69,11 @@ bool Enemy::canShoot(float time_to_shoot) {
 const sf::Sprite &Enemy::getSprite() const {
     return sprite;
 }
+
+bool Enemy::isAlive() {
+    return alive;
+}
+
+bool Enemy::isKilledByPlayer() {
+    return killed_by_player;
+}
