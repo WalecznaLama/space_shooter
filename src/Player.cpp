@@ -9,56 +9,89 @@ void Player::init(const sf::Vector2u& windowSize, const sf::Texture& texture) {
     // set initial position at the bottom of the screen
     float x = windowSize.x / 2. - texture.getSize().x / 2.;
     float y = windowSize.y - texture.getSize().y;
+    position_ = sf::Vector2f(x,y);
 
-    sprite_.setPosition(x, y);
+    sprite_.setPosition(position_);
     sprite_.setOrigin(sprite_.getLocalBounds().width / 2, sprite_.getLocalBounds().height / 2);
-    acceleration_ = 30;
+    alive_ = true;
+    first_shot_fired_ = false;
+    killed_by_bullet_ = false;
+    engineForce_ = 80.0;
+    angularVel_ = 0;
+    maxAngularVel_ = 180;
+    maxLinearVel_ = 50;
+    angularAcc_ = 360;
+    linearDecConst_ = 2.0;
 }
 
 void Player::update(const sf::Vector2f& speed, std::vector<Bullet>& bullets) {
     sf::Time elapsed = updateClock_.getElapsedTime();
     updateClock_.restart();
 
-    userMovement(speed, elapsed);
-
+    userMovement(elapsed);
     // keep the player_ inside the screen bounds
     sf::Vector2f position = sprite_.getPosition();
     sf::Vector2u size = sprite_.getTexture()->getSize();
     sf::Vector2f half_size = sf::Vector2f(size.x/2., size.y/2.);
 
-    if (position.x < half_size.x) position.x = half_size.x;
-    if (position.y < half_size.y) position.y = half_size.y;
-    if (position.x > windowSize_.x - half_size.x) position.x = windowSize_.x - half_size.x;
-    if (position.y > windowSize_.y - half_size.y) position.y = windowSize_.y - half_size.y;
+    if (position.x < half_size.x) { position.x = half_size.x, velocity_.x = 0.f; }
+    if (position.y < half_size.y) { position.y = half_size.y, velocity_.y = 0.f; }
+    if (position.x > windowSize_.x - half_size.x) { position.x = windowSize_.x - half_size.x, velocity_.x = 0.f; }
+    if (position.y > windowSize_.y - half_size.y) { position.y = windowSize_.y - half_size.y, velocity_.y = 0.f; }
 
     sprite_.setPosition(position);
     checkBulletsCollision(bullets);
 }
 
-void Player::userMovement(const sf::Vector2f& speed, sf::Time elapsed) {
-    sf::Vector2f movement(0.f, 0.f);
-    float _rotation_degrees = 30;
-    float _rotation = 0;
+void Player::userMovement(const sf::Time& deltaTime){
     bool _moved = false;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        currentSpeed_.x -= speed.x / elapsed.asMicroseconds() * acceleration_;
+    float _deltaTime = deltaTime.asSeconds();
+        // TODO clamp vel, improve Down force
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        // Oblicz kierunek siły silnika
+        sf::Vector2f _engineForceDirection(sinf(rotation_ * M_PI / 180.0f), -cosf(rotation_ * M_PI / 180.0f));
+        // Oblicz przyspieszenie wynikające z siły silnika
+        sf::Vector2f _acceleration = _engineForceDirection * engineForce_;
+        // Dodaj przyspieszenie do prędkości
+        velocity_ += _acceleration * _deltaTime;
+
         _moved = true;
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        currentSpeed_.x += speed.x / elapsed.asMicroseconds() * acceleration_;
-        _moved = true;
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        float _force = engineForce_ / 3;
+        // Oblicz kierunek siły silnika
+        sf::Vector2f _engineForceDirection(sinf(rotation_ * M_PI / 180.0f), -cosf(rotation_ * M_PI / 180.0f));
+        // Oblicz przyspieszenie wynikające z siły silnika
+        sf::Vector2f _acceleration = _engineForceDirection * _force;
+        // Dodaj przyspieszenie do prędkości
+        velocity_ -= _acceleration * _deltaTime;
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        currentSpeed_.y -= speed.y / elapsed.asMicroseconds() * acceleration_;
-        _moved = true;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+        angularVel_ -= angularAcc_ * _deltaTime;
+        if (angularVel_ < -maxAngularVel_)  angularVel_ = -maxAngularVel_;
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-        movement.y += speed.y;
-        currentSpeed_.y += speed.y / elapsed.asMicroseconds() * acceleration_;
-        _rotation *= -1.;
-        _moved = true;
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+        angularVel_ += angularAcc_ * _deltaTime;
+        if (angularVel_ > maxAngularVel_)   angularVel_ = maxAngularVel_;
     }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+
+        // Oblicz kierunek przeciwny do kierunku prędkości
+        sf::Vector2f decelerationDirection = -normalize(velocity_);
+        sf::Vector2f deceleration = decelerationDirection * engineForce_  * linearDecConst_;
+        // Dodaj przyspieszenie hamujące do prędkości
+        velocity_ += deceleration * _deltaTime;
+    }
+
+    // Zaktualizuj pozycję rakiety
+    position_ += velocity_ * _deltaTime;
+    // Zaktualizuj kąt rakiety
+    rotation_ += angularVel_ * _deltaTime;
+
+    sprite_.setPosition(position_);
+    sprite_.setRotation(rotation_);
 
     if(_moved != user_input){
         user_input = _moved;
@@ -66,28 +99,13 @@ void Player::userMovement(const sf::Vector2f& speed, sf::Time elapsed) {
         else sprite_.setTexture(textures_["engine_off"]);
     }
 
-    currentSpeed_.x = std::clamp(currentSpeed_.x, -speed.x, speed.x);
-    currentSpeed_.y = std::clamp(currentSpeed_.y, -speed.y, speed.y);
-
-    movement = sf::Vector2f(currentSpeed_);
-    _rotation = (currentSpeed_.x / speed.x) * _rotation_degrees;
-
-    // apply the movement
-    sprite_.move(movement);
-    sprite_.setRotation(_rotation);
 }
 
-void Player::setRotationAcceleration(float rotationAcceleration) {
-    acceleration_ = rotationAcceleration;
-}
+void Player::setEngineForce(float engineForce) { engineForce_ = engineForce; }
 
-float Player::getRotationAcceleration() const {
-    return acceleration_;
-}
+float Player::getEngineForce() const { return engineForce_; }
 
-void Player::multiplyRotationAcceleration(float k) {
-    acceleration_ *= k;
-}
+void Player::multiplyEngineForce(float k) { engineForce_ *= k; }
 
 void Player::checkEnemyCollision(const std::vector<Enemy>& enemies){
     sf::FloatRect bounds = sprite_.getGlobalBounds();

@@ -15,6 +15,7 @@ public:
 
 private:
     sf::Vector2f playerPosition_;
+    float max_tilt_;
 };
 
 #endif //SPACE_SHOOTER_ENEMY_H

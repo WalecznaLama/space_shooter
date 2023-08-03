@@ -19,7 +19,6 @@ private:
     void gameOver();
 
     void enemiesShoot();
-
     void bullets_update();
     void powerups_update();
 

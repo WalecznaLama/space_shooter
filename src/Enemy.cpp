@@ -16,6 +16,7 @@ void Enemy::init(const sf::Vector2u &windowSize, const sf::Texture &texture) {
     sprite_.setPosition(x, 0);
     sprite_.setOrigin(sprite_.getLocalBounds().width / 2, sprite_.getLocalBounds().height / 2);
     acceleration_ = 0.001;
+    max_tilt_ = 40;
 }
 
 
@@ -30,11 +31,11 @@ void Enemy::update(const sf::Vector2f& speed, std::vector <Bullet> &bullets) {
     float finat_dx = 0;
     float angle = error * speed.x * elapsed * acceleration_;
 
-    if(error > windowSize_.x / 20 or error < -windowSize_.x / 20)      finat_dx = angle;
+    if (error > windowSize_.x / 20 or error < -windowSize_.x / 20)      finat_dx = angle;
 
     finat_dx = std::clamp(finat_dx, -speed.x, speed.x);
 
-    float rotate = (finat_dx / speed.x) * -30;
+    float rotate = (finat_dx / speed.x) * -max_tilt_;
     sprite_.move(finat_dx, speed.y);
     sprite_.setRotation(rotate);
     checkBulletsCollision(bullets);

@@ -1,13 +1,5 @@
 #include "Entity.h"
 
-void Entity::draw(sf::RenderWindow& window) const{
-    window.draw(sprite_);
-}
-
-sf::Vector2f Entity::getPosition(){
-    return sprite_.getPosition();
-}
-
 bool Entity::canShoot(float time_to_shoot){
     sf::Time elapsed = shootClock_.getElapsedTime();
     float interval;
@@ -24,10 +16,6 @@ bool Entity::canShoot(float time_to_shoot){
         return true;
     }
     return false;
-}
-
-const sf::Sprite& Entity::getSprite() const{
-    return sprite_;
 }
 
 void Entity::checkBulletsCollision(std::vector <Bullet> &bullets) {
@@ -49,11 +37,25 @@ void Entity::checkBulletsCollision(std::vector <Bullet> &bullets) {
     }
 }
 
-
-bool Entity::isAlive() {
-    return alive_;
-}
-
 void Entity::addTexture(const std::string& texture_name, const sf::Texture& texture) {
     textures_[texture_name] = texture;
 }
+
+sf::Vector2f Entity::normalize(const sf::Vector2f& vector){
+    float length = sqrt(vector.x * vector.x + vector.y * vector.y);
+    if (length != 0)
+        return {vector.x / length, vector.y / length};
+    else
+        return vector;
+}
+
+void Entity::draw(sf::RenderWindow& window) const{ window.draw(sprite_); }
+
+sf::Vector2f Entity::getPosition() const{ return sprite_.getPosition(); }
+
+float Entity::getRotation() const { return rotation_; }
+
+const sf::Sprite& Entity::getSprite() const{ return sprite_; }
+
+bool Entity::isAlive() { return alive_; }
+

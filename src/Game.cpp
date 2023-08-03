@@ -42,23 +42,22 @@ void Game::run() {
 
         update();
         render();
-
     }
 }
 
 void Game::update() {
-    static sf::Clock enemySpawnClock;
-    sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
-    if (elapsed_enemy.asSeconds() >= 3.0f) {  // every 3 seconds spawn enemy
-        enemies_.emplace_back(window_.getSize(), assets_.enemyTexture);
-        enemySpawnClock.restart();
-    }
-    static sf::Clock powerupSpawnClock;
-    sf::Time elapsed_powerup = powerupSpawnClock.getElapsedTime();
-    if (elapsed_powerup.asSeconds() >= 9.0f) {  // every 9 seconds spawn powerup
-        powerups_.emplace_back(window_.getSize(), assets_.powerupTexture);
-        powerupSpawnClock.restart();
-    }
+//    static sf::Clock enemySpawnClock;
+//    sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
+//    if (elapsed_enemy.asSeconds() >= 3.0f) {  // every 3 seconds spawn enemy
+//        enemies_.emplace_back(window_.getSize(), assets_.enemyTexture);
+//        enemySpawnClock.restart();
+//    }
+//    static sf::Clock powerupSpawnClock;
+//    sf::Time elapsed_powerup = powerupSpawnClock.getElapsedTime();
+//    if (elapsed_powerup.asSeconds() >= 9.0f) {  // every 9 seconds spawn powerup
+//        powerups_.emplace_back(window_.getSize(), assets_.powerupTexture);
+//        powerupSpawnClock.restart();
+//    }
 
     // update fps text
     static sf::Clock clock_fps;
@@ -177,8 +176,9 @@ void Game::powerups_update() {
 
         if (playerBounds.intersects(powerupBounds)){
             powerups_.erase(powerups_.begin() + i);
-            player_.multiplyRotationAcceleration(1.3);
+            player_.multiplyEngineForce(1.3);
         }
     }
 }
+
 
