@@ -7,7 +7,7 @@
 class Bullet : public PassiveObject {
 
 public:
-    Bullet(const sf::Vector2f& position, const sf::Texture& texture, const float& angle);
+    Bullet(const sf::Vector2u& windowSize, const sf::Vector2f& position, const sf::Texture& texture, const float& angle);
     void update(const float &speed) override;
 
 private:

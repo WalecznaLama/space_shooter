@@ -10,7 +10,7 @@ public:
 
 private:
     float d_range_;
-    float d_from_spawn_;
+    float d_from_spawn_ = 0;
     bool going_right_;
 };
 

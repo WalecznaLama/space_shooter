@@ -2,15 +2,17 @@
 #include <cmath>
 Powerup::Powerup(const sf::Vector2u& windowSize,const sf::Texture& texture) {
     sprite_.setTexture(texture);
+    windowSize_ = windowSize;
 
-    d_from_spawn_ = 0;
     going_right_ = true;
 
     std::srand(std::time(nullptr));
-    auto x = (float)(std::rand() % windowSize.x);
+    uint bound_offset = windowSize_.x / 5;
+    auto x = (float)(std::rand() % (windowSize.x - bound_offset*2));
+    x += bound_offset;
 
-    sprite_.setPosition(x, 0);
     sprite_.setOrigin(sprite_.getLocalBounds().width / 2, sprite_.getLocalBounds().height / 2);
+    sprite_.setPosition(x,  1);
 
     d_range_ = 100;
 }

@@ -40,6 +40,7 @@ private:
     sf::Vector2f enemySpeed_;
     float player_bullet_speed_;
     float enemy_bullet_speed_;
+    float powerup_speed_;
     float shoot_time_player_;
     float shoot_time_enemy_;
     uint kill_counter_ = 0;

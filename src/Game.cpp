@@ -27,6 +27,7 @@ Game::Game() {
     enemySpeed_ = sf::Vector2f(0.8f, 0.1f);
     player_bullet_speed_ = 1.8f;
     enemy_bullet_speed_ = 1.2f;
+    powerup_speed_ = 0.4f;
     shoot_time_player_ = 0.2f;
     shoot_time_enemy_ = 2.0f;
 
@@ -89,8 +90,8 @@ void Game::update() {
     enemiesShoot();
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && player_.canShoot(shoot_time_player_))
-        playerBullets_.emplace_back(player_.getPosition(), assets_.playerBulletTexture,
-                                    player_.getSprite().getRotation());
+        playerBullets_.emplace_back(window_.getSize(),player_.getPosition(),
+                                    assets_.playerBulletTexture,player_.getSprite().getRotation());
 
     bullets_update();
     powerups_update();
@@ -138,20 +139,17 @@ void Game::gameOver() {
 }
 
 void Game::enemiesShoot() {
-    for (auto& enemy : enemies_) {
-        if (enemy.canShoot(shoot_time_enemy_)) {
-            enemyBullets_.emplace_back(enemy.getPosition(), assets_.enemyBulletTexture,
-                                       enemy.getSprite().getRotation());
-        }
-    }
+    for (auto& enemy : enemies_)
+        if (enemy.canShoot(shoot_time_enemy_))
+            enemyBullets_.emplace_back(window_.getSize() ,enemy.getPosition(),
+                                       assets_.enemyBulletTexture,enemy.getSprite().getRotation());
 }
 
 void Game::bullets_update() {
     for (int i = playerBullets_.size() - 1; i >= 0; --i) {
         Bullet& bullet = playerBullets_[i];
         bullet.update(-player_bullet_speed_);
-
-        if (bullet.getPosition().y < 0) {
+        if (bullet.isOffScreen())   {
             playerBullets_.erase(playerBullets_.begin() + i);
         }
     }
@@ -159,10 +157,8 @@ void Game::bullets_update() {
     for (int i = enemyBullets_.size() - 1; i >= 0; --i) {
         Bullet& bullet = enemyBullets_[i];
         bullet.update(enemy_bullet_speed_);
-
-        if (bullet.getPosition().y > window_.getSize().y) {
-            enemyBullets_.erase(enemyBullets_.begin() + i);
-        }
+        if (bullet.isOffScreen()) {
+            enemyBullets_.erase(enemyBullets_.begin() + i); }
     }
 }
 
@@ -171,17 +167,18 @@ void Game::powerups_update() {
 
     for (int i = powerups_.size() - 1; i >= 0; --i) {
         Powerup& powerup = powerups_[i];
-        powerup.update(0.4);
+        powerup.update(powerup_speed_);
         sf::FloatRect powerupBounds = powerup.getSprite().getGlobalBounds();
 
         // remove off screen
-        if(powerup.getPosition().y > window_.getSize().y)    powerups_.erase(powerups_.begin() + i);
+        if(powerup.isOffScreen()) {
+            powerups_.erase(powerups_.begin() + i);
+        }
 
         if (playerBounds.intersects(powerupBounds)){
             powerups_.erase(powerups_.begin() + i);
             player_.multiplyRotationAcceleration(1.3);
         }
-
     }
 }
 

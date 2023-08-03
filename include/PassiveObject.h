@@ -9,9 +9,11 @@ public:
     virtual void update(const float &speed) = 0;
     virtual sf::Vector2f getPosition();
     virtual const sf::Sprite& getSprite() const;
+    virtual bool isOffScreen();
 
 protected:
     sf::Sprite sprite_;
+    sf::Vector2u windowSize_;
 };
 
 #endif //SPACE_SHOOTER_PASSIVEOBJECT_H
