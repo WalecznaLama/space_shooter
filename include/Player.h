@@ -18,7 +18,6 @@ public:
 
 private:
     sf::Vector2f currentSpeed_;
-    float acceleration_;
     bool user_input = false;
 };
 

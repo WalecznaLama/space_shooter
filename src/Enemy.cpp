@@ -15,6 +15,7 @@ void Enemy::init(const sf::Vector2u &windowSize, const sf::Texture &texture) {
     auto x = (float)(std::rand() % windowSize_.x);
     sprite_.setPosition(x, 0);
     sprite_.setOrigin(sprite_.getLocalBounds().width / 2, sprite_.getLocalBounds().height / 2);
+    acceleration_ = 0.001;
 }
 
 
@@ -23,9 +24,11 @@ void Enemy::draw(sf::RenderWindow& window) const {
 }
 
 void Enemy::update(const sf::Vector2f& speed, std::vector <Bullet> &bullets) {
+    const auto &elapsed = updateClock_.getElapsedTime().asMilliseconds();
+    updateClock_.restart();
     float error = playerPosition_.x - sprite_.getPosition().x;
     float finat_dx = 0;
-    float angle = error * speed.x * 0.004;
+    float angle = error * speed.x * elapsed * acceleration_;
 
     if(error > windowSize_.x / 20 or error < -windowSize_.x / 20)      finat_dx = angle;
 

@@ -8,8 +8,8 @@ class Entity {
 
 public:
     virtual void init(const sf::Vector2u& windowSize, const sf::Texture& texture) = 0;
-    virtual void draw(sf::RenderWindow& window) const;
     virtual void update(const sf::Vector2f& speed, std::vector<Bullet>& bullets) = 0;
+    virtual void draw(sf::RenderWindow& window) const;
     virtual sf::Vector2f getPosition();
     virtual bool canShoot(float time_to_shoot);
     virtual const sf::Sprite& getSprite() const;
@@ -22,6 +22,7 @@ protected:
     sf::Sprite sprite_;
     sf::Clock shootClock_;
     sf::Clock updateClock_;
+    float acceleration_;
     sf::Vector2u windowSize_;
     bool alive_ = true;
     bool first_shot_fired_ = false;
