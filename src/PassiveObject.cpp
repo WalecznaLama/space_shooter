@@ -1,13 +1,13 @@
 #include "PassiveObject.h"
 
 void PassiveObject::draw(sf::RenderWindow& window) const {
-    window.draw(sprite);
+    window.draw(sprite_);
 }
 
 sf::Vector2f PassiveObject::getPosition() {
-    return sprite.getPosition();
+    return sprite_.getPosition();
 }
 
 const sf::Sprite &PassiveObject::getSprite() const {
-    return sprite;
+    return sprite_;
 }

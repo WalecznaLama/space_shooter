@@ -9,9 +9,9 @@ public:
     void update(const float& speed) override;
 
 private:
-    float d_range;
-    float d_from_spawn;
-    bool going_right;
+    float d_range_;
+    float d_from_spawn_;
+    bool going_right_;
 };
 
 

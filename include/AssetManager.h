@@ -12,7 +12,8 @@ public:
     sf::Font& loadFont(const std::string& filename);
 
     sf::Texture backgroundTexture;
-    sf::Texture playerTexture;
+    sf::Texture playerEngineOnTexture;
+    sf::Texture playerEngineOffTexture;
     sf::Texture enemyTexture;
     sf::Texture playerBulletTexture;
     sf::Texture enemyBulletTexture;
@@ -21,8 +22,8 @@ public:
     sf::Font font;
 
 private:
-    std::map<std::string, sf::Texture> textures;
-    std::map<std::string, sf::Font> fonts;
+    std::map<std::string, sf::Texture> textures_;
+    std::map<std::string, sf::Font> fonts_;
 };
 
 

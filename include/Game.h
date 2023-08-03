@@ -23,27 +23,27 @@ private:
     void bullets_update();
     void powerups_update();
 
-    sf::RenderWindow window;
-    AssetManager assets;
-    Player player;
-    std::vector<Enemy> enemies;
-    std::vector<Bullet> playerBullets;
-    std::vector<Bullet> enemyBullets;
-    std::vector<Powerup> powerups;
+    sf::RenderWindow window_;
+    AssetManager assets_;
+    Player player_;
+    std::vector<Enemy> enemies_;
+    std::vector<Bullet> playerBullets_;
+    std::vector<Bullet> enemyBullets_;
+    std::vector<Powerup> powerups_;
 
-    sf::Sprite backgroundSprite;
+    sf::Sprite backgroundSprite_;
 
-    sf::Text fpsText;
-    sf::Text killCounterText;
+    sf::Text fpsText_;
+    sf::Text killCounterText_;
 
-    sf::Vector2f player_speed;
-    sf::Vector2f enemy_speed;
-    float player_bullet_speed;
-    float enemy_bullet_speed;
-    float shoot_time_player;
-    float shoot_time_enemy;
-    uint kill_counter = 0;
-    int framerate;
+    sf::Vector2f playerSpeed_;
+    sf::Vector2f enemySpeed_;
+    float player_bullet_speed_;
+    float enemy_bullet_speed_;
+    float shoot_time_player_;
+    float shoot_time_enemy_;
+    uint kill_counter_ = 0;
+    int framerate_;
 };
 
 #endif //SPACE_SHOOTER_GAME_H

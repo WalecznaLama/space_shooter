@@ -11,7 +11,7 @@ public:
     virtual const sf::Sprite& getSprite() const;
 
 protected:
-    sf::Sprite sprite;
+    sf::Sprite sprite_;
 };
 
 #endif //SPACE_SHOOTER_PASSIVEOBJECT_H

@@ -7,11 +7,11 @@ AssetManager::AssetManager() {
 
 sf::Texture &AssetManager::loadTexture(const std::string &filename) {
     // Use the filename as the key
-    auto& texture = textures[filename];
+    auto& texture = textures_[filename];
 
     // Only load the texture if it's not already loaded
     if (!texture.loadFromFile(filename)) {
-        std::cerr << "Failed to load textures\n";
+        std::cerr << "Failed to load textures_\n";
         std::exit(1);
     }
 
@@ -19,7 +19,7 @@ sf::Texture &AssetManager::loadTexture(const std::string &filename) {
 }
 
 sf::Font &AssetManager::loadFont(const std::string &filename) {
-    auto& _font = fonts[filename];
+    auto& _font = fonts_[filename];
     if (!_font.loadFromFile(filename)) {
         std::cerr << "Failed to load font\n";
         std::exit(1);
@@ -28,9 +28,10 @@ sf::Font &AssetManager::loadFont(const std::string &filename) {
 }
 
 void AssetManager::init() {
-    // load textures
+    // load textures_
     backgroundTexture = loadTexture("resources/space.png");
-    playerTexture = loadTexture("resources/player.png");
+    playerEngineOnTexture = loadTexture("resources/player_engine_on.png");
+    playerEngineOffTexture = loadTexture("resources/player_engine_off.png");
     enemyTexture = loadTexture("resources/enemy.png");
     playerBulletTexture = loadTexture("resources/player_bullet.png");
     enemyBulletTexture = loadTexture("resources/enemy_bullet.png");

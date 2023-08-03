@@ -2,27 +2,19 @@
 #define SPACE_SHOOTER_ENEMY_H
 
 #include <SFML/Graphics.hpp>
-#include "Bullet.h"
+#include "Entity.h"
 
-class Enemy {
+class Enemy  : public Entity {
 public:
     Enemy(const sf::Vector2u& windowSize,  const sf::Texture& texture);
-    void draw(sf::RenderWindow& window) const;
-    void update(float dx, float speed, sf::Vector2f player_position,
-                std::vector<Bullet>& playerBullets);
-    sf::Vector2f getPosition();
-    bool canShoot(float time_to_shoot);
-    const sf::Sprite& getSprite() const;
-    bool isAlive();
+    void init(const sf::Vector2u& windowSize, const sf::Texture& texture) override;
+    void draw(sf::RenderWindow& window) const override;
+    void update(const sf::Vector2f& speed, std::vector <Bullet> &bullets) override;
     bool isKilledByPlayer();
+    void setPlayerPosition(const sf::Vector2f& playerPosition);
 
 private:
-    bool alive = true;
-    bool killed_by_player = false;
-    sf::Sprite sprite;
-    sf::Clock shootClock;
-    bool first_shot_fired = false;
-    sf::Vector2u window_size;
+    sf::Vector2f playerPosition_;
 };
 
 #endif //SPACE_SHOOTER_ENEMY_H
