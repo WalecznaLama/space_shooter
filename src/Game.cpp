@@ -22,7 +22,7 @@ Game::Game() {
     killCounterText.setPosition(10, window.getSize().y - 50);  // bottom left corner
 
     player.init(window.getSize(), assets.playerTexture);
-    player_speed = sf::Vector2f(1.8f, 0.0001f);
+    player_speed = sf::Vector2f(1.8f, 2.0f);
     enemy_speed = sf::Vector2f(0.8f, 0.1f);
     player_bullet_speed = 1.8f;
     enemy_bullet_speed = 1.2f;
@@ -41,7 +41,6 @@ void Game::run() {
         update();
         render();
 
-        if (!player.isALive()) gameOver();
     }
 }
 
@@ -95,6 +94,7 @@ void Game::update() {
     powerups_update();
 
     player.update(window.getSize(), player_speed, enemies, enemyBullets);
+    if (!player.isALive()) gameOver();
 }
 
 void Game::render() {
@@ -176,7 +176,7 @@ void Game::powerups_update() {
 
         if (playerBounds.intersects(powerupBounds)){
             powerups.erase(powerups.begin() + i);
-            player.setRotationAcceleration(player.getRotationAcceleration() * 1.2);
+            player.multiplyRotationAcceleration( 1.3);
         }
 
     }

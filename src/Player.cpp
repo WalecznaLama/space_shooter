@@ -7,12 +7,12 @@ void Player::init(const sf::Vector2u& windowSize, const sf::Texture& texture) {
     sprite.setTexture(texture);
 
     // set initial position at the bottom of the screen
-    float x = windowSize.x / 2 - texture.getSize().x / 2;
+    float x = windowSize.x / 2. - texture.getSize().x / 2.;
     float y = windowSize.y - texture.getSize().y;
 
     sprite.setPosition(x, y);
     sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
-    rotation_acceleration = 30;
+    acceleration = 30;
 }
 
 void Player::draw(sf::RenderWindow& window) const {
@@ -26,16 +26,15 @@ void Player::update(const sf::Vector2u& windowSize,const sf::Vector2f& speed,
 
     userMovement(speed, elapsed);
 
-
     // keep the player inside the screen bounds
     sf::Vector2f position = sprite.getPosition();
     sf::Vector2u size = sprite.getTexture()->getSize();
+    sf::Vector2f half_size = sf::Vector2f(size.x/2., size.y/2.);
 
-    if (position.x < 0) position.x = 0;
-    if (position.y < 0) position.y = 0;
-
-    if (position.x > windowSize.x - size.x) position.x = windowSize.x - size.x;
-    if (position.y > windowSize.y - size.y) position.y = windowSize.y - size.y;
+    if (position.x < half_size.x) position.x = half_size.x;
+    if (position.y < half_size.y) position.y = half_size.y;
+    if (position.x > windowSize.x - half_size.x) position.x = windowSize.x - half_size.x;
+    if (position.y > windowSize.y - half_size.y) position.y = windowSize.y - half_size.y;
 
     sprite.setPosition(position);
     checkPlayerCollision(enemies, enemyBullets);
@@ -88,22 +87,25 @@ void Player::userMovement(const sf::Vector2f& speed, sf::Time elapsed) {
     float rotation_degrees = 30;
     float rotation = 0;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        current_dx -= speed.x / elapsed.asMicroseconds() * rotation_acceleration;
+        current_speed.x -= speed.x / elapsed.asMicroseconds() * acceleration;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        current_dx += speed.x / elapsed.asMicroseconds() * rotation_acceleration;
+        current_speed.x += speed.x / elapsed.asMicroseconds() * acceleration;
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        movement.y -= speed.y;
+        current_speed.y -= speed.y / elapsed.asMicroseconds() * acceleration;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
         movement.y += speed.y;
+        current_speed.y += speed.y / elapsed.asMicroseconds() * acceleration;
         rotation *= -1.;
     }
-    current_dx = std::clamp(current_dx, -speed.x, speed.x);
-    movement.x = current_dx;
-    rotation = (current_dx / speed.x) * rotation_degrees;
+    current_speed.x = std::clamp(current_speed.x, -speed.x, speed.x);
+    current_speed.y = std::clamp(current_speed.y, -speed.y, speed.y);
+
+    movement = sf::Vector2f(current_speed);
+    rotation = (current_speed.x / speed.x) * rotation_degrees;
 
     // apply the movement
     sprite.move(movement);
@@ -115,9 +117,13 @@ bool Player::isALive() {
 }
 
 void Player::setRotationAcceleration(float rotationAcceleration) {
-    rotation_acceleration = rotationAcceleration;
+    acceleration = rotationAcceleration;
 }
 
 float Player::getRotationAcceleration() const {
-    return rotation_acceleration;
+    return acceleration;
+}
+
+void Player::multiplyRotationAcceleration(float k) {
+    acceleration *= k;
 }

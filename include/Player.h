@@ -20,14 +20,15 @@ public:
     bool isALive();
 
     void setRotationAcceleration(float rotationAcceleration);
+    void multiplyRotationAcceleration(float k);
     float getRotationAcceleration() const;
 
 private:
     sf::Sprite sprite;
     sf::Clock shootClock;
     sf::Clock updateClock;
-    float current_dx = 0;
-    float rotation_acceleration;
+    sf::Vector2f current_speed;
+    float acceleration;
     bool alive = true;
 };
 
