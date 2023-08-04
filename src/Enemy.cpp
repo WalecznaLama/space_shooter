@@ -50,8 +50,8 @@ void Enemy::update(std::vector <Bullet> &bullets, const sf::Vector2f& playerPosi
     updateClock_.restart();
 
     sf::Vector2f direction = playerPosition - position_; // Compute direction from enemy to player
-    float targetAngle = std::atan2(-direction.x, direction.y); // Compute angle to player
-    targetAngle = targetAngle * 180 / M_PI;
+    float targetAngle = std::atan2(direction.y, direction.x); // Compute angle to player
+    targetAngle = targetAngle * 180 / M_PI + 90; // Convert to degrees and adjust for SFML's coordinate system
 
     float currentAngle = rotation_; // Get enemy's current rotation
     float angleDifference = targetAngle - currentAngle; // Compute absolute difference
@@ -62,8 +62,8 @@ void Enemy::update(std::vector <Bullet> &bullets, const sf::Vector2f& playerPosi
     float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
 //    sf::Vector2f normalizedDirection = direction / length;
 
-    calculateVelocity(length, angleDifference, elapsed);
-
+    // TODO
+    calculateVelocity(-length, angleDifference, elapsed);
     if (vectorLength(velocity_) > maxLinearVel_) velocity_ = vectorNormalize(velocity_) * maxLinearVel_;
 
     position_ += velocity_ * elapsed;
