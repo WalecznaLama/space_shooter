@@ -77,7 +77,7 @@ void Player::userMovement(const sf::Time& deltaTime){
     sf::Vector2f _userVelocity = getInput();
     calculateVelocity(_userVelocity.x, _userVelocity.y, _deltaTime);
 
-    if (length(velocity_) > maxLinearVel_)  velocity_ = normalize(velocity_) * maxLinearVel_;
+    if (vectorLength(velocity_) > maxLinearVel_) velocity_ = vectorNormalize(velocity_) * maxLinearVel_;
 
     position_ += velocity_ * _deltaTime;
     rotation_ += angularVel_ * _deltaTime;
@@ -171,24 +171,15 @@ void Player::calculateAngularVelocity(float theta_acc, float deltaTime) {
     float _sgnDeccVel = sgn(angularVel_) * (angConstDecc_ * deltaTime);
     angularVel_ += (angAcc_ * deltaTime * theta_acc) - _sgnDeccVel;
     angularVel_ = std::clamp(angularVel_, -maxAngularVel_, maxAngularVel_);
-    if (angularVel_ < -maxAngularVel_)  angularVel_ = -maxAngularVel_;
-}
-
-sf::Vector2f Player::calculateForceDirection() {
-    return sf::Vector2f(sinf(-rotation_ * M_PI / 180.0f), cosf(rotation_ * M_PI / 180.0f));
-}
-
-sf::Vector2f Player::calculateAcceleration(sf::Vector2f _engineForceDirection, float _x_acc, float deltaTime) {
-    return _engineForceDirection * linAcc_ * _x_acc * deltaTime;
 }
 
 sf::Vector2f Player::calculateDeceleration(float deltaTime) {
-    sf::Vector2f decelerationDirection = -normalize(velocity_);
+    sf::Vector2f decelerationDirection = -vectorNormalize(velocity_);
     return decelerationDirection * linConstDecc_ * deltaTime;
 }
 
 sf::Vector2f Player::calculateBrakeDeceleration(float deltaTime) {
-    sf::Vector2f decelerationDirection = -normalize(velocity_);
+    sf::Vector2f decelerationDirection = -vectorNormalize(velocity_);
     return decelerationDirection * linBreakDecc_ * deltaTime;
 }
 
@@ -197,7 +188,3 @@ void Player::draw(sf::RenderWindow& window) const {
     if (boostActive_)  window.draw(sprites_.at("boost"));
     else if (userInput_)  window.draw(sprites_.at("engine_on"));
 }
-
-
-template<typename T>
-int Player::sgn(T val) { return (T(0) < val) - (val < T(0)); }

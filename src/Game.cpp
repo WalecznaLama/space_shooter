@@ -20,14 +20,12 @@ Game::Game() {
     killCounterText_.setFillColor(sf::Color::Red);
     killCounterText_.setPosition(10, window_.getSize().y - 50);  // bottom left corner
 
-    enemySpeed_ = sf::Vector2f(0.8f, 0.1f);
-
     player_bullet_speed_ = 1.8f;
     enemy_bullet_speed_ = 1.2f;
     powerup_speed_ = 0.4f;
     shoot_time_player_ = 0.2f;
     shoot_time_enemy_ = 20.0f;
-    player_ = std::make_unique<Player>(window_.getSize(), assets_.playerTextures_);
+    player_ = std::make_shared<Player>(window_.getSize(), assets_.playerTextures_);
 }
 
 void Game::run() {
@@ -48,12 +46,12 @@ void Game::run() {
 }
 
 void Game::update() {
-//    static sf::Clock enemySpawnClock;
-//    sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
-//    if (elapsed_enemy.asSeconds() >= 3.0f) {  // every 3 seconds spawn enemy
-//        enemies_.emplace_back(window_.getSize(), assets_.enemyTexture);
-//        enemySpawnClock.restart();
-//    }
+    static sf::Clock enemySpawnClock;
+    sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
+    if (elapsed_enemy.asSeconds() >= 5.0f) {  // every 5 seconds spawn enemy
+        enemies_.emplace_back(window_.getSize(), assets_.enemyTexture);
+        enemySpawnClock.restart();
+    }
 //    static sf::Clock powerupSpawnClock;
 //    sf::Time elapsed_powerup = powerupSpawnClock.getElapsedTime();
 //    if (elapsed_powerup.asSeconds() >= 9.0f) {  // every 9 seconds spawn powerup
@@ -71,8 +69,7 @@ void Game::update() {
     killCounterText_.setString("Score: " + std::to_string(kill_counter_));
 
     for (auto it = enemies_.rbegin(); it != enemies_.rend(); /* no increment here */) {
-        it->setPlayerPosition(player_->getSprite().getPosition());
-        it->update(enemySpeed_, playerBullets_);
+        it->update( playerBullets_, player_->getPosition());
         if (!it->isAlive()) {
             if (it->isKilledByPlayer()) kill_counter_++;
             // Convert reverse iterator to base (which will be one position forward in terms of direct iterator)
@@ -83,12 +80,10 @@ void Game::update() {
             directIt = enemies_.erase(directIt);
             // Convert the direct iterator back to reverse iterator
             it = std::reverse_iterator<decltype(directIt)>(directIt);
-        } else {
-            ++it;
-        }
+        } else { ++it; }
     }
 
-    enemiesShoot();
+//    enemiesShoot();
 
     // Shoot on Space and A
     bool _user_shoot = (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)

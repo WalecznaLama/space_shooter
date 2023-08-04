@@ -24,7 +24,7 @@ private:
 
     sf::RenderWindow window_;
     AssetManager assets_;
-    std::unique_ptr<Player> player_;
+    std::shared_ptr<Player> player_;
     std::vector<Enemy> enemies_;
     std::vector<Bullet> playerBullets_;
     std::vector<Bullet> enemyBullets_;
@@ -35,7 +35,6 @@ private:
     sf::Text fpsText_;
     sf::Text killCounterText_;
 
-    sf::Vector2f enemySpeed_;
     float player_bullet_speed_;
     float enemy_bullet_speed_;
     float powerup_speed_;

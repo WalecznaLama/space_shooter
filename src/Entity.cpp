@@ -40,15 +40,20 @@ void Entity::addSprite(const std::string& sprite_name, const sf::Texture& textur
                                     sprites_[sprite_name].getLocalBounds().height / 2);
 }
 
-float Entity::length(const sf::Vector2f& vec) { return std::sqrt(vec.x * vec.x + vec.y * vec.y); }
+float Entity::vectorLength(const sf::Vector2f& vec) { return std::sqrt(vec.x * vec.x + vec.y * vec.y); }
 
-sf::Vector2f Entity::normalize(const sf::Vector2f& vec) {
-    float len = length(vec);
-    if (len != 0) {
-        return sf::Vector2f(vec.x / len, vec.y / len);
-    } else {
-        return sf::Vector2f(0, 0);
-    }
+sf::Vector2f Entity::vectorNormalize(const sf::Vector2f& vector) {
+    float len = vectorLength(vector);
+    if (len != 0)   return sf::Vector2f(vector.x / len, vector.y / len);
+    else            return sf::Vector2f(0.f, 0.f);
+}
+
+sf::Vector2f Entity::calculateForceDirection() const {
+    return sf::Vector2f(sinf(-rotation_ * M_PI / 180.0f), cosf(rotation_ * M_PI / 180.0f));
+}
+
+sf::Vector2f Entity::calculateAcceleration(sf::Vector2f _engineForceDirection, float _x_acc, float deltaTime) const {
+    return _engineForceDirection * linAcc_ * _x_acc * deltaTime;
 }
 
 void Entity::draw(sf::RenderWindow& window) const{ window.draw(mainSprite_); }
@@ -60,4 +65,3 @@ float Entity::getRotation() const { return rotation_; }
 const sf::Sprite& Entity::getSprite() const { return mainSprite_; }
 
 bool Entity::isAlive() const { return alive_; }
-
