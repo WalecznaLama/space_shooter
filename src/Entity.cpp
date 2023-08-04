@@ -41,12 +41,17 @@ void Entity::addTexture(const std::string& texture_name, const sf::Texture& text
     textures_[texture_name] = texture;
 }
 
-sf::Vector2f Entity::normalize(const sf::Vector2f& vector){
-    float length = sqrt(vector.x * vector.x + vector.y * vector.y);
-    if (length != 0)
-        return {vector.x / length, vector.y / length};
-    else
-        return vector;
+float Entity::length(const sf::Vector2f& vec) {
+    return std::sqrt(vec.x * vec.x + vec.y * vec.y);
+}
+
+sf::Vector2f Entity::normalize(const sf::Vector2f& vec) {
+    float len = length(vec);
+    if (len != 0) {
+        return sf::Vector2f(vec.x / len, vec.y / len);
+    } else {
+        return sf::Vector2f(0, 0);
+    }
 }
 
 void Entity::draw(sf::RenderWindow& window) const{ window.draw(sprite_); }

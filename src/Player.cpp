@@ -16,15 +16,19 @@ void Player::init(const sf::Vector2u& windowSize, const sf::Texture& texture) {
     alive_ = true;
     first_shot_fired_ = false;
     killed_by_bullet_ = false;
-    linearAcc_ = 100.;
+    decelerationDivider_ = 2.;
+
+    linAcc_ = 100.;
+    linBreakDecc_ = 200.;
+    linConstDecc_ = 10.;
+    maxLinearVel_ = 200.;
     angularVel_ = 0.;
     maxAngularVel_ = 180.;
-    maxLinearVel_ = 50.;
-    angularAcc_ = 300.;
-    breakDecc_ = 200.;
-    constDecc_ = 10.;
-    engineDeccDivider_ = 2.;
-    // TODO angular decceleration, black holes!/w gravity,
+    angAcc_ = 300.;
+    angBreakDecc_ = 60.;
+    angConstDecc_ = 10.;
+
+    // TODO  black holes!/w gravity,
 }
 
 void Player::update(const sf::Vector2f& speed, std::vector<Bullet>& bullets) {
@@ -52,6 +56,7 @@ void Player::userMovement(const sf::Time& deltaTime){
 
     float _x_acc = 0.f, _theta = 0.f;
     bool _brake = false;
+    bool _boost = false;
 
     if (sf::Joystick::isConnected(0)) {
         _x_acc = sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::Y);  // Y lewego analoga
@@ -61,6 +66,7 @@ void Player::userMovement(const sf::Time& deltaTime){
         _theta /= 100.; // (0 .. 1)
 
         _brake = (sf::Joystick::isButtonPressed(0, 1));
+        _boost = (sf::Joystick::isButtonPressed(0, 2)); // TODO
 
         if (fabs(_x_acc) > 0.1) _moved = true;
     }
@@ -68,14 +74,18 @@ void Player::userMovement(const sf::Time& deltaTime){
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
         _x_acc = -1.0;
         _moved = true;
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))   _x_acc = 1.0;
-
+    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))   _x_acc = 1.f / decelerationDivider_;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) _theta = -1.0;
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) _theta = 1.0;
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))   _brake = true; // dont touch when false
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))   _boost = true; // dont touch when false
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) _brake = true; // dont touch when false
 
+    boost_active_ = _boost;
+    if (boost_active_) {_x_acc -= 1.5; _moved = true;}
     calculateVelocity(_x_acc, _theta, _brake, _deltaTime);
+
+    if (length(velocity_) > maxLinearVel_)  velocity_ = normalize(velocity_) * maxLinearVel_;
 
     position_ += velocity_ * _deltaTime;
     rotation_ += angularVel_ * _deltaTime;
@@ -91,11 +101,11 @@ void Player::userMovement(const sf::Time& deltaTime){
     user_input_ = _moved;
 }
 
-void Player::setlinearAcc(float linearAcc) { linearAcc_ = linearAcc; }
+void Player::setLinearAcc(float linearAcc) { linAcc_ = linearAcc; }
 
-float Player::getlinearAcc() const { return linearAcc_; }
+float Player::getlinearAcc() const { return linAcc_; }
 
-void Player::multiplyEngineForce(float k) { linearAcc_ *= k; }
+void Player::multiplyLinearAcc(float k) { linAcc_ *= k; }
 
 void Player::checkEnemyCollision(const std::vector<Enemy>& enemies){
     sf::FloatRect bounds = sprite_.getGlobalBounds();
@@ -109,33 +119,53 @@ void Player::checkEnemyCollision(const std::vector<Enemy>& enemies){
     }
 }
 
-void Player::calculateVelocity(const float& x_acc, const float& y_acc, const bool& brake, const float& deltaTime) {
-    float _x_acc = x_acc;
-    if (_x_acc < 0) _x_acc /= engineDeccDivider_;
+void Player::calculateVelocity(const float& lin_acc, const float& theta_acc, const bool& brake, const float& deltaTime) {
+    float _lin_acc = lin_acc;
+    if (_lin_acc < 0) _lin_acc /= decelerationDivider_;  // if backward worse acceleration
 
-    float _y_acc = y_acc;  // X lewego analoga
+    float _theta = theta_acc;
 
-    angularVel_ += angularAcc_ * deltaTime * _y_acc;
-    angularVel_ = std::clamp(angularVel_, -maxAngularVel_, maxAngularVel_);
-    if (angularVel_ < -maxAngularVel_)  angularVel_ = -maxAngularVel_;
+    calculateAngularVelocity(_theta, deltaTime);
 
-    // Oblicz kierunek siły silnika
-    sf::Vector2f _engineForceDirection(sinf(-rotation_ * M_PI / 180.0f), cosf(rotation_ * M_PI / 180.0f));
-    // Oblicz przyspieszenie wynikające z siły silnika
-    sf::Vector2f _acceleration = _engineForceDirection * linearAcc_ * _x_acc;
-    // Dodaj przyspieszenie do prędkości
-    velocity_ += _acceleration * deltaTime;
+    sf::Vector2f _engineForceDirection = calculateForceDirection();
+    sf::Vector2f _acceleration = calculateAcceleration(_engineForceDirection,
+                                                       _lin_acc, deltaTime);
+    velocity_ += _acceleration;
+
+    sf::Vector2f deceleration = calculateDeceleration(deltaTime);
+    velocity_ += deceleration;
 
     if (brake){
-        // Oblicz kierunek przeciwny do kierunku prędkości
-        sf::Vector2f decelerationDirection = -normalize(velocity_);
-        sf::Vector2f deceleration = decelerationDirection * breakDecc_;
-        // Dodaj przyspieszenie hamujące do prędkości
-        velocity_ += deceleration * deltaTime;
+        deceleration = calculateBrakeDeceleration(deltaTime);
+        velocity_ += deceleration;
+        angularVel_ -= sgn(angularVel_) * angBreakDecc_ * deltaTime;
     }
-    // Oblicz kierunek przeciwny do kierunku prędkości
-    sf::Vector2f decelerationDirection = -normalize(velocity_);
-    sf::Vector2f deceleration = decelerationDirection * constDecc_;
-    // Dodaj przyspieszenie hamujące do prędkości
-    velocity_ += deceleration * deltaTime;
 }
+
+void Player::calculateAngularVelocity(float theta_acc, float deltaTime) {
+    float _sgnDeccVel = sgn(angularVel_) * (angConstDecc_ * deltaTime);
+    angularVel_ += (angAcc_ * deltaTime * theta_acc) + _sgnDeccVel;
+    angularVel_ = std::clamp(angularVel_, -maxAngularVel_, maxAngularVel_);
+    if (angularVel_ < -maxAngularVel_)  angularVel_ = -maxAngularVel_;
+}
+
+sf::Vector2f Player::calculateForceDirection() {
+    return sf::Vector2f(sinf(-rotation_ * M_PI / 180.0f), cosf(rotation_ * M_PI / 180.0f));
+}
+
+sf::Vector2f Player::calculateAcceleration(sf::Vector2f _engineForceDirection, float _x_acc, float deltaTime) {
+    return _engineForceDirection * linAcc_ * _x_acc * deltaTime;
+}
+
+sf::Vector2f Player::calculateDeceleration(float deltaTime) {
+    sf::Vector2f decelerationDirection = -normalize(velocity_);
+    return decelerationDirection * linConstDecc_ * deltaTime;
+}
+
+sf::Vector2f Player::calculateBrakeDeceleration(float deltaTime) {
+    sf::Vector2f decelerationDirection = -normalize(velocity_);
+    return decelerationDirection * linBreakDecc_ * deltaTime;
+}
+
+template<typename T>
+int Player::sgn(T val) { return (T(0) < val) - (val < T(0)); }

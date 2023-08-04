@@ -190,7 +190,7 @@ void Game::powerups_update() {
 
         if (playerBounds.intersects(powerupBounds)){
             powerups_.erase(powerups_.begin() + i);
-            player_->multiplyEngineForce(1.3);
+            player_->multiplyLinearAcc(1.3);
         }
     }
 }
