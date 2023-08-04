@@ -8,8 +8,7 @@ class Enemy  : public Entity {
 public:
     Enemy(const sf::Vector2u& windowSize, const sf::Texture& texture);
     void init(const sf::Texture& texture);
-    void draw(sf::RenderWindow& window) const override;
-    void update(const sf::Vector2f& speed, std::vector <Bullet> &bullets) override;
+    void update(const sf::Vector2f& speed, std::vector <Bullet> &bullets);
     bool isKilledByPlayer();
     void setPlayerPosition(const sf::Vector2f& playerPosition);
 

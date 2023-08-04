@@ -20,17 +20,14 @@ Game::Game() {
     killCounterText_.setFillColor(sf::Color::Red);
     killCounterText_.setPosition(10, window_.getSize().y - 50);  // bottom left corner
 
-    player_ = std::make_unique<Player>(window_.getSize(), assets_.playerTextures_);
-
-    playerSpeed_ = sf::Vector2f(1.8f, 2.0f);
     enemySpeed_ = sf::Vector2f(0.8f, 0.1f);
+
     player_bullet_speed_ = 1.8f;
     enemy_bullet_speed_ = 1.2f;
     powerup_speed_ = 0.4f;
     shoot_time_player_ = 0.2f;
     shoot_time_enemy_ = 20.0f;
-
-//    std::srand(std::time(nullptr));
+    player_ = std::make_unique<Player>(window_.getSize(), assets_.playerTextures_);
 }
 
 void Game::run() {
@@ -104,8 +101,7 @@ void Game::update() {
     bullets_update();
     powerups_update();
 
-    player_->update(playerSpeed_, enemyBullets_);
-    player_->checkEnemyCollision(enemies_);
+    player_->update(enemyBullets_, enemies_);
     if (!player_->isAlive()) gameOver();
 }
 
@@ -189,5 +185,3 @@ void Game::powerups_update() {
         }
     }
 }
-
-

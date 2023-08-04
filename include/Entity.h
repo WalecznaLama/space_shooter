@@ -8,14 +8,13 @@
 class Entity {
 
 public:
-    virtual void update(const sf::Vector2f& speed, std::vector<Bullet>& bullets) = 0;
     virtual void draw(sf::RenderWindow& window) const;
     virtual sf::Vector2f getPosition() const;
     virtual float getRotation() const;
     virtual bool canShoot(float time_to_shoot);
     virtual const sf::Sprite& getSprite() const;
     virtual void checkBulletsCollision(std::vector<Bullet>& bullets);
-    virtual bool isAlive();
+    virtual bool isAlive() const;
     virtual void addSprite(const std::string&, const sf::Texture& texture);
 
 protected:

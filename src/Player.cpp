@@ -33,10 +33,9 @@ void Player::init() {
     // TODO  black holes!/w gravity,
 }
 
-void Player::update(const sf::Vector2f& speed, std::vector<Bullet>& bullets) {
+void Player::update(std::vector<Bullet>& bullets, const std::vector<Enemy>& enemies) {
     sf::Time elapsed = updateClock_.getElapsedTime();
     updateClock_.restart();
-    mainSprite_ = sprites_["main"];
     userMovement(elapsed);
     // keep the player_ inside the screen bounds
     sf::Vector2f position = mainSprite_.getPosition();
@@ -69,6 +68,7 @@ void Player::update(const sf::Vector2f& speed, std::vector<Bullet>& bullets) {
     sprites_["boost"].setRotation(rotation_);
 
     checkBulletsCollision(bullets);
+    checkEnemyCollision(enemies);
 }
 
 void Player::userMovement(const sf::Time& deltaTime){

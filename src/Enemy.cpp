@@ -19,11 +19,6 @@ void Enemy::init(const sf::Texture& texture) {
     maxTilt_ = 40;
 }
 
-
-void Enemy::draw(sf::RenderWindow& window) const {
-    window.draw(mainSprite_);
-}
-
 void Enemy::update(const sf::Vector2f& speed, std::vector <Bullet> &bullets) {
     const auto &elapsed = updateClock_.getElapsedTime().asMilliseconds();
     updateClock_.restart();
@@ -42,11 +37,6 @@ void Enemy::update(const sf::Vector2f& speed, std::vector <Bullet> &bullets) {
     if (mainSprite_.getPosition().y > windowSize_.y) alive_ = false;
 }
 
-bool Enemy::isKilledByPlayer() {
-    return killedByBullet_;
-}
+bool Enemy::isKilledByPlayer() { return killedByBullet_; }
 
-void Enemy::setPlayerPosition(const sf::Vector2f &playerPosition) {
-    playerPosition_ = playerPosition;
-}
-
+void Enemy::setPlayerPosition(const sf::Vector2f &playerPosition) { playerPosition_ = playerPosition; }
