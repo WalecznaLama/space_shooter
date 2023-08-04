@@ -1,32 +1,34 @@
 #include "Player.h"
 
-Player::Player() = default;
-
-void Player::init(const sf::Vector2u& windowSize, const sf::Texture& texture) {
-    addTexture("engine_off", texture);
-    sprite_.setTexture(textures_["engine_off"]);
+Player::Player(const sf::Vector2u &windowSize, std::map<std::string, sf::Texture> &textures) : textures_(textures) {
     windowSize_ = windowSize;
+    init();
+}
+
+void Player::init() {
+    for (const auto& texturePair : textures_)   addSprite(texturePair.first, texturePair.second);
+    mainSprite_ = sprites_["main"];
+
     // set initial position at the bottom of the screen
-    float x = windowSize.x / 2. - texture.getSize().x / 2.;
-    float y = windowSize.y / 2. - texture.getSize().y / 2.;
+    float x = windowSize_.x / 2. - textures_["main"].getSize().x / 2.;
+    float y = windowSize_.y / 2. - textures_["main"].getSize().y / 2.;
     position_ = sf::Vector2f(x,y);
 
-    sprite_.setPosition(position_);
-    sprite_.setOrigin(sprite_.getLocalBounds().width / 2, sprite_.getLocalBounds().height / 2);
+    mainSprite_.setOrigin(mainSprite_.getLocalBounds().width / 2, mainSprite_.getLocalBounds().height / 2);
+    mainSprite_.setPosition(position_);
     alive_ = true;
-    first_shot_fired_ = false;
-    killed_by_bullet_ = false;
+    firstShotFired_ = false;
+    killedByBullet_ = false;
     decelerationDivider_ = 2.;
 
     linAcc_ = 100.;
-    linBreakDecc_ = 200.;
+    linBreakDecc_ = 20.;
     linConstDecc_ = 10.;
     maxLinearVel_ = 200.;
-    angularVel_ = 0.;
     maxAngularVel_ = 180.;
     angAcc_ = 300.;
-    angBreakDecc_ = 60.;
-    angConstDecc_ = 10.;
+    angBreakDecc_ = 30.;
+    angConstDecc_ = 15.;
 
     // TODO  black holes!/w gravity,
 }
@@ -34,11 +36,11 @@ void Player::init(const sf::Vector2u& windowSize, const sf::Texture& texture) {
 void Player::update(const sf::Vector2f& speed, std::vector<Bullet>& bullets) {
     sf::Time elapsed = updateClock_.getElapsedTime();
     updateClock_.restart();
-
+    mainSprite_ = sprites_["main"];
     userMovement(elapsed);
     // keep the player_ inside the screen bounds
-    sf::Vector2f position = sprite_.getPosition();
-    sf::Vector2u size = sprite_.getTexture()->getSize();
+    sf::Vector2f position = mainSprite_.getPosition();
+    sf::Vector2u size = mainSprite_.getTexture()->getSize();
     sf::Vector2f half_size = sf::Vector2f(size.x/2., size.y/2.);
 
     if (position.x < half_size.x) { position.x = half_size.x, velocity_.x = 0.f; }
@@ -46,13 +48,47 @@ void Player::update(const sf::Vector2f& speed, std::vector<Bullet>& bullets) {
     if (position.x > windowSize_.x - half_size.x) { position.x = windowSize_.x - half_size.x, velocity_.x = 0.f; }
     if (position.y > windowSize_.y - half_size.y) { position.y = windowSize_.y - half_size.y, velocity_.y = 0.f; }
 
-    sprite_.setPosition(position);
+    mainSprite_.setPosition(position);
+
+    // Ustaw pozycje płomieni silnika
+    sf::Vector2f flameDisplacement(0.f, 0.f); // wektor przesunięcia płomieni
+    float rotationRadians = rotation_ * M_PI / 180.0f; // konwersja stopni na radiany
+
+    // Oblicz nowy wektor przesunięcia na podstawie rotacji statku
+    sf::Vector2f rotatedFlameDisplacement(
+            flameDisplacement.x * cos(rotationRadians) - flameDisplacement.y * sin(rotationRadians),
+            flameDisplacement.x * sin(rotationRadians) + flameDisplacement.y * cos(rotationRadians)
+    );
+    // Dodaj obliczony wektor przesunięcia do pozycji statku, aby uzyskać nową pozycję płomieni
+    sf::Vector2f flamePosition = position_ + rotatedFlameDisplacement;
+    sprites_["engine_on"].setPosition(flamePosition);
+    sprites_["boost"].setPosition(flamePosition);
+
+    // Ustaw rotację płomieni silnika na tę samą, co statek
+    sprites_["engine_on"].setRotation(rotation_);
+    sprites_["boost"].setRotation(rotation_);
+
     checkBulletsCollision(bullets);
 }
 
 void Player::userMovement(const sf::Time& deltaTime){
-    bool _moved = false;
     float _deltaTime = deltaTime.asSeconds();
+
+    sf::Vector2f _userVelocity = getInput();
+    calculateVelocity(_userVelocity.x, _userVelocity.y, _deltaTime);
+
+    if (length(velocity_) > maxLinearVel_)  velocity_ = normalize(velocity_) * maxLinearVel_;
+
+    position_ += velocity_ * _deltaTime;
+    rotation_ += angularVel_ * _deltaTime;
+
+    mainSprite_.setPosition(position_);
+    mainSprite_.setRotation(rotation_);
+
+
+}
+sf::Vector2f Player::getInput() {
+    bool _moved = false;
 
     float _x_acc = 0.f, _theta = 0.f;
     bool _brake = false;
@@ -81,24 +117,13 @@ void Player::userMovement(const sf::Time& deltaTime){
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))   _boost = true; // dont touch when false
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) _brake = true; // dont touch when false
 
-    boost_active_ = _boost;
-    if (boost_active_) {_x_acc -= 1.5; _moved = true;}
-    calculateVelocity(_x_acc, _theta, _brake, _deltaTime);
+    if (_boost) {_x_acc -= 1.5; _moved = true;}
 
-    if (length(velocity_) > maxLinearVel_)  velocity_ = normalize(velocity_) * maxLinearVel_;
+    boostActive_ = _boost;
+    brakeActive_ = _brake;
+    userInput_ = _moved;
 
-    position_ += velocity_ * _deltaTime;
-    rotation_ += angularVel_ * _deltaTime;
-
-    sprite_.setPosition(position_);
-    sprite_.setRotation(rotation_);
-
-    if(_moved != user_input_){
-        user_input_ = _moved;
-        if(user_input_) sprite_.setTexture(textures_["engine_on"]);
-        else sprite_.setTexture(textures_["engine_off"]);
-    }
-    user_input_ = _moved;
+    return {_x_acc, _theta};
 }
 
 void Player::setLinearAcc(float linearAcc) { linAcc_ = linearAcc; }
@@ -108,7 +133,7 @@ float Player::getlinearAcc() const { return linAcc_; }
 void Player::multiplyLinearAcc(float k) { linAcc_ *= k; }
 
 void Player::checkEnemyCollision(const std::vector<Enemy>& enemies){
-    sf::FloatRect bounds = sprite_.getGlobalBounds();
+    sf::FloatRect bounds = mainSprite_.getGlobalBounds();
     for (const auto& enemy : enemies) {
         sf::FloatRect enemyBounds = enemy.getSprite().getGlobalBounds();
         if (bounds.intersects(enemyBounds)) {
@@ -119,7 +144,7 @@ void Player::checkEnemyCollision(const std::vector<Enemy>& enemies){
     }
 }
 
-void Player::calculateVelocity(const float& lin_acc, const float& theta_acc, const bool& brake, const float& deltaTime) {
+void Player::calculateVelocity(const float& lin_acc, const float& theta_acc, const float& deltaTime) {
     float _lin_acc = lin_acc;
     if (_lin_acc < 0) _lin_acc /= decelerationDivider_;  // if backward worse acceleration
 
@@ -135,7 +160,7 @@ void Player::calculateVelocity(const float& lin_acc, const float& theta_acc, con
     sf::Vector2f deceleration = calculateDeceleration(deltaTime);
     velocity_ += deceleration;
 
-    if (brake){
+    if (brakeActive_){
         deceleration = calculateBrakeDeceleration(deltaTime);
         velocity_ += deceleration;
         angularVel_ -= sgn(angularVel_) * angBreakDecc_ * deltaTime;
@@ -144,7 +169,7 @@ void Player::calculateVelocity(const float& lin_acc, const float& theta_acc, con
 
 void Player::calculateAngularVelocity(float theta_acc, float deltaTime) {
     float _sgnDeccVel = sgn(angularVel_) * (angConstDecc_ * deltaTime);
-    angularVel_ += (angAcc_ * deltaTime * theta_acc) + _sgnDeccVel;
+    angularVel_ += (angAcc_ * deltaTime * theta_acc) - _sgnDeccVel;
     angularVel_ = std::clamp(angularVel_, -maxAngularVel_, maxAngularVel_);
     if (angularVel_ < -maxAngularVel_)  angularVel_ = -maxAngularVel_;
 }
@@ -166,6 +191,13 @@ sf::Vector2f Player::calculateBrakeDeceleration(float deltaTime) {
     sf::Vector2f decelerationDirection = -normalize(velocity_);
     return decelerationDirection * linBreakDecc_ * deltaTime;
 }
+
+void Player::draw(sf::RenderWindow& window) const {
+    window.draw(mainSprite_);
+    if (boostActive_)  window.draw(sprites_.at("boost"));
+    else if (userInput_)  window.draw(sprites_.at("engine_on"));
+}
+
 
 template<typename T>
 int Player::sgn(T val) { return (T(0) < val) - (val < T(0)); }

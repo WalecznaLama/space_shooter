@@ -3,13 +3,6 @@
 Game::Game() {
     window_.create(sf::VideoMode(1280, 720), "Space Shooter");
 
-    player_ = std::make_unique<Player>();
-    // Utwórz widok o docelowej rozdzielczości
-//    sf::View view(sf::FloatRect(0, 0, 800, 600));
-
-// Ustaw widok dla okna
-//    window_.setView(view);
-    // limit the framerate_ to 300 frames per second
     framerate_ = 150;
     window_.setFramerateLimit(framerate_);
 
@@ -27,15 +20,15 @@ Game::Game() {
     killCounterText_.setFillColor(sf::Color::Red);
     killCounterText_.setPosition(10, window_.getSize().y - 50);  // bottom left corner
 
-    player_->init(window_.getSize(), assets_.playerEngineOffTexture);
-    player_->addTexture("engine_on", assets_.playerEngineOnTexture);
+    player_ = std::make_unique<Player>(window_.getSize(), assets_.playerTextures_);
+
     playerSpeed_ = sf::Vector2f(1.8f, 2.0f);
     enemySpeed_ = sf::Vector2f(0.8f, 0.1f);
     player_bullet_speed_ = 1.8f;
     enemy_bullet_speed_ = 1.2f;
     powerup_speed_ = 0.4f;
     shoot_time_player_ = 0.2f;
-    shoot_time_enemy_ = 2.0f;
+    shoot_time_enemy_ = 20.0f;
 
 //    std::srand(std::time(nullptr));
 }
@@ -101,8 +94,10 @@ void Game::update() {
     enemiesShoot();
 
     // Shoot on Space and A
-    if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Space) || sf::Joystick::isButtonPressed(0, 0))
-    && player_->canShoot(shoot_time_player_))
+    bool _user_shoot = (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)
+            || sf::Joystick::isButtonPressed(0, 0));
+
+    if (_user_shoot && player_->canShoot(shoot_time_player_))
         playerBullets_.emplace_back(window_.getSize(),player_->getPosition(),
                                     assets_.playerBulletTexture,player_->getSprite().getRotation());
 

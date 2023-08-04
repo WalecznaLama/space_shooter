@@ -10,14 +10,12 @@ public:
     void init();
     sf::Texture& loadTexture(const std::string& filename);
     sf::Font& loadFont(const std::string& filename);
-
     sf::Texture backgroundTexture;
-    sf::Texture playerEngineOnTexture;
-    sf::Texture playerEngineOffTexture;
     sf::Texture enemyTexture;
     sf::Texture playerBulletTexture;
     sf::Texture enemyBulletTexture;
     sf::Texture powerupTexture;
+    std::map<std::string, sf::Texture> playerTextures_;
 
     sf::Font font;
 

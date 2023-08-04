@@ -6,17 +6,17 @@ Bullet::Bullet(const sf::Vector2u& windowSize, const sf::Vector2f& position, con
     sprite_.setOrigin(sprite_.getLocalBounds().width / 2, sprite_.getLocalBounds().height / 2);
     sprite_.setPosition(position);
 
-    init_angle_ = angle;
-    sprite_.setRotation(init_angle_);
+    initAngle_ = angle;
+    sprite_.setRotation(initAngle_);
     windowSize_ = windowSize;
 }
 
 void Bullet::update(const float &speed) {
-    float angle_rad = init_angle_ * (M_PI / 180.);
-    float dx = speed * sinf(angle_rad);
-    float dy = speed * cosf(angle_rad);
+    float _angle_rad = initAngle_ * (M_PI / 180.);
+    float _dx = speed * sinf(_angle_rad);
+    float _dy = speed * cosf(_angle_rad);
 
-    sprite_.move(-dx, dy);
+    sprite_.move(-_dx, _dy);
 }
 
 

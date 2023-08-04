@@ -8,10 +8,12 @@
 
 class Player : public Entity {
 public:
-    Player();
-    void init(const sf::Vector2u& windowSize, const sf::Texture& texture) override;
+    Player(const sf::Vector2u &windowSize, std::map<std::string, sf::Texture> &textures);
+    void init();
+    void draw(sf::RenderWindow& window) const override;
     void update(const sf::Vector2f& speed, std::vector<Bullet>& bullets) override;
     void userMovement(const sf::Time& deltaTime);
+    sf::Vector2f getInput();
     void checkEnemyCollision(const std::vector<Enemy>& enemies);
 
     float getlinearAcc() const;
@@ -32,12 +34,18 @@ private:
     float decelerationDivider_; // if (backward) acceleration /= decelerationDivider_;
     float maxAngularVel_; // deg / s
     float maxLinearVel_; // pixels / s
-    float angularVel_; // deg / s
+    float angularVel_ = 0; // deg / s
 
-    bool user_input_ = false;
-    bool boost_active_ = false;
+    bool userInput_ = false;
+    bool boostActive_ = false;
+    bool brakeActive_ = false;
 
-    void calculateVelocity(const float& lin_acc, const float& theta_acc, const bool& brake, const float& deltaTime);
+    sf::Sprite boostSprite_;
+    sf::Sprite engineSprite_;
+
+    std::map<std::string, sf::Texture>& textures_;
+
+    void calculateVelocity(const float& lin_acc, const float& theta_acc, const float& deltaTime);
     void calculateAngularVelocity(float theta_acc, float deltaTime);
     sf::Vector2f calculateForceDirection();
     sf::Vector2f calculateAcceleration(sf::Vector2f _engineForceDirection, float _x_acc, float deltaTime);

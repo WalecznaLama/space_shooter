@@ -11,7 +11,7 @@ public:
     void update(const float &speed) override;
 
 private:
-    float init_angle_;
+    float initAngle_;
 };
 
 #endif //SPACE_SHOOTER_BULLET_H

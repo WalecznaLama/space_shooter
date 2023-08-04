@@ -6,8 +6,8 @@
 
 class Enemy  : public Entity {
 public:
-    Enemy(const sf::Vector2u& windowSize,  const sf::Texture& texture);
-    void init(const sf::Vector2u& windowSize, const sf::Texture& texture) override;
+    Enemy(const sf::Vector2u& windowSize, const sf::Texture& texture);
+    void init(const sf::Texture& texture);
     void draw(sf::RenderWindow& window) const override;
     void update(const sf::Vector2f& speed, std::vector <Bullet> &bullets) override;
     bool isKilledByPlayer();
@@ -15,7 +15,8 @@ public:
 
 private:
     sf::Vector2f playerPosition_;
-    float max_tilt_;
+    float maxTilt_;
+    float acceleration_ = 0.0;
 };
 
 #endif //SPACE_SHOOTER_ENEMY_H
