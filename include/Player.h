@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include "Enemy.h"
 #include <cmath>
+#include <memory>
 
 class Player : public Entity {
 public:
@@ -18,9 +19,10 @@ public:
     void multiplyEngineForce(float k);
 
     float getRotation() const { return rotation_; }
+    void calculateVelocity(const float& x_acc, const float& y_acc, const bool& brake, const float& deltaTime);
 
 private:
-    bool user_input = false;
+    bool user_input_ = false;
     float engineForce_;
     float angularAcc_; // deg / s^2
     float linearDecConst_; // deceleration = linearDecConst_ * (engineForce_ / mass_)

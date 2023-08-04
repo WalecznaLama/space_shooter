@@ -1,8 +1,14 @@
 #include "Game.h"
 
 Game::Game() {
-    window_.create(sf::VideoMode(800, 600), "Space Shooter");
+    window_.create(sf::VideoMode(1280, 720), "Space Shooter");
 
+    player_ = std::make_unique<Player>();
+    // Utwórz widok o docelowej rozdzielczości
+//    sf::View view(sf::FloatRect(0, 0, 800, 600));
+
+// Ustaw widok dla okna
+//    window_.setView(view);
     // limit the framerate_ to 300 frames per second
     framerate_ = 150;
     window_.setFramerateLimit(framerate_);
@@ -21,8 +27,8 @@ Game::Game() {
     killCounterText_.setFillColor(sf::Color::Red);
     killCounterText_.setPosition(10, window_.getSize().y - 50);  // bottom left corner
 
-    player_.init(window_.getSize(), assets_.playerEngineOffTexture);
-    player_.addTexture("engine_on", assets_.playerEngineOnTexture);
+    player_->init(window_.getSize(), assets_.playerEngineOffTexture);
+    player_->addTexture("engine_on", assets_.playerEngineOnTexture);
     playerSpeed_ = sf::Vector2f(1.8f, 2.0f);
     enemySpeed_ = sf::Vector2f(0.8f, 0.1f);
     player_bullet_speed_ = 1.8f;
@@ -39,6 +45,12 @@ void Game::run() {
         sf::Event event;
         while (window_.pollEvent(event))
             if (event.type == sf::Event::Closed)    window_.close();
+        if (event.type == sf::Event::Resized)
+        {
+            // Ustaw widok na nowy rozmiar okna, zachowując docelową rozdzielczość
+            sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+            window_.setView(sf::View(visibleArea));
+        }
 
         update();
         render();
@@ -69,7 +81,7 @@ void Game::update() {
     killCounterText_.setString("Score: " + std::to_string(kill_counter_));
 
     for (auto it = enemies_.rbegin(); it != enemies_.rend(); /* no increment here */) {
-        it->setPlayerPosition(player_.getSprite().getPosition());
+        it->setPlayerPosition(player_->getSprite().getPosition());
         it->update(enemySpeed_, playerBullets_);
         if (!it->isAlive()) {
             if (it->isKilledByPlayer()) kill_counter_++;
@@ -88,16 +100,18 @@ void Game::update() {
 
     enemiesShoot();
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && player_.canShoot(shoot_time_player_))
-        playerBullets_.emplace_back(window_.getSize(),player_.getPosition(),
-                                    assets_.playerBulletTexture,player_.getSprite().getRotation());
+    // Shoot on Space and A
+    if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Space) || sf::Joystick::isButtonPressed(0, 0))
+    && player_->canShoot(shoot_time_player_))
+        playerBullets_.emplace_back(window_.getSize(),player_->getPosition(),
+                                    assets_.playerBulletTexture,player_->getSprite().getRotation());
 
     bullets_update();
     powerups_update();
 
-    player_.update(playerSpeed_, enemyBullets_);
-    player_.checkEnemyCollision(enemies_);
-    if (!player_.isAlive()) gameOver();
+    player_->update(playerSpeed_, enemyBullets_);
+    player_->checkEnemyCollision(enemies_);
+    if (!player_->isAlive()) gameOver();
 }
 
 void Game::render() {
@@ -107,7 +121,7 @@ void Game::render() {
     for (const Bullet& bullet : playerBullets_)  bullet.draw(window_);
     for (const Bullet& bullet : enemyBullets_)   bullet.draw(window_);
     for (const Enemy& enemy : enemies_)          enemy.draw(window_);
-    player_.draw(window_);
+    player_->draw(window_);
 
     window_.draw(fpsText_);  // draw the fps text
     window_.draw(killCounterText_);  // draw the killCounter text
@@ -162,7 +176,7 @@ void Game::bullets_update() {
 }
 
 void Game::powerups_update() {
-    sf::FloatRect playerBounds = player_.getSprite().getGlobalBounds();
+    sf::FloatRect playerBounds = player_->getSprite().getGlobalBounds();
 
     for (int i = powerups_.size() - 1; i >= 0; --i) {
         Powerup& powerup = powerups_[i];
@@ -176,7 +190,7 @@ void Game::powerups_update() {
 
         if (playerBounds.intersects(powerupBounds)){
             powerups_.erase(powerups_.begin() + i);
-            player_.multiplyEngineForce(1.3);
+            player_->multiplyEngineForce(1.3);
         }
     }
 }
