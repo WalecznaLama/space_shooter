@@ -14,18 +14,19 @@ public:
     void userMovement(const sf::Time& deltaTime);
     void checkEnemyCollision(const std::vector<Enemy>& enemies);
 
-    void setEngineForce(float engineForce);
-    float getEngineForce() const;
+    void  setlinearAcc(float engineForce);
+    float getlinearAcc() const;
     void multiplyEngineForce(float k);
 
-    float getRotation() const { return rotation_; }
     void calculateVelocity(const float& x_acc, const float& y_acc, const bool& brake, const float& deltaTime);
 
 private:
     bool user_input_ = false;
-    float engineForce_;
+    float linearAcc_; // pixels / s^s
     float angularAcc_; // deg / s^2
-    float linearDecConst_; // deceleration = linearDecConst_ * (engineForce_ / mass_)
+    float breakDecc_; // pixels / s^s
+    float constDecc_; // pixels / s^s
+    float engineDeccDivider_; // if (backward) acceleration /= engineDeccDivider_;
     float maxAngularVel_; // deg / s
     float maxLinearVel_; // pixels / s
     float angularVel_; // deg / s

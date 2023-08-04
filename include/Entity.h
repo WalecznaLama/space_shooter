@@ -18,6 +18,7 @@ public:
     virtual bool isAlive();
     virtual void addTexture(const std::string&, const sf::Texture& texture);
     virtual sf::Vector2f normalize(const sf::Vector2f& vector);
+
 protected:
     std::map<std::string, sf::Texture> textures_;
     sf::Sprite sprite_;

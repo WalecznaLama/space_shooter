@@ -16,12 +16,15 @@ void Player::init(const sf::Vector2u& windowSize, const sf::Texture& texture) {
     alive_ = true;
     first_shot_fired_ = false;
     killed_by_bullet_ = false;
-    engineForce_ = 100.0;
-    angularVel_ = 0;
-    maxAngularVel_ = 180;
-    maxLinearVel_ = 50;
-    angularAcc_ = 300;
-    linearDecConst_ = 2.0;
+    linearAcc_ = 100.;
+    angularVel_ = 0.;
+    maxAngularVel_ = 180.;
+    maxLinearVel_ = 50.;
+    angularAcc_ = 300.;
+    breakDecc_ = 200.;
+    constDecc_ = 10.;
+    engineDeccDivider_ = 2.;
+    // TODO angular decceleration, black holes!/w gravity,
 }
 
 void Player::update(const sf::Vector2f& speed, std::vector<Bullet>& bullets) {
@@ -88,11 +91,11 @@ void Player::userMovement(const sf::Time& deltaTime){
     user_input_ = _moved;
 }
 
-void Player::setEngineForce(float engineForce) { engineForce_ = engineForce; }
+void Player::setlinearAcc(float linearAcc) { linearAcc_ = linearAcc; }
 
-float Player::getEngineForce() const { return engineForce_; }
+float Player::getlinearAcc() const { return linearAcc_; }
 
-void Player::multiplyEngineForce(float k) { engineForce_ *= k; }
+void Player::multiplyEngineForce(float k) { linearAcc_ *= k; }
 
 void Player::checkEnemyCollision(const std::vector<Enemy>& enemies){
     sf::FloatRect bounds = sprite_.getGlobalBounds();
@@ -108,9 +111,9 @@ void Player::checkEnemyCollision(const std::vector<Enemy>& enemies){
 
 void Player::calculateVelocity(const float& x_acc, const float& y_acc, const bool& brake, const float& deltaTime) {
     float _x_acc = x_acc;
-    if (_x_acc < 0) _x_acc /= linearDecConst_;
+    if (_x_acc < 0) _x_acc /= engineDeccDivider_;
 
-    float _y_acc = y_acc;  //X lewego analoga
+    float _y_acc = y_acc;  // X lewego analoga
 
     angularVel_ += angularAcc_ * deltaTime * _y_acc;
     angularVel_ = std::clamp(angularVel_, -maxAngularVel_, maxAngularVel_);
@@ -119,15 +122,20 @@ void Player::calculateVelocity(const float& x_acc, const float& y_acc, const boo
     // Oblicz kierunek siły silnika
     sf::Vector2f _engineForceDirection(sinf(-rotation_ * M_PI / 180.0f), cosf(rotation_ * M_PI / 180.0f));
     // Oblicz przyspieszenie wynikające z siły silnika
-    sf::Vector2f _acceleration = _engineForceDirection * engineForce_ * _x_acc;
+    sf::Vector2f _acceleration = _engineForceDirection * linearAcc_ * _x_acc;
     // Dodaj przyspieszenie do prędkości
     velocity_ += _acceleration * deltaTime;
 
     if (brake){
         // Oblicz kierunek przeciwny do kierunku prędkości
         sf::Vector2f decelerationDirection = -normalize(velocity_);
-        sf::Vector2f deceleration = decelerationDirection * engineForce_  * linearDecConst_;
+        sf::Vector2f deceleration = decelerationDirection * breakDecc_;
         // Dodaj przyspieszenie hamujące do prędkości
         velocity_ += deceleration * deltaTime;
     }
+    // Oblicz kierunek przeciwny do kierunku prędkości
+    sf::Vector2f decelerationDirection = -normalize(velocity_);
+    sf::Vector2f deceleration = decelerationDirection * constDecc_;
+    // Dodaj przyspieszenie hamujące do prędkości
+    velocity_ += deceleration * deltaTime;
 }
