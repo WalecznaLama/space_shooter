@@ -8,6 +8,7 @@ Game::Game()
           player_(std::make_shared<Player>(sf::Vector2f(1500, 1500), assets_.playerTextures_))
 {
 
+    cameraPosition_ = player_->getPosition();
     // set the texture to the sprite_
     backgroundSprite_.setTexture(assets_.backgroundTexture);
 
@@ -47,7 +48,8 @@ void Game::update() {
     updateBullets();
     updatePowerups();
 
-    cameraPosition_ = player_->getPosition() ;
+//    cameraPosition_ = player_->getPosition() ;
+    calculateCameraPosition();
     window_.updateView(cameraPosition_);
     if (!player_->getIsAlive()) gameOver();
 
@@ -63,6 +65,7 @@ void Game::render() {
     for (const Enemy& enemy : enemies_)          enemy.draw(window_.getRenderWindow());
     player_->draw(window_.getRenderWindow());
 
+    window_.setUiView();
     window_.draw(fpsText_);  // draw the fps text
     window_.draw(killCounterText_);  // draw the killCounter text
     window_.display();
@@ -78,7 +81,7 @@ void Game::gameOver() {
 
     sf::FloatRect textRect = gameOverText.getLocalBounds();
     gameOverText.setOrigin(textRect.left + textRect.width/2.0f, textRect.top  + textRect.height/2.0f);
-    gameOverText.setPosition(sf::Vector2f(window_.getSize().x / 2.0f, window_.getSize().y / 2.0f));
+    gameOverText.setPosition(cameraPosition_);
 
     while (window_.isOpen()) {
         window_.processEvents();
@@ -290,4 +293,13 @@ void Game::checkPlayerCollision() {
         }
     }
     if (lives_ < 1) player_->setIsAlive(false);
+}
+
+void Game::calculateCameraPosition() {
+    sf::Vector2f direction = player_->getPosition() - cameraPosition_;
+
+    // move the camera towards the player with a certain acceleration
+    float acceleration = 0.01f;  // adjust this as needed
+    cameraPosition_ += direction * acceleration;
+
 }

@@ -22,11 +22,10 @@ private:
     void updateBullets();
     void updatePowerups();
     void updateTexts(float deltaTime);
-
     void checkPlayerCollision();
+    void calculateCameraPosition();
 
     sf::Vector2f randomSpawnPoint();
-
     sf::Clock updateClock_;
 
     Window window_;
@@ -37,8 +36,8 @@ private:
     std::vector<Bullet> playerBullets_;
     std::vector<Bullet> enemyBullets_;
     std::vector<Powerup> powerups_;
-    sf::Vector2f cameraPosition_;
 
+    sf::Vector2f cameraPosition_;
     sf::Sprite backgroundSprite_;
 
     sf::Text fpsText_;

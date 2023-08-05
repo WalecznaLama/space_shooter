@@ -6,6 +6,9 @@ Window::Window(const std::string &title, sf::Vector2u size)
     window_.setView(view_);
     framerate_ = 150;
     window_.setFramerateLimit(framerate_);
+
+    uiView_.setSize(window_.getSize().x, window_.getSize().y);
+    uiView_.setCenter(window_.getSize().x / 2, window_.getSize().y / 2);
 }
 
 void Window::processEvents() {
@@ -34,3 +37,5 @@ bool Window::isOpen() const { return window_.isOpen(); }
 sf::Vector2u Window::getSize() const { return window_.getSize(); }
 
 sf::RenderWindow &Window::getRenderWindow() { return window_; }
+
+void Window::setUiView() { window_.setView(uiView_); }

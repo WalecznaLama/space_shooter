@@ -1,7 +1,3 @@
-//
-// Created by rav on 05.08.23.
-//
-
 #ifndef SPACE_SHOOTER_WINDOW_H
 #define SPACE_SHOOTER_WINDOW_H
 
@@ -17,6 +13,8 @@ public:
 
     // Update the view to follow the given position
     void updateView(const sf::Vector2f& position);
+
+    void setUiView();
 
     // Clear the window
     void clear();
@@ -35,6 +33,7 @@ public:
 private:
     sf::RenderWindow window_;
     sf::View view_;
+    sf::View uiView_;
     int framerate_;
 };
 
