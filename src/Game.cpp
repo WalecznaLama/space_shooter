@@ -3,9 +3,9 @@
 // TODO  black holes!/w gravity,
 Game::Game()
         : window_("Space Shooter", sf::Vector2u(1280, 720)), // Initialize GameWindow with a title and size
-          grid_(1280, 720),
+          grid_(3000, 3000),
           assets_(),
-          player_(std::make_shared<Player>(sf::Vector2f(600, 300), assets_.playerTextures_))
+          player_(std::make_shared<Player>(sf::Vector2f(1500, 1500), assets_.playerTextures_))
 {
 
     // set the texture to the sprite_
@@ -21,9 +21,6 @@ Game::Game()
     killCounterText_.setCharacterSize(40);  // in pixels
     killCounterText_.setFillColor(sf::Color::Red);
     killCounterText_.setPosition(10, window_.getSize().y - 50);  // bottom left corner
-
-    playerWidth_= 10, playerHeight_ = 30;
-    enemyWidth_ = 200, enemyHeight_  = 200;
 
     player_bullet_speed_ = 1.8f;
     enemy_bullet_speed_ = 1.2f;
@@ -50,6 +47,8 @@ void Game::update() {
     updateBullets();
     updatePowerups();
 
+    cameraPosition_ = player_->getPosition() ;
+    window_.updateView(cameraPosition_);
     if (!player_->getIsAlive()) gameOver();
 
     updateClock_.restart();
@@ -123,51 +122,32 @@ void Game::updatePowerups() {
 void Game::updatePlayer(float deltaTime) {
     player_->update(deltaTime);
 
+    // check if the player's new bounding box collides with anything
+    checkPlayerCollision();
+
     sf::Vector2f linDisplacement = player_->getLinearVelocity() * deltaTime; // calculate how far the player should move
     sf::Vector2f newPosition = player_->getPosition() + linDisplacement; // calculate the player's new position
     float angDisplacement = player_->getAngularVelocity() * deltaTime;
     float newRotation = player_->getRotation() + angDisplacement;
 
-    // check if the player's new bounding box collides with anything
-    bool collidesWithSomething = false;
+    // Jeśli nowa pozycja jest wewnątrz gry i nie koliduje z niczym
+    if (grid_.isInside(newPosition) && !grid_.getCell(newPosition.x, newPosition.y).isOccupiedEnemy()) {
+        // Znajdź starą komórkę, w której znajduje się gracz
+        Cell& oldCell = grid_.getCell(player_->getPosition().x, player_->getPosition().y);
+        // Zaznacz starą komórkę jako pustą
+        oldCell.setPlayer(nullptr);
 
-    // Check collision with enemies
-    for (const auto& enemy : enemies_) {
-        if (enemy.getBounds().intersects(player_->getBounds())) {
-            collidesWithSomething = true;
-            player_->setIsALive(false);
-            break;
-        }
-    }
-
-    // Check collision with enemy bullets
-    if (!collidesWithSomething) {
-        for (const auto& bullet : enemyBullets_) {
-            if (bullet.getBounds().intersects(player_->getBounds())) {
-                collidesWithSomething = true;
-                player_->setIsALive(false);
-                break;
-            }
-        }
-    }
-
-    // Check collision with powerups
-    if (!collidesWithSomething) {
-        for (auto& powerup : powerups_) {
-            if (powerup.getBounds().intersects(player_->getBounds())) {
-                powerup.setIsAlive(false);
-                // TODO powerup stuff
-                player_->multiplyLinearAcc(1.2);
-                break;
-            }
-        }
-    }
-
-    // if the player's new position is inside the game area and doesn't collide with anything, move the player
-    if (!collidesWithSomething && grid_.isInside(newPosition.x, newPosition.y)) {
+        // Ustaw nową pozycję gracza
         player_->setPosition(newPosition);
         player_->setRotation(newRotation);
-    } else{
+
+        // Znajdź nową komórkę, w której znajduje się gracz
+        Cell& newCell = grid_.getCell(newPosition.x, newPosition.y);
+        // Zaznacz nową komórkę jako zajętą przez gracza
+        newCell.setPlayer(player_.get());
+    }
+        // Jeśli nowa pozycja jest poza grą lub koliduje z czymś, zatrzymaj gracza
+    else {
         sf::Vector2f _zero_velocity = sf::Vector2f (0.f,0.f);
         player_->setVelocity(_zero_velocity);
     }
@@ -179,6 +159,7 @@ void Game::updatePlayer(float deltaTime) {
     if (_user_shoot && player_->canShoot(shoot_time_player_))
         playerBullets_.emplace_back(player_->getPosition(),
                                     assets_.playerBulletTexture,player_->getRotation());
+
 }
 
 void Game::updateEnemies(float deltaTime) {
@@ -203,11 +184,16 @@ void Game::updateEnemies(float deltaTime) {
         bool collidesWithSomething = false;
 
         for (auto& bullet : playerBullets_) {
-            if (bullet.getBounds().intersects(enemy.getBounds())) {
+            // Oblicz odległość między graczem a wrogiem
+            sf::Vector2f diff = bullet.getPosition() - enemy.getPosition();
+            float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+
+            // Sprawdź, czy odległość jest mniejsza lub równa sumie promieni
+            float _sum_radius = bullet.getRadius() + enemy.getRadius();
+            if (distance < _sum_radius) {
                 collidesWithSomething = true;
+                enemy.setIsAlive(false);
                 bullet.setIsAlive(false);
-                enemy.setIsALive(false);
-                enemy.setIsKilledByPlayer(true);
                 kill_counter_++;
                 break;
             }
@@ -230,34 +216,78 @@ void Game::updateEnemies(float deltaTime) {
 void Game::updateTexts(float deltaTime) {
     float fps = 1.f / deltaTime;
     fpsText_.setString("FPS: " + std::to_string(static_cast<int>(fps)));
-//    killCounterText_.setString("Score: " + std::to_string(kill_counter_));
-    killCounterText_.setString("Score: " + std::to_string(playerBullets_.size()));
+    killCounterText_.setString("Score: " + std::to_string(kill_counter_));
+//    killCounterText_.setString("Score: " + std::to_string(playerBullets_.size()));
 }
 
 sf::Vector2f Game::randomSpawnPoint() {
     std::random_device rd;  // (seed)
     std::mt19937 gen(rd());  // generator liczb pseudolosowych
-    std::uniform_int_distribution<> distr(0, 3);  // rozkład jednostajny
 
-    int _spawnDirection = distr(gen);  // 0 - Up, 1 - Right, 2 - Down, 3 - Left
-    float _x, _y;
-    switch (_spawnDirection) {
-        case Direction::Up:
-            _x = (float)(std::rand() % window_.getSize().x);
-            _y = 0;
-            break;
-        case Direction::Down:
-            _x = (float)(std::rand() % window_.getSize().x);
-            _y = window_.getSize().y - enemyHeight_;
-            break;
-        case Direction::Left:
-            _x = 0;
-            _y = (float)(std::rand() % window_.getSize().y);
-            break;
-        case Direction::Right:
-            _x = window_.getSize().x - enemyWidth_;
-            _y = (float)(std::rand() % window_.getSize().y);
-            break;
-    }
+    std::uniform_real_distribution<> distr(0, 2 * M_PI);  // rozkład jednostajny od 0 do 2*pi
+    std::uniform_real_distribution<> distrRadius(200, 600);  // rozkład jednostajny od 0 do 600
+
+    float spawnRadius = distrRadius(gen);  // radius of the spawn circle around the player
+    float spawnAngle = distr(gen);  // random angle
+
+    // calculate the spawn point
+    float _x = player_->getPosition().x + spawnRadius * std::cos(spawnAngle);
+    float _y = player_->getPosition().y + spawnRadius * std::sin(spawnAngle);
     return {_x, _y};
+}
+
+void Game::checkPlayerCollision() {
+    bool collidesWithSomething = false;
+
+    for (auto& enemy : enemies_) {
+        // Oblicz odległość między graczem a wrogiem
+        sf::Vector2f diff = player_->getPosition() - enemy.getPosition();
+        float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+
+        // Sprawdź, czy odległość jest mniejsza lub równa sumie promieni kara co sekunde
+        float _sum_radius = player_->getRadius() + enemy.getRadius();
+        if (distance < _sum_radius && collisionTimer_.getElapsedTime().asSeconds() > 1.0f) {
+            collidesWithSomething = true;
+//            player_->setIsAlive(false);
+//            enemy.setIsAlive(false);
+            lives_--;
+            collisionTimer_.restart();
+            break;
+        }
+    }
+
+    // Check collision with enemy bullets
+    if (!collidesWithSomething) {
+        for (auto& bullet : enemyBullets_) {
+            // Oblicz odległość między graczem a wrogiem
+            sf::Vector2f diff = player_->getPosition() - bullet.getPosition();
+            float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+
+            float _sum_radius = player_->getRadius() + bullet.getRadius();
+            if (distance < _sum_radius) {
+                collidesWithSomething = true;
+                lives_--;
+                bullet.setIsAlive(false);
+                break;
+            }
+        }
+    }
+
+    // Check collision with powerups
+    if (!collidesWithSomething) {
+        for (auto& powerup : powerups_) {
+            sf::Vector2f diff = player_->getPosition() - powerup.getPosition();
+            float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+
+            float _sum_radius = player_->getRadius() + powerup.getRadius();
+            if (distance < _sum_radius) {
+                collidesWithSomething = true;
+                lives_++;
+                player_->multiplyLinearAcc(1.2);
+                powerup.setIsAlive(false);
+                break;
+            }
+        }
+    }
+    if (lives_ < 1) player_->setIsAlive(false);
 }

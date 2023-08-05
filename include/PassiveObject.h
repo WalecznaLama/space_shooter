@@ -11,11 +11,13 @@ public:
     sf::FloatRect getBounds() const;
     virtual void setIsAlive(bool alive);
     virtual bool getIsAlive() const;
+    virtual float getRadius() const;
 
 protected:
     sf::Sprite sprite_;
     sf::Vector2u windowSize_;
     bool alive_=true;
+    float collisionRadius_=0; // pixels
 };
 
 #endif //SPACE_SHOOTER_PASSIVEOBJECT_H

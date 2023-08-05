@@ -3,7 +3,7 @@
 Powerup::Powerup(const sf::Vector2u& windowSize,const sf::Texture& texture) {
     sprite_.setTexture(texture);
     windowSize_ = windowSize;
-
+    collisionRadius_ = 10;
     goingRight_ = true;
 
     std::srand(std::time(nullptr));

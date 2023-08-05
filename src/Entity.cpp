@@ -56,8 +56,10 @@ sf::FloatRect Entity::getBounds() const { return mainSprite_.getGlobalBounds(); 
 
 void Entity::setPosition(sf::Vector2f& newPosition) { position_ = newPosition; }
 
-void Entity::setIsALive(bool isAlive) { alive_ = isAlive; }
-
 void Entity::setVelocity(sf::Vector2f &newVelocity) { velocity_ = newVelocity; }
 
 void Entity::setRotation(float newRotation) { rotation_ = newRotation; }
+
+float Entity::getRadius() const { return collisionRadius_; }
+
+void Entity::setIsAlive(bool isAlive) { alive_ = isAlive; }

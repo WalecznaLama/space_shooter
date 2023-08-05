@@ -33,6 +33,9 @@ public:
     void addEnemyBullet(Bullet* bullet);
     void removeEnemyBullet(Bullet* bullet);
 
+
+    bool isOccupied() const;
+    bool isOccupiedEnemy() const;
 //    // Planets
 //    bool hasPlanet() const {
 //        return planet_ != nullptr;

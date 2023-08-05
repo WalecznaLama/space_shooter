@@ -14,13 +14,14 @@ public:
     virtual void setPosition(sf::Vector2f& newPosition);
     virtual void setRotation(float newRotation);
     virtual void setVelocity(sf::Vector2f& newVelocity);
-    virtual void setIsALive(bool isAlive);
     virtual float getRotation() const;
+    virtual float getRadius() const;
     virtual sf::Vector2f getLinearVelocity() const;
     virtual float getAngularVelocity() const;
     sf::FloatRect getBounds() const;
     virtual bool canShoot(float time_to_shoot);
     virtual const sf::Sprite& getSprite() const;
+    virtual void setIsAlive(bool isAlive);
     virtual bool getIsAlive() const;
     virtual void addSprite(const std::string&, const sf::Texture& texture);
 
@@ -43,6 +44,7 @@ protected:
     sf::Vector2f velocity_ = sf::Vector2f(0.0f, 0.0f);
     sf::Vector2f position_;
     float rotation_ = 0.0;
+    float collisionRadius_; // pixels
 
     float maxAngularVel_; // deg / s
     float maxLinearVel_; // pixels / s

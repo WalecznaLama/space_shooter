@@ -2,6 +2,7 @@
 
 Bullet::Bullet(const sf::Vector2f& position, const sf::Texture& texture, const float& angle) {
     sprite_.setTexture(texture);
+    collisionRadius_ = 5;
 
     sprite_.setOrigin(sprite_.getLocalBounds().width / 2, sprite_.getLocalBounds().height / 2);
     sprite_.setPosition(position);

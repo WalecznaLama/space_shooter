@@ -23,3 +23,6 @@ void Cell::addEnemyBullet(Bullet* bullet) { enemyBullets_.push_back(bullet); }
 void Cell::removeEnemyBullet(Bullet* bullet) { enemyBullets_.erase(std::remove(enemyBullets_.begin(),
                                                                                enemyBullets_.end(), bullet),
                                                                    enemyBullets_.end()); }
+
+bool Cell::isOccupied() const { return hasPlayer() || hasEnemies() || hasPlayerBullets() || hasEnemyBullets(); }
+bool Cell::isOccupiedEnemy() const { return hasEnemies() || hasEnemyBullets(); }

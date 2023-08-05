@@ -8,6 +8,7 @@ Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture
     killedByBullet_ = false;
     decelerationDivider_ = 2.;
 
+    collisionRadius_ = 10;
     linAcc_ = 100.;
     linBreakDecc_ = 20.;
     linConstDecc_ = 10.;

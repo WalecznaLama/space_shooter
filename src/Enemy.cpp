@@ -3,6 +3,7 @@
 #include "Enemy.h"
 
 Enemy::Enemy(const sf::Vector2f spawn_point, const sf::Texture& texture) {
+    collisionRadius_ = 40;
     linAcc_ = 20.;
     maxLinearVel_ = 30.;
     maxAngularVel_ = 150.;

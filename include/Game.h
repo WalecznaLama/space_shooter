@@ -23,6 +23,8 @@ private:
     void updatePowerups();
     void updateTexts(float deltaTime);
 
+    void checkPlayerCollision();
+
     sf::Vector2f randomSpawnPoint();
 
     sf::Clock updateClock_;
@@ -35,11 +37,14 @@ private:
     std::vector<Bullet> playerBullets_;
     std::vector<Bullet> enemyBullets_;
     std::vector<Powerup> powerups_;
+    sf::Vector2f cameraPosition_;
 
     sf::Sprite backgroundSprite_;
 
     sf::Text fpsText_;
     sf::Text killCounterText_;
+
+    sf::Clock collisionTimer_;
 
     float player_bullet_speed_;
     float enemy_bullet_speed_;
@@ -47,9 +52,7 @@ private:
     float shoot_time_player_;
     float shoot_time_enemy_;
     uint kill_counter_ = 0;
-
-    float playerWidth_, playerHeight_;
-    float enemyWidth_, enemyHeight_;
+    uint lives_ = 5;
 
     enum Direction { Up, Down, Left, Right };
 };
