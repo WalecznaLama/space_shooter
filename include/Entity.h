@@ -19,9 +19,12 @@ public:
     virtual sf::Vector2f getLinearVelocity() const;
     virtual float getAngularVelocity() const;
     sf::FloatRect getBounds() const;
+    virtual int getHp() const;
+    virtual float getMaxHp() const;
     virtual bool canShoot(float time_to_shoot);
     virtual const sf::Sprite& getSprite() const;
     virtual void setIsAlive(bool isAlive);
+    virtual void setDamage(int damage);
     virtual bool getIsAlive() const;
     virtual void addSprite(const std::string&, const sf::Texture& texture);
 
@@ -40,12 +43,13 @@ protected:
     bool alive_ = true;
     bool firstShotFired_ = false;
     bool killedByBullet_ = false;
+    int hp_;
+    int maxHp_;
 
     sf::Vector2f velocity_ = sf::Vector2f(0.0f, 0.0f);
     sf::Vector2f position_;
     float rotation_ = 0.0;
     float collisionRadius_; // pixels
-
     float maxAngularVel_; // deg / s
     float maxLinearVel_; // pixels / s
     float angularVel_ = 0; // deg / s

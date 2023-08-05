@@ -18,6 +18,8 @@ Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture
     angBreakDecc_ = 30.;
     angConstDecc_ = 15.;
 
+    maxHp_ = 5;
+    hp_ = maxHp_;
     init();
 }
 
@@ -32,6 +34,7 @@ void Player::update(float deltaTime) {
     userMovement(deltaTime);
     if (vectorLength(velocity_) > maxLinearVel_) velocity_ = vectorNormalize(velocity_) * maxLinearVel_;
     updateSprites();
+    if (hp_ == 0) alive_ = false;
 }
 
 void Player::userMovement(float deltaTime){

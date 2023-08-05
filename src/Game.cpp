@@ -11,6 +11,9 @@ Game::Game()
     cameraPosition_ = player_->getPosition();
     // set the texture to the sprite_
     backgroundSprite_.setTexture(assets_.backgroundTexture);
+    heartSprite_.setTexture(assets_.heartTexture);
+    heartSprite_.scale(.5, .5);
+    heartSprite_.setPosition(10, window_.getSize().y - 100);
 
     // set up fps and killCounter text
     fpsText_.setFont(assets_.font);
@@ -48,11 +51,11 @@ void Game::update() {
     updateBullets();
     updatePowerups();
 
-//    cameraPosition_ = player_->getPosition() ;
+    setHeartSprite();
+
     calculateCameraPosition();
     window_.updateView(cameraPosition_);
     if (!player_->getIsAlive()) gameOver();
-
     updateClock_.restart();
 }
 
@@ -68,6 +71,7 @@ void Game::render() {
     window_.setUiView();
     window_.draw(fpsText_);  // draw the fps text
     window_.draw(killCounterText_);  // draw the killCounter text
+    window_.draw(heartSprite_);
     window_.display();
 }
 
@@ -253,7 +257,7 @@ void Game::checkPlayerCollision() {
             collidesWithSomething = true;
 //            player_->setIsAlive(false);
 //            enemy.setIsAlive(false);
-            lives_--;
+            player_->setDamage(1);
             collisionTimer_.restart();
             break;
         }
@@ -269,7 +273,7 @@ void Game::checkPlayerCollision() {
             float _sum_radius = player_->getRadius() + bullet.getRadius();
             if (distance < _sum_radius) {
                 collidesWithSomething = true;
-                lives_--;
+                player_->setDamage(1);
                 bullet.setIsAlive(false);
                 break;
             }
@@ -285,14 +289,13 @@ void Game::checkPlayerCollision() {
             float _sum_radius = player_->getRadius() + powerup.getRadius();
             if (distance < _sum_radius) {
                 collidesWithSomething = true;
-                lives_++;
+                player_->setDamage(1);
                 player_->multiplyLinearAcc(1.2);
                 powerup.setIsAlive(false);
                 break;
             }
         }
     }
-    if (lives_ < 1) player_->setIsAlive(false);
 }
 
 void Game::calculateCameraPosition() {
@@ -301,5 +304,14 @@ void Game::calculateCameraPosition() {
     // move the camera towards the player with a certain acceleration
     float acceleration = 0.01f;  // adjust this as needed
     cameraPosition_ += direction * acceleration;
+}
 
+void Game::setHeartSprite() {
+    // Obliczenie procenta życia
+    float hp_percent = player_->getHp() * 1. / player_->getMaxHp();
+
+// Ustawienie prostokąta tekstury na sprite, proporcjonalnie do procentu życia
+    heartSprite_.setTextureRect(sf::IntRect(0, 0,
+                                            heartSprite_.getTexture()->getSize().x * hp_percent,
+                                            heartSprite_.getTexture()->getSize().y));
 }

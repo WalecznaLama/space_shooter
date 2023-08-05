@@ -63,3 +63,9 @@ void Entity::setRotation(float newRotation) { rotation_ = newRotation; }
 float Entity::getRadius() const { return collisionRadius_; }
 
 void Entity::setIsAlive(bool isAlive) { alive_ = isAlive; }
+
+int Entity::getHp() const { return hp_; }
+
+float Entity::getMaxHp() const { return maxHp_; }
+
+void Entity::setDamage(int damage) { hp_ = std::max(0, hp_ - damage); }

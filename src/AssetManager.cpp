@@ -40,6 +40,7 @@ void AssetManager::init() {
 
     powerupTexture = loadTexture("resources/powerup1.png");
 
+    heartTexture = loadTexture("resources/heart.png");
     backgroundTexture = loadTexture("resources/space.png");
     // load font
     font = loadFont("resources/Roboto-Medium.ttf");

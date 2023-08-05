@@ -24,6 +24,7 @@ private:
     void updateTexts(float deltaTime);
     void checkPlayerCollision();
     void calculateCameraPosition();
+    void setHeartSprite();
 
     sf::Vector2f randomSpawnPoint();
     sf::Clock updateClock_;
@@ -39,6 +40,7 @@ private:
 
     sf::Vector2f cameraPosition_;
     sf::Sprite backgroundSprite_;
+    sf::Sprite heartSprite_;
 
     sf::Text fpsText_;
     sf::Text killCounterText_;
@@ -51,7 +53,6 @@ private:
     float shoot_time_player_;
     float shoot_time_enemy_;
     uint kill_counter_ = 0;
-    uint lives_ = 5;
 
     enum Direction { Up, Down, Left, Right };
 };
