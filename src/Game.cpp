@@ -1,10 +1,12 @@
 #include "Game.h"
 
-Game::Game() {
-    window_.create(sf::VideoMode(1280, 720), "Space Shooter");
-
-    framerate_ = 150;
-    window_.setFramerateLimit(framerate_);
+// TODO  black holes!/w gravity,
+Game::Game()
+        : window_("Space Shooter", sf::Vector2u(1280, 720)), // Initialize GameWindow with a title and size
+          grid_(1280, 720),
+          assets_(),
+          player_(std::make_shared<Player>(sf::Vector2f(600, 300), assets_.playerTextures_))
+{
 
     // set the texture to the sprite_
     backgroundSprite_.setTexture(assets_.backgroundTexture);
@@ -20,94 +22,47 @@ Game::Game() {
     killCounterText_.setFillColor(sf::Color::Red);
     killCounterText_.setPosition(10, window_.getSize().y - 50);  // bottom left corner
 
+    playerWidth_= 10, playerHeight_ = 30;
+    enemyWidth_ = 200, enemyHeight_  = 200;
+
     player_bullet_speed_ = 1.8f;
     enemy_bullet_speed_ = 1.2f;
     powerup_speed_ = 0.4f;
     shoot_time_player_ = 0.2f;
     shoot_time_enemy_ = 20.0f;
-    player_ = std::make_shared<Player>(window_.getSize(), assets_.playerTextures_);
 }
 
 void Game::run() {
     while (window_.isOpen()) {
-        sf::Event event;
-        while (window_.pollEvent(event))
-            if (event.type == sf::Event::Closed)    window_.close();
-        if (event.type == sf::Event::Resized)
-        {
-            // Ustaw widok na nowy rozmiar okna, zachowując docelową rozdzielczość
-            sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
-            window_.setView(sf::View(visibleArea));
-        }
-
+        window_.processEvents();
         update();
         render();
     }
 }
 
 void Game::update() {
-    static sf::Clock enemySpawnClock;
-    sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
-    if (elapsed_enemy.asSeconds() >= 5.0f) {  // every 5 seconds spawn enemy
-        enemies_.emplace_back(window_.getSize(), assets_.enemyTexture);
-        enemySpawnClock.restart();
-    }
-//    static sf::Clock powerupSpawnClock;
-//    sf::Time elapsed_powerup = powerupSpawnClock.getElapsedTime();
-//    if (elapsed_powerup.asSeconds() >= 9.0f) {  // every 9 seconds spawn powerup
-//        powerups_.emplace_back(window_.getSize(), assets_.powerupTexture);
-//        powerupSpawnClock.restart();
-//    }
+    float elapsed = updateClock_.getElapsedTime().asSeconds();
 
-    // update fps text
-    static sf::Clock clock_fps;
-    sf::Time elapsed_fps = clock_fps.getElapsedTime();
-    float fps = 1.f / elapsed_fps.asSeconds();
-    fpsText_.setString("FPS: " + std::to_string(static_cast<int>(fps)));
-    clock_fps.restart();
+    updatePlayer(elapsed);
+    updateEnemies(elapsed);
+    updateTexts(elapsed);
 
-    killCounterText_.setString("Score: " + std::to_string(kill_counter_));
+    updateBullets();
+    updatePowerups();
 
-    for (auto it = enemies_.rbegin(); it != enemies_.rend(); /* no increment here */) {
-        it->update( playerBullets_, player_->getPosition());
-        if (!it->isAlive()) {
-            if (it->isKilledByPlayer()) kill_counter_++;
-            // Convert reverse iterator to base (which will be one position forward in terms of direct iterator)
-            auto directIt = it.base();
-            // Move to the actual element in terms of direct iterator
-            --directIt;
-            // Erase the element and get the new iterator
-            directIt = enemies_.erase(directIt);
-            // Convert the direct iterator back to reverse iterator
-            it = std::reverse_iterator<decltype(directIt)>(directIt);
-        } else { ++it; }
-    }
+    if (!player_->getIsAlive()) gameOver();
 
-//    enemiesShoot();
-
-    // Shoot on Space and A
-    bool _user_shoot = (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)
-            || sf::Joystick::isButtonPressed(0, 0));
-
-    if (_user_shoot && player_->canShoot(shoot_time_player_))
-        playerBullets_.emplace_back(window_.getSize(),player_->getPosition(),
-                                    assets_.playerBulletTexture,player_->getSprite().getRotation());
-
-    bullets_update();
-    powerups_update();
-
-    player_->update(enemyBullets_, enemies_);
-    if (!player_->isAlive()) gameOver();
+    updateClock_.restart();
 }
 
 void Game::render() {
     window_.clear();
     window_.draw(backgroundSprite_);  // draw the background
-    for (const Powerup& powerup : powerups_)     powerup.draw(window_);
-    for (const Bullet& bullet : playerBullets_)  bullet.draw(window_);
-    for (const Bullet& bullet : enemyBullets_)   bullet.draw(window_);
-    for (const Enemy& enemy : enemies_)          enemy.draw(window_);
-    player_->draw(window_);
+    for (const Powerup& powerup : powerups_)     powerup.draw(window_.getRenderWindow());
+    for (const Bullet& bullet : playerBullets_)  bullet.draw(window_.getRenderWindow());
+    for (const Bullet& bullet : enemyBullets_)   bullet.draw(window_.getRenderWindow());
+    for (const Enemy& enemy : enemies_)          enemy.draw(window_.getRenderWindow());
+    player_->draw(window_.getRenderWindow());
 
     window_.draw(fpsText_);  // draw the fps text
     window_.draw(killCounterText_);  // draw the killCounter text
@@ -127,56 +82,182 @@ void Game::gameOver() {
     gameOverText.setPosition(sf::Vector2f(window_.getSize().x / 2.0f, window_.getSize().y / 2.0f));
 
     while (window_.isOpen()) {
-        sf::Event event;
-        while (window_.pollEvent(event))
-            if (event.type == sf::Event::Closed)    window_.close();
-
+        window_.processEvents();
         window_.clear();
         window_.draw(gameOverText);
         window_.display();
     }
 }
 
-void Game::enemiesShoot() {
-    for (auto& enemy : enemies_)
-        if (enemy.canShoot(shoot_time_enemy_))
-            enemyBullets_.emplace_back(window_.getSize() ,enemy.getPosition(),
-                                       assets_.enemyBulletTexture,enemy.getSprite().getRotation());
-}
-
-void Game::bullets_update() {
+void Game::updateBullets() {
     for (int i = playerBullets_.size() - 1; i >= 0; --i) {
         Bullet& bullet = playerBullets_[i];
-        bullet.update(-player_bullet_speed_);
-        if (bullet.isOffScreen())   {
-            playerBullets_.erase(playerBullets_.begin() + i);
-        }
+        bullet.update(player_bullet_speed_);
+        if (!grid_.isInside(bullet.getPosition()) or !bullet.getIsAlive())   playerBullets_.erase(playerBullets_.begin() + i);
     }
 
     for (int i = enemyBullets_.size() - 1; i >= 0; --i) {
-        Bullet& bullet = enemyBullets_[i];
+        Bullet &bullet = enemyBullets_[i];
         bullet.update(enemy_bullet_speed_);
-        if (bullet.isOffScreen()) {
-            enemyBullets_.erase(enemyBullets_.begin() + i); }
+        if (!grid_.isInside(bullet.getPosition()) or !bullet.getIsAlive()) enemyBullets_.erase(enemyBullets_.begin() + i);
     }
 }
 
-void Game::powerups_update() {
-    sf::FloatRect playerBounds = player_->getSprite().getGlobalBounds();
+void Game::updatePowerups() {
+    static sf::Clock powerupSpawnClock;
+    sf::Time elapsed_enemy = powerupSpawnClock.getElapsedTime();
+    if (elapsed_enemy.asSeconds() >= 3.0f) {  // every 3 seconds spawn enemy
+        powerups_.emplace_back(window_.getSize(), assets_.powerupTexture);
+        powerupSpawnClock.restart();
+    }
 
     for (int i = powerups_.size() - 1; i >= 0; --i) {
         Powerup& powerup = powerups_[i];
         powerup.update(powerup_speed_);
-        sf::FloatRect powerupBounds = powerup.getSprite().getGlobalBounds();
-
         // remove off screen
-        if(powerup.isOffScreen()) {
-            powerups_.erase(powerups_.begin() + i);
-        }
+        if (grid_.isInside(powerup.getPosition())) { powerups_.erase(powerups_.begin() + i); }
+    }
+}
 
-        if (playerBounds.intersects(powerupBounds)){
-            powerups_.erase(powerups_.begin() + i);
-            player_->multiplyLinearAcc(1.3);
+// TODO add HP
+void Game::updatePlayer(float deltaTime) {
+    player_->update(deltaTime);
+
+    sf::Vector2f linDisplacement = player_->getLinearVelocity() * deltaTime; // calculate how far the player should move
+    sf::Vector2f newPosition = player_->getPosition() + linDisplacement; // calculate the player's new position
+    float angDisplacement = player_->getAngularVelocity() * deltaTime;
+    float newRotation = player_->getRotation() + angDisplacement;
+
+    // check if the player's new bounding box collides with anything
+    bool collidesWithSomething = false;
+
+    // Check collision with enemies
+    for (const auto& enemy : enemies_) {
+        if (enemy.getBounds().intersects(player_->getBounds())) {
+            collidesWithSomething = true;
+            player_->setIsALive(false);
+            break;
         }
     }
+
+    // Check collision with enemy bullets
+    if (!collidesWithSomething) {
+        for (const auto& bullet : enemyBullets_) {
+            if (bullet.getBounds().intersects(player_->getBounds())) {
+                collidesWithSomething = true;
+                player_->setIsALive(false);
+                break;
+            }
+        }
+    }
+
+    // Check collision with powerups
+    if (!collidesWithSomething) {
+        for (auto& powerup : powerups_) {
+            if (powerup.getBounds().intersects(player_->getBounds())) {
+                powerup.setIsAlive(false);
+                // TODO powerup stuff
+                player_->multiplyLinearAcc(1.2);
+                break;
+            }
+        }
+    }
+
+    // if the player's new position is inside the game area and doesn't collide with anything, move the player
+    if (!collidesWithSomething && grid_.isInside(newPosition.x, newPosition.y)) {
+        player_->setPosition(newPosition);
+        player_->setRotation(newRotation);
+    } else{
+        sf::Vector2f _zero_velocity = sf::Vector2f (0.f,0.f);
+        player_->setVelocity(_zero_velocity);
+    }
+
+    // Shoot on Space and A
+    bool _user_shoot = (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)
+                        || sf::Joystick::isButtonPressed(0, 0));
+
+    if (_user_shoot && player_->canShoot(shoot_time_player_))
+        playerBullets_.emplace_back(player_->getPosition(),
+                                    assets_.playerBulletTexture,player_->getRotation());
+}
+
+void Game::updateEnemies(float deltaTime) {
+    static sf::Clock enemySpawnClock;
+    sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
+    if (elapsed_enemy.asSeconds() >= 5.0f) {  // every 5 seconds spawn enemy
+        enemies_.emplace_back(randomSpawnPoint(), assets_.enemyTexture);
+        enemySpawnClock.restart();
+    }
+
+    for (int i = enemies_.size() - 1; i >= 0; --i) {
+        Enemy& enemy = enemies_[i];
+
+        enemy.update(player_->getPosition(), deltaTime);
+
+        sf::Vector2f displacement = enemy.getLinearVelocity() * deltaTime; // calculate how far should move
+        sf::Vector2f newPosition = enemy.getPosition() + displacement; // calculate new position
+        float angDisplacement = enemy.getAngularVelocity() * deltaTime;
+        float newRotation = enemy.getRotation() + angDisplacement;
+
+        // check if the enemy's new bounding box collides with anything
+        bool collidesWithSomething = false;
+
+        for (auto& bullet : playerBullets_) {
+            if (bullet.getBounds().intersects(enemy.getBounds())) {
+                collidesWithSomething = true;
+                bullet.setIsAlive(false);
+                enemy.setIsALive(false);
+                enemy.setIsKilledByPlayer(true);
+                kill_counter_++;
+                break;
+            }
+        }
+
+        // if the enemy's new position is inside the game area and doesn't collide with anything, move the player
+        if (!collidesWithSomething && grid_.isInside(newPosition.x, newPosition.y)) {
+            enemy.setPosition(newPosition);
+            enemy.setRotation(newRotation);
+        }
+
+        if (enemy.canShoot(shoot_time_enemy_) and enemy.getIsAlive())
+            enemyBullets_.emplace_back(enemy.getPosition(),
+                                       assets_.enemyBulletTexture,enemy.getSprite().getRotation());
+
+        if (!enemy.getIsAlive()) enemies_.erase(enemies_.begin() + i);
+    }
+}
+
+void Game::updateTexts(float deltaTime) {
+    float fps = 1.f / deltaTime;
+    fpsText_.setString("FPS: " + std::to_string(static_cast<int>(fps)));
+//    killCounterText_.setString("Score: " + std::to_string(kill_counter_));
+    killCounterText_.setString("Score: " + std::to_string(playerBullets_.size()));
+}
+
+sf::Vector2f Game::randomSpawnPoint() {
+    std::random_device rd;  // (seed)
+    std::mt19937 gen(rd());  // generator liczb pseudolosowych
+    std::uniform_int_distribution<> distr(0, 3);  // rozkład jednostajny
+
+    int _spawnDirection = distr(gen);  // 0 - Up, 1 - Right, 2 - Down, 3 - Left
+    float _x, _y;
+    switch (_spawnDirection) {
+        case Direction::Up:
+            _x = (float)(std::rand() % window_.getSize().x);
+            _y = 0;
+            break;
+        case Direction::Down:
+            _x = (float)(std::rand() % window_.getSize().x);
+            _y = window_.getSize().y - enemyHeight_;
+            break;
+        case Direction::Left:
+            _x = 0;
+            _y = (float)(std::rand() % window_.getSize().y);
+            break;
+        case Direction::Right:
+            _x = window_.getSize().x - enemyWidth_;
+            _y = (float)(std::rand() % window_.getSize().y);
+            break;
+    }
+    return {_x, _y};
 }

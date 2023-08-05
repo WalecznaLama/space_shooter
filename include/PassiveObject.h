@@ -6,14 +6,16 @@
 class PassiveObject {
 public:
     virtual void draw(sf::RenderWindow& window) const;
-    virtual void update(const float &speed) = 0;
-    virtual sf::Vector2f getPosition();
-    virtual const sf::Sprite& getSprite() const;
-    virtual bool isOffScreen();
+    virtual void update(const float &velocity) = 0;
+    virtual sf::Vector2f getPosition() const;
+    sf::FloatRect getBounds() const;
+    virtual void setIsAlive(bool alive);
+    virtual bool getIsAlive() const;
 
 protected:
     sf::Sprite sprite_;
     sf::Vector2u windowSize_;
+    bool alive_=true;
 };
 
 #endif //SPACE_SHOOTER_PASSIVEOBJECT_H

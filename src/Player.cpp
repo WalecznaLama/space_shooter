@@ -1,21 +1,8 @@
 #include "Player.h"
 
-Player::Player(const sf::Vector2u &windowSize, std::map<std::string, sf::Texture> &textures) : textures_(textures) {
-    windowSize_ = windowSize;
-    init();
-}
-
-void Player::init() {
-    for (const auto& texturePair : textures_)   addSprite(texturePair.first, texturePair.second);
-    mainSprite_ = sprites_["main"];
-
-    // set initial position at the bottom of the screen
-    float x = windowSize_.x / 2. - textures_["main"].getSize().x / 2.;
-    float y = windowSize_.y / 2. - textures_["main"].getSize().y / 2.;
-    position_ = sf::Vector2f(x,y);
-
-    mainSprite_.setOrigin(mainSprite_.getLocalBounds().width / 2, mainSprite_.getLocalBounds().height / 2);
-    mainSprite_.setPosition(position_);
+Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture> &textures)
+: textures_(textures) {
+    position_ = spawn_point;
     alive_ = true;
     firstShotFired_ = false;
     killedByBullet_ = false;
@@ -30,63 +17,27 @@ void Player::init() {
     angBreakDecc_ = 30.;
     angConstDecc_ = 15.;
 
-    // TODO  black holes!/w gravity,
+    init();
 }
 
-void Player::update(std::vector<Bullet>& bullets, const std::vector<Enemy>& enemies) {
-    sf::Time elapsed = updateClock_.getElapsedTime();
-    updateClock_.restart();
-    userMovement(elapsed);
-    // keep the player_ inside the screen bounds
-    sf::Vector2f position = mainSprite_.getPosition();
-    sf::Vector2u size = mainSprite_.getTexture()->getSize();
-    sf::Vector2f half_size = sf::Vector2f(size.x/2., size.y/2.);
-
-    if (position.x < half_size.x) { position.x = half_size.x, velocity_.x = 0.f; }
-    if (position.y < half_size.y) { position.y = half_size.y, velocity_.y = 0.f; }
-    if (position.x > windowSize_.x - half_size.x) { position.x = windowSize_.x - half_size.x, velocity_.x = 0.f; }
-    if (position.y > windowSize_.y - half_size.y) { position.y = windowSize_.y - half_size.y, velocity_.y = 0.f; }
-
-    mainSprite_.setPosition(position);
-
-    // Ustaw pozycje płomieni silnika
-    sf::Vector2f flameDisplacement(0.f, 0.f); // wektor przesunięcia płomieni
-    float rotationRadians = rotation_ * M_PI / 180.0f; // konwersja stopni na radiany
-
-    // Oblicz nowy wektor przesunięcia na podstawie rotacji statku
-    sf::Vector2f rotatedFlameDisplacement(
-            flameDisplacement.x * cos(rotationRadians) - flameDisplacement.y * sin(rotationRadians),
-            flameDisplacement.x * sin(rotationRadians) + flameDisplacement.y * cos(rotationRadians)
-    );
-    // Dodaj obliczony wektor przesunięcia do pozycji statku, aby uzyskać nową pozycję płomieni
-    sf::Vector2f flamePosition = position_ + rotatedFlameDisplacement;
-    sprites_["engine_on"].setPosition(flamePosition);
-    sprites_["boost"].setPosition(flamePosition);
-
-    // Ustaw rotację płomieni silnika na tę samą, co statek
-    sprites_["engine_on"].setRotation(rotation_);
-    sprites_["boost"].setRotation(rotation_);
-
-    checkBulletsCollision(bullets);
-    checkEnemyCollision(enemies);
-}
-
-void Player::userMovement(const sf::Time& deltaTime){
-    float _deltaTime = deltaTime.asSeconds();
-
-    sf::Vector2f _userVelocity = getInput();
-    calculateVelocity(_userVelocity.x, _userVelocity.y, _deltaTime);
-
-    if (vectorLength(velocity_) > maxLinearVel_) velocity_ = vectorNormalize(velocity_) * maxLinearVel_;
-
-    position_ += velocity_ * _deltaTime;
-    rotation_ += angularVel_ * _deltaTime;
-
+void Player::init() {
+    for (const auto& texturePair : textures_)   addSprite(texturePair.first, texturePair.second);
+    mainSprite_ = sprites_["main"];
+    mainSprite_.setOrigin(mainSprite_.getLocalBounds().width / 2, mainSprite_.getLocalBounds().height / 2);
     mainSprite_.setPosition(position_);
-    mainSprite_.setRotation(rotation_);
-
-
 }
+
+void Player::update(float deltaTime) {
+    userMovement(deltaTime);
+    if (vectorLength(velocity_) > maxLinearVel_) velocity_ = vectorNormalize(velocity_) * maxLinearVel_;
+    updateSprites();
+}
+
+void Player::userMovement(float deltaTime){
+    sf::Vector2f _userVelocity = getInput();
+    calculateVelocity(_userVelocity.x, _userVelocity.y, deltaTime);
+}
+
 sf::Vector2f Player::getInput() {
     bool _moved = false;
 
@@ -108,16 +59,16 @@ sf::Vector2f Player::getInput() {
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-        _x_acc = -1.0;
+        _x_acc = 1.0;
         _moved = true;
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))   _x_acc = 1.f / decelerationDivider_;
+    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))   _x_acc = -1.f / decelerationDivider_;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) _theta = -1.0;
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) _theta = 1.0;
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))   _boost = true; // dont touch when false
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) _brake = true; // dont touch when false
 
-    if (_boost) {_x_acc -= 1.5; _moved = true;}
+    if (_boost) {_x_acc += 1.5; _moved = true;}
 
     boostActive_ = _boost;
     brakeActive_ = _brake;
@@ -131,18 +82,6 @@ void Player::setLinearAcc(float linearAcc) { linAcc_ = linearAcc; }
 float Player::getlinearAcc() const { return linAcc_; }
 
 void Player::multiplyLinearAcc(float k) { linAcc_ *= k; }
-
-void Player::checkEnemyCollision(const std::vector<Enemy>& enemies){
-    sf::FloatRect bounds = mainSprite_.getGlobalBounds();
-    for (const auto& enemy : enemies) {
-        sf::FloatRect enemyBounds = enemy.getSprite().getGlobalBounds();
-        if (bounds.intersects(enemyBounds)) {
-            // Player and enemy have collided
-            alive_ = false;
-            return;
-        }
-    }
-}
 
 void Player::calculateVelocity(const float& lin_acc, const float& theta_acc, const float& deltaTime) {
     float _lin_acc = lin_acc;
@@ -168,8 +107,8 @@ void Player::calculateVelocity(const float& lin_acc, const float& theta_acc, con
 }
 
 void Player::calculateAngularVelocity(float theta_acc, float deltaTime) {
-    float _sgnDeccVel = sgn(angularVel_) * (angConstDecc_ * deltaTime);
-    angularVel_ += (angAcc_ * deltaTime * theta_acc) - _sgnDeccVel;
+    float _sgnDecelerationVel = sgn(angularVel_) * (angConstDecc_ * deltaTime);
+    angularVel_ += (angAcc_ * deltaTime * theta_acc) - _sgnDecelerationVel;
     angularVel_ = std::clamp(angularVel_, -maxAngularVel_, maxAngularVel_);
 }
 
@@ -187,4 +126,27 @@ void Player::draw(sf::RenderWindow& window) const {
     window.draw(mainSprite_);
     if (boostActive_)  window.draw(sprites_.at("boost"));
     else if (userInput_)  window.draw(sprites_.at("engine_on"));
+}
+
+void Player::updateSprites() {
+    mainSprite_.setPosition(position_);
+    mainSprite_.setRotation(rotation_);
+
+    // Ustaw pozycje płomieni silnika
+    sf::Vector2f flameDisplacement(0.f, 0.f); // wektor przesunięcia płomieni
+    float rotationRadians = rotation_ * M_PI / 180.0f; // konwersja stopni na radiany
+
+    // Oblicz nowy wektor przesunięcia na podstawie rotacji statku
+    sf::Vector2f rotatedFlameDisplacement(
+            flameDisplacement.x * cos(rotationRadians) - flameDisplacement.y * sin(rotationRadians),
+            flameDisplacement.x * sin(rotationRadians) + flameDisplacement.y * cos(rotationRadians)
+    );
+    // Dodaj obliczony wektor przesunięcia do pozycji statku, aby uzyskać nową pozycję płomieni
+    sf::Vector2f flamePosition = position_ + rotatedFlameDisplacement;
+    sprites_["engine_on"].setPosition(flamePosition);
+    sprites_["boost"].setPosition(flamePosition);
+
+    // Ustaw rotację płomieni silnika na tę samą, co statek
+    sprites_["engine_on"].setRotation(rotation_);
+    sprites_["boost"].setRotation(rotation_);
 }

@@ -11,11 +11,17 @@ class Entity {
 public:
     virtual void draw(sf::RenderWindow& window) const;
     virtual sf::Vector2f getPosition() const;
+    virtual void setPosition(sf::Vector2f& newPosition);
+    virtual void setRotation(float newRotation);
+    virtual void setVelocity(sf::Vector2f& newVelocity);
+    virtual void setIsALive(bool isAlive);
     virtual float getRotation() const;
+    virtual sf::Vector2f getLinearVelocity() const;
+    virtual float getAngularVelocity() const;
+    sf::FloatRect getBounds() const;
     virtual bool canShoot(float time_to_shoot);
     virtual const sf::Sprite& getSprite() const;
-    virtual void checkBulletsCollision(std::vector<Bullet>& bullets);
-    virtual bool isAlive() const;
+    virtual bool getIsAlive() const;
     virtual void addSprite(const std::string&, const sf::Texture& texture);
 
     template<typename T>
@@ -30,7 +36,6 @@ protected:
     sf::Sprite mainSprite_;
     sf::Clock shootClock_;
     sf::Clock updateClock_;
-    sf::Vector2u windowSize_;
     bool alive_ = true;
     bool firstShotFired_ = false;
     bool killedByBullet_ = false;

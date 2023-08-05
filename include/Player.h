@@ -2,19 +2,16 @@
 #define SPACE_SHOOTER_PLAYER_H
 
 #include <SFML/Graphics.hpp>
-#include "Enemy.h"
+#include "Entity.h"
 #include <cmath>
 #include <memory>
 
 class Player : public Entity {
 public:
-    Player(const sf::Vector2u &windowSize, std::map<std::string, sf::Texture> &textures);
+    Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture> &textures);
     void init();
     void draw(sf::RenderWindow& window) const override;
-    void update(std::vector<Bullet>& bullets, const std::vector<Enemy>& enemies);
-    void userMovement(const sf::Time& deltaTime);
-    sf::Vector2f getInput();
-    void checkEnemyCollision(const std::vector<Enemy>& enemies);
+    void update(float deltaTime);
 
     float getlinearAcc() const;
     void setLinearAcc(float linearAcc);
@@ -35,8 +32,11 @@ private:
     sf::Sprite boostSprite_;
     sf::Sprite engineSprite_;
 
-    std::map<std::string, sf::Texture>& textures_;
+    const std::map<std::string, sf::Texture>& textures_;
 
+    void userMovement(float deltaTime);
+    void updateSprites();
+    sf::Vector2f getInput();
     void calculateVelocity(const float& lin_acc, const float& theta_acc, const float& deltaTime);
     void calculateAngularVelocity(float theta_acc, float deltaTime);
     sf::Vector2f calculateDeceleration(float deltaTime);

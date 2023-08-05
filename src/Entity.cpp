@@ -15,25 +15,6 @@ bool Entity::canShoot(float time_to_shoot){
     return false;
 }
 
-void Entity::checkBulletsCollision(std::vector <Bullet> &bullets) {
-    sf::FloatRect bounds = mainSprite_.getGlobalBounds();
-
-    for (auto it = bullets.begin(); it != bullets.end(); ) {
-        sf::FloatRect bulletBounds = it->getSprite().getGlobalBounds();
-
-        if (bounds.intersects(bulletBounds)) {
-            // Player and bullet have collided
-            alive_ = false;
-            killedByBullet_ = true;
-            // Remove the bullet from the vector
-            it = bullets.erase(it);
-            // No need to increment the iterator in this case
-        } else {
-            ++it; // Only increment the iterator if no erasure happened
-        }
-    }
-}
-
 void Entity::addSprite(const std::string& sprite_name, const sf::Texture& texture) {
     sprites_[sprite_name] = sf::Sprite(texture);
     sprites_[sprite_name].setOrigin(sprites_[sprite_name].getLocalBounds().width / 2,
@@ -49,19 +30,34 @@ sf::Vector2f Entity::vectorNormalize(const sf::Vector2f& vector) {
 }
 
 sf::Vector2f Entity::calculateForceDirection() const {
-    return sf::Vector2f(sinf(-rotation_ * M_PI / 180.0f), cosf(rotation_ * M_PI / 180.0f));
+    return sf::Vector2f(sinf(rotation_ * M_PI / 180.0f), -cosf(rotation_ * M_PI / 180.0f));
 }
 
-sf::Vector2f Entity::calculateAcceleration(sf::Vector2f _engineForceDirection, float _x_acc, float deltaTime) const {
-    return _engineForceDirection * linAcc_ * _x_acc * deltaTime;
+/// acceleration 0-1
+sf::Vector2f Entity::calculateAcceleration(sf::Vector2f _engineForceDirection, float acceleration, float deltaTime) const {
+    return _engineForceDirection * linAcc_ * acceleration * deltaTime;
 }
 
 void Entity::draw(sf::RenderWindow& window) const{ window.draw(mainSprite_); }
 
-sf::Vector2f Entity::getPosition() const{ return mainSprite_.getPosition(); }
+sf::Vector2f Entity::getPosition() const{ return position_; }
 
 float Entity::getRotation() const { return rotation_; }
 
 const sf::Sprite& Entity::getSprite() const { return mainSprite_; }
 
-bool Entity::isAlive() const { return alive_; }
+bool Entity::getIsAlive() const { return alive_; }
+
+sf::Vector2f Entity::getLinearVelocity() const { return velocity_; }
+
+float Entity::getAngularVelocity() const { return angularVel_; }
+
+sf::FloatRect Entity::getBounds() const { return mainSprite_.getGlobalBounds(); }
+
+void Entity::setPosition(sf::Vector2f& newPosition) { position_ = newPosition; }
+
+void Entity::setIsALive(bool isAlive) { alive_ = isAlive; }
+
+void Entity::setVelocity(sf::Vector2f &newVelocity) { velocity_ = newVelocity; }
+
+void Entity::setRotation(float newRotation) { rotation_ = newRotation; }

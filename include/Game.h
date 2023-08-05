@@ -1,13 +1,12 @@
 #ifndef SPACE_SHOOTER_GAME_H
 #define SPACE_SHOOTER_GAME_H
 
-#include <SFML/Graphics.hpp>
-#include "Player.h"
-#include "Enemy.h"
+#include "Grid.h"
 #include "Bullet.h"
 #include "AssetManager.h"
 #include "Powerup.h"
-
+#include "Window.h"
+#include <algorithm>
 class Game {
 public:
     Game();
@@ -18,11 +17,18 @@ private:
     void render();
     void gameOver();
 
-    void enemiesShoot();
-    void bullets_update();
-    void powerups_update();
+    void updatePlayer(float deltaTime);
+    void updateEnemies(float deltaTime);
+    void updateBullets();
+    void updatePowerups();
+    void updateTexts(float deltaTime);
 
-    sf::RenderWindow window_;
+    sf::Vector2f randomSpawnPoint();
+
+    sf::Clock updateClock_;
+
+    Window window_;
+    Grid grid_;
     AssetManager assets_;
     std::shared_ptr<Player> player_;
     std::vector<Enemy> enemies_;
@@ -41,7 +47,11 @@ private:
     float shoot_time_player_;
     float shoot_time_enemy_;
     uint kill_counter_ = 0;
-    int framerate_;
+
+    float playerWidth_, playerHeight_;
+    float enemyWidth_, enemyHeight_;
+
+    enum Direction { Up, Down, Left, Right };
 };
 
 #endif //SPACE_SHOOTER_GAME_H

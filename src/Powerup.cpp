@@ -17,7 +17,7 @@ Powerup::Powerup(const sf::Vector2u& windowSize,const sf::Texture& texture) {
     dyRange_ = 100;
 }
 
-void Powerup::update(const float& speed) {
+void Powerup::update(const float& velocity) {
     if(fabs(dyFromSpawn_) > dyRange_) goingRight_ = !goingRight_;
 
     int direction;
@@ -25,8 +25,8 @@ void Powerup::update(const float& speed) {
     else direction = -1;
     float dx_dy = 30. * (M_PI / 180.);
 
-    float dx = speed * sinf(dx_dy);
-    float dy = speed * cosf(dx_dy);
+    float dx = velocity * sinf(dx_dy);
+    float dy = velocity * cosf(dx_dy);
     dyFromSpawn_ += direction * dx;
     sprite_.move(direction * dx, dy);
 }

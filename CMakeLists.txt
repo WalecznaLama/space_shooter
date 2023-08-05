@@ -7,7 +7,7 @@ include_directories(include)
 
 add_executable(space_shooter src/main.cpp src/Player.cpp src/Enemy.cpp src/Bullet.cpp src/Game.cpp
                              src/AssetManager.cpp src/PassiveObject.cpp src/Powerup.cpp src/Entity.cpp
-                            )
+                             src/Grid.cpp src/Cell.cpp src/Window.cpp)
 
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR})
 
