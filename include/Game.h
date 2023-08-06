@@ -2,10 +2,10 @@
 #define SPACE_SHOOTER_GAME_H
 
 #include "Grid.h"
-#include "Bullet.h"
 #include "AssetManager.h"
-#include "Powerup.h"
 #include "Window.h"
+#include "Planet.h"
+
 #include <algorithm>
 class Game {
 public:
@@ -22,6 +22,7 @@ private:
     void updateBullets();
     void updatePowerups();
     void updateTexts(float deltaTime);
+    void updatePlanets(float deltaTime);
     void checkPlayerCollision();
     void calculateCameraPosition();
     void setHeartSprite();
@@ -37,6 +38,7 @@ private:
     std::vector<Bullet> playerBullets_;
     std::vector<Bullet> enemyBullets_;
     std::vector<Powerup> powerups_;
+    std::vector<std::shared_ptr<SpaceObject>> spaceObjects_;
 
     sf::Vector2f cameraPosition_;
     sf::Sprite backgroundSprite_;

@@ -16,6 +16,7 @@ public:
     sf::Texture enemyBulletTexture;
     sf::Texture powerupTexture;
     sf::Texture heartTexture;
+    sf::Texture planetTexture;
     std::map<std::string, sf::Texture> playerTextures_;
 
     sf::Font font;

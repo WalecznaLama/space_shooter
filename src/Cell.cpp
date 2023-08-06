@@ -24,5 +24,18 @@ void Cell::removeEnemyBullet(Bullet* bullet) { enemyBullets_.erase(std::remove(e
                                                                                enemyBullets_.end(), bullet),
                                                                    enemyBullets_.end()); }
 
-bool Cell::isOccupied() const { return hasPlayer() || hasEnemies() || hasPlayerBullets() || hasEnemyBullets(); }
+bool Cell::hasSpaceObjects() const { return !spaceObjects_.empty(); }
+const std::vector<SpaceObject *> &Cell::getSpaceObjects() const { return spaceObjects_; }
+void Cell::addSpaceObject(SpaceObject *spaceObject) { spaceObjects_.push_back(spaceObject); }
+
+void Cell::removeSpaceObject(SpaceObject *spaceObject) { spaceObjects_.erase(std::remove(spaceObjects_.begin(),
+                                                                                         spaceObjects_.end(),
+                                                                                         spaceObject),
+                                                                             spaceObjects_.end()); }
+
+bool Cell::isOccupied() const {
+    return hasPlayer() || hasEnemies() || hasPlayerBullets() || hasEnemyBullets() || hasSpaceObjects();
+}
+
 bool Cell::isOccupiedEnemy() const { return hasEnemies() || hasEnemyBullets(); }
+

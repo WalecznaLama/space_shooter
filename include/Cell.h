@@ -4,6 +4,8 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Bullet.h"
+#include "Planet.h"
+#include "Powerup.h"
 
 class Cell {
 public:
@@ -33,27 +35,22 @@ public:
     void addEnemyBullet(Bullet* bullet);
     void removeEnemyBullet(Bullet* bullet);
 
+    // SpaceObject
+    bool hasSpaceObjects() const;
+    const std::vector<SpaceObject*>& getSpaceObjects() const;
+    void addSpaceObject(SpaceObject* spaceObject);
+    void removeSpaceObject(SpaceObject* spaceObject);
 
     bool isOccupied() const;
     bool isOccupiedEnemy() const;
-//    // Planets
-//    bool hasPlanet() const {
-//        return planet_ != nullptr;
-//    }
-//
-//    Planet* getPlanet() const {
-//        return planet_;
-//    }
-//
-//    void setPlanet(Planet* planet) {
-//        planet_ = planet;
-//    }
 
 private:
     Player* player_;
     std::vector<Enemy*> enemies_;
     std::vector<Bullet*> playerBullets_;
     std::vector<Bullet*> enemyBullets_;
+    std::vector<Planet*> planets_;
+    std::vector<SpaceObject*> spaceObjects_;
 //    Planet* planet_;
 };
 

@@ -31,6 +31,12 @@ Game::Game()
     powerup_speed_ = 0.4f;
     shoot_time_player_ = 0.2f;
     shoot_time_enemy_ = 20.0f;
+
+    sf::Vector2f vel = {0., 0.};
+    sf::Vector2f pos = {1700., 1700.};
+    spaceObjects_.emplace_back(std::make_shared<Planet>(assets_.planetTexture, pos, vel,
+                                                        0.0, 100.));
+
 }
 
 void Game::run() {
@@ -47,6 +53,7 @@ void Game::update() {
     updatePlayer(elapsed);
     updateEnemies(elapsed);
     updateTexts(elapsed);
+    updatePlanets(elapsed);
 
     updateBullets();
     updatePowerups();
@@ -66,6 +73,10 @@ void Game::render() {
     for (const Bullet& bullet : playerBullets_)  bullet.draw(window_.getRenderWindow());
     for (const Bullet& bullet : enemyBullets_)   bullet.draw(window_.getRenderWindow());
     for (const Enemy& enemy : enemies_)          enemy.draw(window_.getRenderWindow());
+
+    for (const auto& spaceObjectPtr : spaceObjects_)
+        window_.draw(spaceObjectPtr->getSprite());
+
     player_->draw(window_.getRenderWindow());
 
     window_.setUiView();
@@ -314,4 +325,9 @@ void Game::setHeartSprite() {
     heartSprite_.setTextureRect(sf::IntRect(0, 0,
                                             heartSprite_.getTexture()->getSize().x * hp_percent,
                                             heartSprite_.getTexture()->getSize().y));
+}
+
+void Game::updatePlanets(float deltaTime) {
+    for (const auto& spaceObjectPtr : spaceObjects_)
+        spaceObjectPtr->update();
 }

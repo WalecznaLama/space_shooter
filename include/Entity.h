@@ -10,23 +10,23 @@ class Entity {
 
 public:
     virtual void draw(sf::RenderWindow& window) const;
-    virtual sf::Vector2f getPosition() const;
-    virtual void setPosition(sf::Vector2f& newPosition);
-    virtual void setRotation(float newRotation);
-    virtual void setVelocity(sf::Vector2f& newVelocity);
-    virtual float getRotation() const;
-    virtual float getRadius() const;
-    virtual sf::Vector2f getLinearVelocity() const;
-    virtual float getAngularVelocity() const;
+    sf::Vector2f getPosition() const;
+    void setPosition(sf::Vector2f& newPosition);
+    void setRotation(float newRotation);
+    void setVelocity(sf::Vector2f& newVelocity);
+    float getRotation() const;
+    float getRadius() const;
+    sf::Vector2f getLinearVelocity() const;
+    float getAngularVelocity() const;
     sf::FloatRect getBounds() const;
-    virtual int getHp() const;
-    virtual float getMaxHp() const;
-    virtual bool canShoot(float time_to_shoot);
-    virtual const sf::Sprite& getSprite() const;
-    virtual void setIsAlive(bool isAlive);
-    virtual void setDamage(int damage);
-    virtual bool getIsAlive() const;
-    virtual void addSprite(const std::string&, const sf::Texture& texture);
+    int getHp() const;
+    float getMaxHp() const;
+    bool canShoot(float time_to_shoot);
+    const sf::Sprite& getSprite() const;
+    void setIsAlive(bool isAlive);
+    void setDamage(int damage);
+    bool getIsAlive() const;
+    void addSprite(const std::string&, const sf::Texture& texture);
 
     template<typename T>
     int sgn(T val) { return (T(0) < val) - (val < T(0)); }
