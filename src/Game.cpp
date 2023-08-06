@@ -7,35 +7,18 @@ Game::Game()
           assets_(),
           player_(std::make_shared<Player>(sf::Vector2f(1500, 1500), assets_.playerTextures_))
 {
-
-    cameraPosition_ = player_->getPosition();
-    // set the texture to the sprite_
-    backgroundSprite_.setTexture(assets_.backgroundTexture);
-    heartSprite_.setTexture(assets_.heartTexture);
-    heartSprite_.scale(.5, .5);
-    heartSprite_.setPosition(10, window_.getSize().y - 100);
-
-    // set up fps and killCounter text
-    fpsText_.setFont(assets_.font);
-    fpsText_.setCharacterSize(20);  // in pixels
-    fpsText_.setFillColor(sf::Color::White);
-    fpsText_.setPosition(10, 10);  // top left corner
-
-    killCounterText_.setFont(assets_.font);
-    killCounterText_.setCharacterSize(40);  // in pixels
-    killCounterText_.setFillColor(sf::Color::Red);
-    killCounterText_.setPosition(10, window_.getSize().y - 50);  // bottom left corner
+    setGui();
 
     player_bullet_speed_ = 1.8f;
     enemy_bullet_speed_ = 1.2f;
     powerup_speed_ = 0.4f;
     shoot_time_player_ = 0.2f;
-    shoot_time_enemy_ = 20.0f;
+    shoot_time_enemy_ = 10.0f;
 
     sf::Vector2f vel = {0., 0.};
     sf::Vector2f pos = {1700., 1700.};
     spaceObjects_.emplace_back(std::make_shared<Planet>(assets_.planetTexture, pos, vel,
-                                                        0.0, 100.));
+                                                        0.0, 200.));
 
 }
 
@@ -51,9 +34,9 @@ void Game::update() {
     float elapsed = updateClock_.getElapsedTime().asSeconds();
 
     updatePlayer(elapsed);
-    updateEnemies(elapsed);
+    // updateEnemies(elapsed);
     updateTexts(elapsed);
-    updatePlanets(elapsed);
+    updateSpaceObjects(elapsed);
 
     updateBullets();
     updatePowerups();
@@ -82,26 +65,17 @@ void Game::render() {
     window_.setUiView();
     window_.draw(fpsText_);  // draw the fps text
     window_.draw(killCounterText_);  // draw the killCounter text
+    window_.draw(debugText_);
     window_.draw(heartSprite_);
     window_.display();
 }
 
 void Game::gameOver() {
-    sf::Text gameOverText;
-    gameOverText.setFont(assets_.font);
-    gameOverText.setString("Game Over!\nFinal Score: " + std::to_string(kill_counter_));
-    gameOverText.setCharacterSize(24);
-    gameOverText.setFillColor(sf::Color::Red);
-    gameOverText.setStyle(sf::Text::Bold);
-
-    sf::FloatRect textRect = gameOverText.getLocalBounds();
-    gameOverText.setOrigin(textRect.left + textRect.width/2.0f, textRect.top  + textRect.height/2.0f);
-    gameOverText.setPosition(cameraPosition_);
-
+    finalScreenText_.setPosition(cameraPosition_);
     while (window_.isOpen()) {
         window_.processEvents();
         window_.clear();
-        window_.draw(gameOverText);
+        window_.draw(finalScreenText_);
         window_.display();
     }
 }
@@ -110,13 +84,15 @@ void Game::updateBullets() {
     for (int i = playerBullets_.size() - 1; i >= 0; --i) {
         Bullet& bullet = playerBullets_[i];
         bullet.update(player_bullet_speed_);
-        if (!grid_.isInside(bullet.getPosition()) or !bullet.getIsAlive())   playerBullets_.erase(playerBullets_.begin() + i);
+        if (!grid_.isInside(bullet.getPosition()) or !bullet.getIsAlive())
+            playerBullets_.erase(playerBullets_.begin() + i);
     }
 
     for (int i = enemyBullets_.size() - 1; i >= 0; --i) {
         Bullet &bullet = enemyBullets_[i];
         bullet.update(enemy_bullet_speed_);
-        if (!grid_.isInside(bullet.getPosition()) or !bullet.getIsAlive()) enemyBullets_.erase(enemyBullets_.begin() + i);
+        if (!grid_.isInside(bullet.getPosition()) or !bullet.getIsAlive())
+            enemyBullets_.erase(enemyBullets_.begin() + i);
     }
 }
 
@@ -138,10 +114,10 @@ void Game::updatePowerups() {
 
 // TODO add HP
 void Game::updatePlayer(float deltaTime) {
-    player_->update(deltaTime);
+    player_->update(deltaTime, spaceObjectsNetForce_);
 
     // check if the player's new bounding box collides with anything
-    checkPlayerCollision();
+    bool collidesWithSomething = getPlayerCollision();
 
     sf::Vector2f linDisplacement = player_->getLinearVelocity() * deltaTime; // calculate how far the player should move
     sf::Vector2f newPosition = player_->getPosition() + linDisplacement; // calculate the player's new position
@@ -149,7 +125,8 @@ void Game::updatePlayer(float deltaTime) {
     float newRotation = player_->getRotation() + angDisplacement;
 
     // Jeśli nowa pozycja jest wewnątrz gry i nie koliduje z niczym
-    if (grid_.isInside(newPosition) && !grid_.getCell(newPosition.x, newPosition.y).isOccupiedEnemy()) {
+//    if (grid_.isInside(newPosition) && !grid_.getCell(newPosition.x, newPosition.y).isOccupiedEnemy()) {
+    if (grid_.isInside(newPosition) && !collidesWithSomething) {
         // Znajdź starą komórkę, w której znajduje się gracz
         Cell& oldCell = grid_.getCell(player_->getPosition().x, player_->getPosition().y);
         // Zaznacz starą komórkę jako pustą
@@ -177,7 +154,6 @@ void Game::updatePlayer(float deltaTime) {
     if (_user_shoot && player_->canShoot(shoot_time_player_))
         playerBullets_.emplace_back(player_->getPosition(),
                                     assets_.playerBulletTexture,player_->getRotation());
-
 }
 
 void Game::updateEnemies(float deltaTime) {
@@ -235,7 +211,12 @@ void Game::updateTexts(float deltaTime) {
     float fps = 1.f / deltaTime;
     fpsText_.setString("FPS: " + std::to_string(static_cast<int>(fps)));
     killCounterText_.setString("Score: " + std::to_string(kill_counter_));
-//    killCounterText_.setString("Score: " + std::to_string(playerBullets_.size()));
+//    debugText_.setString("X: " + std::to_string(spaceObjectsNetForce_.x) + '\n' +
+//                         "Y: " + std::to_string(spaceObjectsNetForce_.y));
+
+    debugText_.setString("X: " + std::to_string(spaceObjectsNetForce_.x) + '\n' +
+                         "Y: " + std::to_string(spaceObjectsNetForce_.y));
+
 }
 
 sf::Vector2f Game::randomSpawnPoint() {
@@ -254,8 +235,19 @@ sf::Vector2f Game::randomSpawnPoint() {
     return {_x, _y};
 }
 
-void Game::checkPlayerCollision() {
+bool Game::getPlayerCollision() {
     bool collidesWithSomething = false;
+
+    for (const auto& spaceObjectPtr : spaceObjects_){
+        sf::Vector2f diff = player_->getPosition() - spaceObjectPtr->getPosition();
+        float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+
+        float _sum_radius = player_->getRadius() + spaceObjectPtr->getCollisionRadius();
+        if (distance < _sum_radius) {
+            collidesWithSomething = true;
+            break;
+        }
+    }
 
     for (auto& enemy : enemies_) {
         // Oblicz odległość między graczem a wrogiem
@@ -266,8 +258,7 @@ void Game::checkPlayerCollision() {
         float _sum_radius = player_->getRadius() + enemy.getRadius();
         if (distance < _sum_radius && collisionTimer_.getElapsedTime().asSeconds() > 1.0f) {
             collidesWithSomething = true;
-//            player_->setIsAlive(false);
-//            enemy.setIsAlive(false);
+            enemy.setDamage(1);
             player_->setDamage(1);
             collisionTimer_.restart();
             break;
@@ -307,7 +298,10 @@ void Game::checkPlayerCollision() {
             }
         }
     }
+
+    return collidesWithSomething;
 }
+
 
 void Game::calculateCameraPosition() {
     sf::Vector2f direction = player_->getPosition() - cameraPosition_;
@@ -327,7 +321,56 @@ void Game::setHeartSprite() {
                                             heartSprite_.getTexture()->getSize().y));
 }
 
-void Game::updatePlanets(float deltaTime) {
-    for (const auto& spaceObjectPtr : spaceObjects_)
+void Game::updateSpaceObjects(float deltaTime) {
+    spaceObjectsNetForce_ = {0.f, 0.f};
+    for (const auto& spaceObjectPtr : spaceObjects_){
         spaceObjectPtr->update();
+        sf::Vector2f direction = spaceObjectPtr->getPosition() - player_->getPosition() ;
+        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+        if (distance == 0.0f) continue; // Aby uniknąć dzielenia przez zero
+
+        // Normalizacja wektora kierunku (daje wektor o długości 1 w kierunku planet)
+        direction /= distance;
+        // Obliczenie siły przy użyciu prawa grawitacji uniwersalnej
+        float forceMagnitude = SpaceObject::G_ * player_->getMass() * spaceObjectPtr->getMass() / (distance * distance);
+
+        // Dodajemy siłę do wypadkowej siły
+        spaceObjectsNetForce_ += direction * forceMagnitude;
+    }
+}
+
+void Game::setGui() {
+    cameraPosition_ = player_->getPosition();
+
+    // set the texture to the sprite_
+    backgroundSprite_.setTexture(assets_.backgroundTexture);
+    heartSprite_.setTexture(assets_.heartTexture);
+    heartSprite_.scale(.5, .5);
+    heartSprite_.setPosition(10, window_.getSize().y - 100);
+
+    // set up fps and killCounter text
+    fpsText_.setFont(assets_.font);
+    fpsText_.setCharacterSize(20);  // in pixels
+    fpsText_.setFillColor(sf::Color::White);
+    fpsText_.setPosition(10, 10);  // top left corner
+
+    killCounterText_.setFont(assets_.font);
+    killCounterText_.setCharacterSize(20);  // in pixels
+    killCounterText_.setFillColor(sf::Color::Red);
+    killCounterText_.setPosition(10, window_.getSize().y - 50);  // bottom left corner
+
+    finalScreenText_.setFont(assets_.font);
+    finalScreenText_.setString("Game Over!\nFinal Score: " + std::to_string(kill_counter_));
+    finalScreenText_.setCharacterSize(24);
+    finalScreenText_.setFillColor(sf::Color::Red);
+    finalScreenText_.setStyle(sf::Text::Bold);
+
+    sf::FloatRect textRect = finalScreenText_.getLocalBounds();
+    finalScreenText_.setOrigin(textRect.left + textRect.width/2.0f, textRect.top  + textRect.height/2.0f);
+
+    debugText_.setFont(assets_.font);
+    debugText_.setCharacterSize(20);  // in pixels
+    debugText_.setFillColor(sf::Color::Red);
+    debugText_.setPosition(10,  300);
 }

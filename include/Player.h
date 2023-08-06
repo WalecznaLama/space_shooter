@@ -11,11 +11,12 @@ public:
     Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture> &textures);
     void init();
     void draw(sf::RenderWindow& window) const override;
-    void update(float deltaTime);
+    void update(float deltaTime, const sf::Vector2f& netForce);
 
     float getlinearAcc() const;
     void setLinearAcc(float linearAcc);
     void multiplyLinearAcc(float k);
+    void setNetForce(const sf::Vector2f& netForce);
 
 private:
     float angBreakDecc_; // deg / s^2
@@ -28,6 +29,7 @@ private:
     bool userInput_ = false;
     bool boostActive_ = false;
     bool brakeActive_ = false;
+    sf::Vector2f netForce_;
 
     sf::Sprite boostSprite_;
     sf::Sprite engineSprite_;

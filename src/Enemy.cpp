@@ -10,6 +10,11 @@ Enemy::Enemy(const sf::Vector2f spawn_point, const sf::Texture& texture) {
     angAcc_ = 200.;
     position_ = spawn_point;
     init(texture);
+
+    mass_ = 1.0;
+    maxHp_ = 2.;
+
+    hp_ = maxHp_;
 }
 
 void Enemy::init(const sf::Texture& texture) {
@@ -38,6 +43,8 @@ void Enemy::update(const sf::Vector2f& playerPosition, float deltaTime) {
 
     mainSprite_.setPosition(position_);
     mainSprite_.setRotation(rotation_);
+
+    if (hp_ == 0) setIsAlive(false);
 }
 
 void Enemy::calculateVelocity(const float& lin_acc, const float& theta_acc, const float& deltaTime) {

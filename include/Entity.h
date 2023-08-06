@@ -11,11 +11,13 @@ class Entity {
 public:
     virtual void draw(sf::RenderWindow& window) const;
     sf::Vector2f getPosition() const;
+    sf::Vector2f getVelocity() const;
     void setPosition(sf::Vector2f& newPosition);
     void setRotation(float newRotation);
     void setVelocity(sf::Vector2f& newVelocity);
     float getRotation() const;
     float getRadius() const;
+    float getMass() const;
     sf::Vector2f getLinearVelocity() const;
     float getAngularVelocity() const;
     sf::FloatRect getBounds() const;
@@ -45,6 +47,7 @@ protected:
     bool killedByBullet_ = false;
     int hp_;
     int maxHp_;
+    float mass_;
 
     sf::Vector2f velocity_ = sf::Vector2f(0.0f, 0.0f);
     sf::Vector2f position_;

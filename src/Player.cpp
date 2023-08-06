@@ -10,13 +10,15 @@ Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture
 
     collisionRadius_ = 10;
     linAcc_ = 100.;
-    linBreakDecc_ = 20.;
+    linBreakDecc_ = 80.;
     linConstDecc_ = 10.;
     maxLinearVel_ = 200.;
     maxAngularVel_ = 180.;
     angAcc_ = 300.;
     angBreakDecc_ = 30.;
     angConstDecc_ = 15.;
+
+    mass_ = 1.0;
 
     maxHp_ = 5;
     hp_ = maxHp_;
@@ -30,7 +32,8 @@ void Player::init() {
     mainSprite_.setPosition(position_);
 }
 
-void Player::update(float deltaTime) {
+void Player::update(float deltaTime, const sf::Vector2f& netForce) {
+    setNetForce(netForce);
     userMovement(deltaTime);
     if (vectorLength(velocity_) > maxLinearVel_) velocity_ = vectorNormalize(velocity_) * maxLinearVel_;
     updateSprites();
@@ -38,8 +41,8 @@ void Player::update(float deltaTime) {
 }
 
 void Player::userMovement(float deltaTime){
-    sf::Vector2f _userVelocity = getInput();
-    calculateVelocity(_userVelocity.x, _userVelocity.y, deltaTime);
+    sf::Vector2f _userInput = getInput(); // normal acceleration, theta
+    calculateVelocity(_userInput.x, _userInput.y, deltaTime);
 }
 
 sf::Vector2f Player::getInput() {
@@ -96,16 +99,15 @@ void Player::calculateVelocity(const float& lin_acc, const float& theta_acc, con
     calculateAngularVelocity(_theta, deltaTime);
 
     sf::Vector2f _engineForceDirection = calculateForceDirection();
-    sf::Vector2f _acceleration = calculateAcceleration(_engineForceDirection,
-                                                       _lin_acc, deltaTime);
-    velocity_ += _acceleration;
+    sf::Vector2f _deltaEngineForce = calculateAcceleration(_engineForceDirection,
+                                                       _lin_acc, deltaTime); // force from space engine
+    sf::Vector2f _deltaNetForce = netForce_ * deltaTime; // force from space objects
+    sf::Vector2f _deltaDecFroce= calculateDeceleration(deltaTime); // constant deceleration
 
-    sf::Vector2f deceleration = calculateDeceleration(deltaTime);
-    velocity_ += deceleration;
+    velocity_ += (_deltaEngineForce + _deltaNetForce - _deltaDecFroce);
 
     if (brakeActive_){
-        deceleration = calculateBrakeDeceleration(deltaTime);
-        velocity_ += deceleration;
+        velocity_ += calculateBrakeDeceleration(deltaTime);
         angularVel_ -= sgn(angularVel_) * angBreakDecc_ * deltaTime;
     }
 }
@@ -154,3 +156,5 @@ void Player::updateSprites() {
     sprites_["engine_on"].setRotation(rotation_);
     sprites_["boost"].setRotation(rotation_);
 }
+
+void Player::setNetForce(const sf::Vector2f& netForce) { netForce_ = netForce; }

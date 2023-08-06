@@ -35,7 +35,8 @@ sf::Vector2f Entity::calculateForceDirection() const {
 
 /// acceleration 0-1
 sf::Vector2f Entity::calculateAcceleration(sf::Vector2f _engineForceDirection, float acceleration, float deltaTime) const {
-    return _engineForceDirection * linAcc_ * acceleration * deltaTime;
+    float actualAcceleration = (linAcc_ * acceleration) / mass_;
+    return _engineForceDirection * actualAcceleration * deltaTime;
 }
 
 void Entity::draw(sf::RenderWindow& window) const{ window.draw(mainSprite_); }
@@ -69,3 +70,7 @@ int Entity::getHp() const { return hp_; }
 float Entity::getMaxHp() const { return maxHp_; }
 
 void Entity::setDamage(int damage) { hp_ = std::max(0, hp_ - damage); }
+
+float Entity::getMass() const { return mass_; }
+
+sf::Vector2f Entity::getVelocity() const { return velocity_; }

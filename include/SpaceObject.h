@@ -23,10 +23,12 @@ public:
     void setCollisionRadius(float collisionRadius);
     float getCollisionRadius() const;
 
-    float getGravity() const;
+    float getMass() const;
     const sf::Sprite& getSprite() const;
+    sf::FloatRect getLocalBounds() const;
     void scaleSprite(const sf::Vector2f &factor);
-    void scaleSprite(const float factorX, const float factorY);
+    void scaleSprite(float factorX, float factorY);
+    void setOriginSprite(float x, float y);
 
     void update();
 
@@ -36,11 +38,11 @@ private:
     float rotation_; // degrees
     float collisionRadius_; // pixels
     float density_;
-    float gravity_;
+    float mass_;
 
     sf::Sprite mainSprite_;
 
-    void calculateGravity();
+    float calculateMass(float radius);
 };
 
 

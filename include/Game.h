@@ -22,10 +22,11 @@ private:
     void updateBullets();
     void updatePowerups();
     void updateTexts(float deltaTime);
-    void updatePlanets(float deltaTime);
-    void checkPlayerCollision();
+    void updateSpaceObjects(float deltaTime);
+    bool getPlayerCollision();
     void calculateCameraPosition();
     void setHeartSprite();
+    void setGui();
 
     sf::Vector2f randomSpawnPoint();
     sf::Clock updateClock_;
@@ -46,9 +47,12 @@ private:
 
     sf::Text fpsText_;
     sf::Text killCounterText_;
+    sf::Text finalScreenText_;
+    sf::Text debugText_;
 
     sf::Clock collisionTimer_;
 
+    sf::Vector2f spaceObjectsNetForce_;
     float player_bullet_speed_;
     float enemy_bullet_speed_;
     float powerup_speed_;
