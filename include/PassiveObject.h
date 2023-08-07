@@ -6,7 +6,7 @@
 class PassiveObject : public Object{
 public:
     virtual void draw(sf::RenderWindow& window) const;
-    virtual void update(float velocity, float deltaTime) = 0;
+    virtual void update(float deltaTime) = 0;
 
 };
 

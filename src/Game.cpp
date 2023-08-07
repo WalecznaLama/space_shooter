@@ -83,7 +83,7 @@ void Game::gameOver() {
 void Game::updateBullets(float deltaTime) {
     for (int i = playerBullets_.size() - 1; i >= 0; --i) {
         Bullet& bullet = playerBullets_[i];
-        bullet.update(playerBulletSpeed_, deltaTime);
+        bullet.update(deltaTime);
 
         sf::Vector2f linDisplacement = bullet.getLinearVelocity() * deltaTime;
         sf::Vector2f newPosition = bullet.getPosition() + linDisplacement;
@@ -94,7 +94,7 @@ void Game::updateBullets(float deltaTime) {
 
     for (int i = enemyBullets_.size() - 1; i >= 0; --i) {
         Bullet &bullet = enemyBullets_[i];
-        bullet.update(enemyBulletSpeed_, deltaTime);
+        bullet.update(deltaTime);
         sf::Vector2f linDisplacement = bullet.getLinearVelocity() * deltaTime;
         sf::Vector2f newPosition = bullet.getPosition() + linDisplacement;
         bullet.setPosition(newPosition);
@@ -114,7 +114,7 @@ void Game::updatePowerups(float deltaTime) {
 
     for (int i = powerups_.size() - 1; i >= 0; --i) {
         Powerup& powerup = powerups_[i];
-        powerup.update(powerupSpeed_, deltaTime);
+        powerup.update(deltaTime);
         // remove off screen
         if (grid_.isInside(powerup.getPosition()) or !powerup.getIsAlive())
             powerups_.erase(powerups_.begin() + i);

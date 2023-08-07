@@ -6,7 +6,7 @@
 class Powerup : public PassiveObject {
 public:
     Powerup(const sf::Vector2f& position, const float& initRotation, const sf::Texture& texture);
-    void update(float velocity, float deltaTime) override;
+    void update(float deltaTime) override;
 
 private:
     float moveFrequency_;

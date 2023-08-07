@@ -9,7 +9,7 @@ Bullet::Bullet(const sf::Vector2f& position, const float& initRotation, const sf
     spriteInit(texture);
 }
 
-void Bullet::update(float linAcc, float deltaTime) {
+void Bullet::update(float deltaTime) {
     updateMainSpritePosition();
     calculateLinearVelocity(deltaTime);
 }
