@@ -7,7 +7,6 @@
 class AssetManager {
 public:
     AssetManager();
-    void init();
     sf::Texture& loadTexture(const std::string& filename);
     sf::Font& loadFont(const std::string& filename);
     sf::Texture backgroundTexture;

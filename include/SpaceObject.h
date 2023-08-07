@@ -45,5 +45,4 @@ private:
     float calculateMass(float radius);
 };
 
-
 #endif //SPACE_SHOOTER_SPACEOBJECT_H

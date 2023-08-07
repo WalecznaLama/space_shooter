@@ -19,13 +19,13 @@ private:
 
     void updatePlayer(float deltaTime);
     void updateEnemies(float deltaTime);
+    void updateSpaceObjects(float deltaTime);
     void updateBullets();
     void updatePowerups();
-    void updateTexts(float deltaTime);
-    void updateSpaceObjects(float deltaTime);
+    void updateGui(float deltaTime);
+
     bool getPlayerCollision();
     void calculateCameraPosition();
-    void setHeartSprite();
     void setGui();
 
     sf::Vector2f randomSpawnPoint();
@@ -41,6 +41,7 @@ private:
     std::vector<Powerup> powerups_;
     std::vector<std::shared_ptr<SpaceObject>> spaceObjects_;
 
+    sf::Vector2f spaceObjectsNetForce_;
     sf::Vector2f cameraPosition_;
     sf::Sprite backgroundSprite_;
     sf::Sprite heartSprite_;
@@ -52,15 +53,13 @@ private:
 
     sf::Clock collisionTimer_;
 
-    sf::Vector2f spaceObjectsNetForce_;
-    float player_bullet_speed_;
-    float enemy_bullet_speed_;
-    float powerup_speed_;
-    float shoot_time_player_;
-    float shoot_time_enemy_;
-    uint kill_counter_ = 0;
-
-    enum Direction { Up, Down, Left, Right };
+    float playerBulletSpeed_;
+    float enemyBulletSpeed_;
+    float powerupSpeed_;
+    float shootTimePlayer_;
+    float shootTimeEnemy_;
+    float cameraAcceleration_;
+    uint killCounter_;
 };
 
 #endif //SPACE_SHOOTER_GAME_H

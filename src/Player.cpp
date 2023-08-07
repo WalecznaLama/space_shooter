@@ -60,7 +60,7 @@ sf::Vector2f Player::getInput() {
         _theta /= 100.; // (0 .. 1)
 
         _brake = (sf::Joystick::isButtonPressed(0, 1));
-        _boost = (sf::Joystick::isButtonPressed(0, 2)); // TODO
+        _boost = (sf::Joystick::isButtonPressed(0, 2)); // TODO check button
 
         if (fabs(_x_acc) > 0.1) _moved = true;
     }
@@ -104,7 +104,7 @@ void Player::calculateVelocity(const float& lin_acc, const float& theta_acc, con
     sf::Vector2f _deltaNetForce = netForce_ * deltaTime; // force from space objects
     sf::Vector2f _deltaDecFroce= calculateDeceleration(deltaTime); // constant deceleration
 
-    velocity_ += (_deltaEngineForce + _deltaNetForce - _deltaDecFroce);
+    velocity_ += (_deltaEngineForce + _deltaNetForce + _deltaDecFroce);
 
     if (brakeActive_){
         velocity_ += calculateBrakeDeceleration(deltaTime);

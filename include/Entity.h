@@ -22,7 +22,7 @@ public:
     float getAngularVelocity() const;
     sf::FloatRect getBounds() const;
     int getHp() const;
-    float getMaxHp() const;
+    int getMaxHp() const;
     bool canShoot(float time_to_shoot);
     const sf::Sprite& getSprite() const;
     void setIsAlive(bool isAlive);
@@ -49,13 +49,13 @@ protected:
     int maxHp_;
     float mass_;
 
-    sf::Vector2f velocity_ = sf::Vector2f(0.0f, 0.0f);
-    sf::Vector2f position_;
-    float rotation_ = 0.0;
+    sf::Vector2f velocity_; // pixels / s
+    sf::Vector2f position_; // pixels
+    float rotation_; // deg
     float collisionRadius_; // pixels
     float maxAngularVel_; // deg / s
     float maxLinearVel_; // pixels / s
-    float angularVel_ = 0; // deg / s
+    float angularVel_; // deg / s
     float linAcc_; // pixels / s^s
     float angAcc_; // deg / s^2
 };

@@ -1,6 +1,6 @@
 #include "Game.h"
 
-// TODO  black holes!/w gravity,
+// TODO grid
 Game::Game()
         : window_("Space Shooter", sf::Vector2u(1280, 720)), // Initialize GameWindow with a title and size
           grid_(3000, 3000),
@@ -9,17 +9,18 @@ Game::Game()
 {
     setGui();
 
-    player_bullet_speed_ = 1.8f;
-    enemy_bullet_speed_ = 1.2f;
-    powerup_speed_ = 0.4f;
-    shoot_time_player_ = 0.2f;
-    shoot_time_enemy_ = 10.0f;
+    playerBulletSpeed_ = 1.8f;
+    enemyBulletSpeed_ = 1.2f;
+    powerupSpeed_ = 0.4f;
+    shootTimePlayer_ = 0.2f;
+    shootTimeEnemy_ = 10.0f;
 
     sf::Vector2f vel = {0., 0.};
     sf::Vector2f pos = {1700., 1700.};
     spaceObjects_.emplace_back(std::make_shared<Planet>(assets_.planetTexture, pos, vel,
                                                         0.0, 200.));
 
+    cameraAcceleration_ = 0.01f;
 }
 
 void Game::run() {
@@ -34,14 +35,12 @@ void Game::update() {
     float elapsed = updateClock_.getElapsedTime().asSeconds();
 
     updatePlayer(elapsed);
-    // updateEnemies(elapsed);
-    updateTexts(elapsed);
+//    updateEnemies(elapsed);
+    updateGui(elapsed);
     updateSpaceObjects(elapsed);
 
     updateBullets();
     updatePowerups();
-
-    setHeartSprite();
 
     calculateCameraPosition();
     window_.updateView(cameraPosition_);
@@ -71,6 +70,7 @@ void Game::render() {
 }
 
 void Game::gameOver() {
+    finalScreenText_.setString("Game Over!\nFinal Score: " + std::to_string(killCounter_));
     finalScreenText_.setPosition(cameraPosition_);
     while (window_.isOpen()) {
         window_.processEvents();
@@ -83,14 +83,14 @@ void Game::gameOver() {
 void Game::updateBullets() {
     for (int i = playerBullets_.size() - 1; i >= 0; --i) {
         Bullet& bullet = playerBullets_[i];
-        bullet.update(player_bullet_speed_);
+        bullet.update(playerBulletSpeed_);
         if (!grid_.isInside(bullet.getPosition()) or !bullet.getIsAlive())
             playerBullets_.erase(playerBullets_.begin() + i);
     }
 
     for (int i = enemyBullets_.size() - 1; i >= 0; --i) {
         Bullet &bullet = enemyBullets_[i];
-        bullet.update(enemy_bullet_speed_);
+        bullet.update(enemyBulletSpeed_);
         if (!grid_.isInside(bullet.getPosition()) or !bullet.getIsAlive())
             enemyBullets_.erase(enemyBullets_.begin() + i);
     }
@@ -106,13 +106,12 @@ void Game::updatePowerups() {
 
     for (int i = powerups_.size() - 1; i >= 0; --i) {
         Powerup& powerup = powerups_[i];
-        powerup.update(powerup_speed_);
+        powerup.update(powerupSpeed_);
         // remove off screen
         if (grid_.isInside(powerup.getPosition())) { powerups_.erase(powerups_.begin() + i); }
     }
 }
 
-// TODO add HP
 void Game::updatePlayer(float deltaTime) {
     player_->update(deltaTime, spaceObjectsNetForce_);
 
@@ -151,7 +150,7 @@ void Game::updatePlayer(float deltaTime) {
     bool _user_shoot = (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)
                         || sf::Joystick::isButtonPressed(0, 0));
 
-    if (_user_shoot && player_->canShoot(shoot_time_player_))
+    if (_user_shoot && player_->canShoot(shootTimePlayer_))
         playerBullets_.emplace_back(player_->getPosition(),
                                     assets_.playerBulletTexture,player_->getRotation());
 }
@@ -188,7 +187,7 @@ void Game::updateEnemies(float deltaTime) {
                 collidesWithSomething = true;
                 enemy.setIsAlive(false);
                 bullet.setIsAlive(false);
-                kill_counter_++;
+                killCounter_++;
                 break;
             }
         }
@@ -199,7 +198,7 @@ void Game::updateEnemies(float deltaTime) {
             enemy.setRotation(newRotation);
         }
 
-        if (enemy.canShoot(shoot_time_enemy_) and enemy.getIsAlive())
+        if (enemy.canShoot(shootTimeEnemy_) and enemy.getIsAlive())
             enemyBullets_.emplace_back(enemy.getPosition(),
                                        assets_.enemyBulletTexture,enemy.getSprite().getRotation());
 
@@ -207,16 +206,20 @@ void Game::updateEnemies(float deltaTime) {
     }
 }
 
-void Game::updateTexts(float deltaTime) {
+void Game::updateGui(float deltaTime) {
     float fps = 1.f / deltaTime;
     fpsText_.setString("FPS: " + std::to_string(static_cast<int>(fps)));
-    killCounterText_.setString("Score: " + std::to_string(kill_counter_));
+    killCounterText_.setString("Score: " + std::to_string(killCounter_));
 //    debugText_.setString("X: " + std::to_string(spaceObjectsNetForce_.x) + '\n' +
 //                         "Y: " + std::to_string(spaceObjectsNetForce_.y));
 
     debugText_.setString("X: " + std::to_string(spaceObjectsNetForce_.x) + '\n' +
                          "Y: " + std::to_string(spaceObjectsNetForce_.y));
 
+    float hp_percent = player_->getHp() * 1. / player_->getMaxHp();
+    heartSprite_.setTextureRect(sf::IntRect(0, 0,
+                                            heartSprite_.getTexture()->getSize().x * hp_percent,
+                                            heartSprite_.getTexture()->getSize().y));
 }
 
 sf::Vector2f Game::randomSpawnPoint() {
@@ -224,7 +227,7 @@ sf::Vector2f Game::randomSpawnPoint() {
     std::mt19937 gen(rd());  // generator liczb pseudolosowych
 
     std::uniform_real_distribution<> distr(0, 2 * M_PI);  // rozkład jednostajny od 0 do 2*pi
-    std::uniform_real_distribution<> distrRadius(200, 600);  // rozkład jednostajny od 0 do 600
+    std::uniform_real_distribution<> distrRadius(200, 600);  // rozkład jednostajny od 200 do 600
 
     float spawnRadius = distrRadius(gen);  // radius of the spawn circle around the player
     float spawnAngle = distr(gen);  // random angle
@@ -305,20 +308,8 @@ bool Game::getPlayerCollision() {
 
 void Game::calculateCameraPosition() {
     sf::Vector2f direction = player_->getPosition() - cameraPosition_;
-
     // move the camera towards the player with a certain acceleration
-    float acceleration = 0.01f;  // adjust this as needed
-    cameraPosition_ += direction * acceleration;
-}
-
-void Game::setHeartSprite() {
-    // Obliczenie procenta życia
-    float hp_percent = player_->getHp() * 1. / player_->getMaxHp();
-
-// Ustawienie prostokąta tekstury na sprite, proporcjonalnie do procentu życia
-    heartSprite_.setTextureRect(sf::IntRect(0, 0,
-                                            heartSprite_.getTexture()->getSize().x * hp_percent,
-                                            heartSprite_.getTexture()->getSize().y));
+    cameraPosition_ += direction * cameraAcceleration_;
 }
 
 void Game::updateSpaceObjects(float deltaTime) {
@@ -361,7 +352,6 @@ void Game::setGui() {
     killCounterText_.setPosition(10, window_.getSize().y - 50);  // bottom left corner
 
     finalScreenText_.setFont(assets_.font);
-    finalScreenText_.setString("Game Over!\nFinal Score: " + std::to_string(kill_counter_));
     finalScreenText_.setCharacterSize(24);
     finalScreenText_.setFillColor(sf::Color::Red);
     finalScreenText_.setStyle(sf::Text::Bold);
