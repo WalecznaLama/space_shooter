@@ -20,8 +20,8 @@ private:
     void updatePlayer(float deltaTime);
     void updateEnemies(float deltaTime);
     void updateSpaceObjects(float deltaTime);
-    void updateBullets();
-    void updatePowerups();
+    void updateBullets(float deltaTime);
+    void updatePowerups(float deltaTime);
     void updateGui(float deltaTime);
 
     bool getPlayerCollision();

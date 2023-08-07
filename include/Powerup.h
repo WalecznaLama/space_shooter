@@ -5,13 +5,11 @@
 
 class Powerup : public PassiveObject {
 public:
-    Powerup(const sf::Vector2u& windowSize, const sf::Texture& texture);
-    void update(const float& speed) override;
+    Powerup(const sf::Vector2f& position, const float& initRotation, const sf::Texture& texture);
+    void update(float velocity, float deltaTime) override;
 
 private:
-    float dyRange_;
-    float dyFromSpawn_ = 0;
-    bool goingRight_;
+    float moveFrequency_;
 };
 
 

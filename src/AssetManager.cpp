@@ -39,3 +39,7 @@ sf::Font &AssetManager::loadFont(const std::string &filename) {
     }
     return _font;
 }
+
+const sf::Texture &AssetManager::getTexture(const std::string &name) const {
+    return textures_.at(name);
+}

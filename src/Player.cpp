@@ -1,20 +1,15 @@
 #include "Player.h"
 
-Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture> &textures)
-: textures_(textures) {
+Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture> &textures){
     position_ = spawn_point;
-    alive_ = true;
-    firstShotFired_ = false;
-    killedByBullet_ = false;
-    decelerationDivider_ = 2.;
 
-    collisionRadius_ = 10;
-    linAcc_ = 100.;
+    radius_ = 10;
+    maxLinAcc_ = 100.;
+    maxAngAcc_ = 300.;
     linBreakDecc_ = 80.;
     linConstDecc_ = 10.;
-    maxLinearVel_ = 200.;
-    maxAngularVel_ = 180.;
-    angAcc_ = 300.;
+    maxLinVel_ = 200.;
+    maxAngVel_ = 180.;
     angBreakDecc_ = 30.;
     angConstDecc_ = 15.;
 
@@ -22,27 +17,18 @@ Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture
 
     maxHp_ = 5;
     hp_ = maxHp_;
-    init();
-}
-
-void Player::init() {
-    for (const auto& texturePair : textures_)   addSprite(texturePair.first, texturePair.second);
-    mainSprite_ = sprites_["main"];
-    mainSprite_.setOrigin(mainSprite_.getLocalBounds().width / 2, mainSprite_.getLocalBounds().height / 2);
-    mainSprite_.setPosition(position_);
+    spriteInit(textures);
 }
 
 void Player::update(float deltaTime, const sf::Vector2f& netForce) {
     setNetForce(netForce);
-    userMovement(deltaTime);
-    if (vectorLength(velocity_) > maxLinearVel_) velocity_ = vectorNormalize(velocity_) * maxLinearVel_;
+    sf::Vector2f _userInput = getInput(); // Linear + Angular acc
+    linAcc_ = _userInput.x * maxLinAcc_;
+    angAcc_ = _userInput.y * maxAngAcc_;
+    updateVelocity(deltaTime);
+    if (vectorLength(linVel_) > maxLinVel_) linVel_ = vectorNormalize(linVel_) * maxLinVel_;
     updateSprites();
     if (hp_ == 0) alive_ = false;
-}
-
-void Player::userMovement(float deltaTime){
-    sf::Vector2f _userInput = getInput(); // normal acceleration, theta
-    calculateVelocity(_userInput.x, _userInput.y, deltaTime);
 }
 
 sf::Vector2f Player::getInput() {
@@ -54,10 +40,10 @@ sf::Vector2f Player::getInput() {
 
     if (sf::Joystick::isConnected(0)) {
         _x_acc = sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::Y);  // Y lewego analoga
-        _x_acc /= 100.; // (0 .. 1)
+        _x_acc /= 100.; // (-1 .. 1)
 
         _theta = sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::X);  // X lewego analoga
-        _theta /= 100.; // (0 .. 1)
+        _theta /= 100.; // (-1 .. 1)
 
         _brake = (sf::Joystick::isButtonPressed(0, 1));
         _boost = (sf::Joystick::isButtonPressed(0, 2)); // TODO check button
@@ -68,7 +54,7 @@ sf::Vector2f Player::getInput() {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
         _x_acc = 1.0;
         _moved = true;
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))   _x_acc = -1.f / decelerationDivider_;
+    }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) _theta = -1.0;
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) _theta = 1.0;
 
@@ -84,48 +70,29 @@ sf::Vector2f Player::getInput() {
     return {_x_acc, _theta};
 }
 
-void Player::setLinearAcc(float linearAcc) { linAcc_ = linearAcc; }
 
-float Player::getlinearAcc() const { return linAcc_; }
-
-void Player::multiplyLinearAcc(float k) { linAcc_ *= k; }
-
-void Player::calculateVelocity(const float& lin_acc, const float& theta_acc, const float& deltaTime) {
-    float _lin_acc = lin_acc;
-    if (_lin_acc < 0) _lin_acc /= decelerationDivider_;  // if backward worse acceleration
-
-    float _theta = theta_acc;
-
-    calculateAngularVelocity(_theta, deltaTime);
-
-    sf::Vector2f _engineForceDirection = calculateForceDirection();
-    sf::Vector2f _deltaEngineForce = calculateAcceleration(_engineForceDirection,
-                                                       _lin_acc, deltaTime); // force from space engine
+void Player::updateVelocity(float deltaTime) {
+    // Linear
+    calculateLinearVelocity(deltaTime);
     sf::Vector2f _deltaNetForce = netForce_ * deltaTime; // force from space objects
-    sf::Vector2f _deltaDecFroce= calculateDeceleration(deltaTime); // constant deceleration
+    sf::Vector2f _deltaDecFroce= calculateDeceleration(linConstDecc_, deltaTime); // constant deceleration
+    linVel_ += (_deltaNetForce + _deltaDecFroce);
 
-    velocity_ += (_deltaEngineForce + _deltaNetForce + _deltaDecFroce);
+    // Angular
+    calculateAngularVelocity(deltaTime);
+    int angVelSign = getSign(int(angVel_));
+    float _sgnDecelerationVel =  angVelSign * (angConstDecc_ * deltaTime);
+    angVel_ -=_sgnDecelerationVel;
 
     if (brakeActive_){
-        velocity_ += calculateBrakeDeceleration(deltaTime);
-        angularVel_ -= sgn(angularVel_) * angBreakDecc_ * deltaTime;
+        linVel_ += calculateDeceleration(linBreakDecc_, deltaTime);
+        angVel_ -= angVelSign * angBreakDecc_ * deltaTime;
     }
 }
 
-void Player::calculateAngularVelocity(float theta_acc, float deltaTime) {
-    float _sgnDecelerationVel = sgn(angularVel_) * (angConstDecc_ * deltaTime);
-    angularVel_ += (angAcc_ * deltaTime * theta_acc) - _sgnDecelerationVel;
-    angularVel_ = std::clamp(angularVel_, -maxAngularVel_, maxAngularVel_);
-}
-
-sf::Vector2f Player::calculateDeceleration(float deltaTime) {
-    sf::Vector2f decelerationDirection = -vectorNormalize(velocity_);
-    return decelerationDirection * linConstDecc_ * deltaTime;
-}
-
-sf::Vector2f Player::calculateBrakeDeceleration(float deltaTime) {
-    sf::Vector2f decelerationDirection = -vectorNormalize(velocity_);
-    return decelerationDirection * linBreakDecc_ * deltaTime;
+sf::Vector2f Player::calculateDeceleration(float deceleration, float deltaTime) {
+    sf::Vector2f decelerationDirection = -vectorNormalize(linVel_);
+    return decelerationDirection * deceleration * deltaTime;
 }
 
 void Player::draw(sf::RenderWindow& window) const {
@@ -135,8 +102,7 @@ void Player::draw(sf::RenderWindow& window) const {
 }
 
 void Player::updateSprites() {
-    mainSprite_.setPosition(position_);
-    mainSprite_.setRotation(rotation_);
+    updateMainSpritePosition();
 
     // Ustaw pozycje płomieni silnika
     sf::Vector2f flameDisplacement(0.f, 0.f); // wektor przesunięcia płomieni

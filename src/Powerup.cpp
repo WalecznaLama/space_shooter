@@ -1,32 +1,23 @@
 #include "Powerup.h"
-#include <cmath>
-Powerup::Powerup(const sf::Vector2u& windowSize,const sf::Texture& texture) {
-    sprite_.setTexture(texture);
-    windowSize_ = windowSize;
-    collisionRadius_ = 10;
-    goingRight_ = true;
 
-    std::srand(std::time(nullptr));
-    uint bound_offset = windowSize_.x / 5;
-    auto x = (float)(std::rand() % (windowSize.x - bound_offset*2));
-    x += bound_offset;
-
-    sprite_.setOrigin(sprite_.getLocalBounds().width / 2, sprite_.getLocalBounds().height / 2);
-    sprite_.setPosition(x,  1);
-
-    dyRange_ = 100;
+Powerup::Powerup(const sf::Vector2f& position, const float& initRotation, const sf::Texture& texture) {
+    rotation_ = initRotation;
+    position_ = position;
+    maxLinVel_ = 100.;
+    maxLinAcc_ = 50.;
+    mass_ = 0.1;
+    spriteInit(texture);
 }
 
-void Powerup::update(const float& velocity) {
-    if(fabs(dyFromSpawn_) > dyRange_) goingRight_ = !goingRight_;
+void Powerup::update(float linAcc, float deltaTime) {
+    static float time = 0.0f;
 
-    int direction;
-    if(goingRight_) direction = 1;
-    else direction = -1;
-    float dx_dy = 30. * (M_PI / 180.);
+    updateMainSpritePosition();
+    time += deltaTime;
+    // Zresetuj czas, gdy osiągnie pełny cykl sinusoidalny
+    time = std::fmod(time, 2 * M_PI / moveFrequency_);
 
-    float dx = velocity * sinf(dx_dy);
-    float dy = velocity * cosf(dx_dy);
-    dyFromSpawn_ += direction * dx;
-    sprite_.move(direction * dx, dy);
+    linAcc_ = maxLinAcc_ * std::sin(2 * M_PI * moveFrequency_ * time);
+
+    calculateLinearVelocity(deltaTime);
 }

@@ -7,9 +7,6 @@ Planet::Planet(const sf::Texture &texture, const sf::Vector2f &position, const s
         SpaceObject(texture, position, velocity,
                     rotation, radius, DEFAULT_DENSITY) {
 
-    const float factor = (2. * radius) / getLocalBounds().height;
-
-    scaleSprite(factor, factor);
-    setOriginSprite(getLocalBounds().width / 2, getLocalBounds().height / 2);
-
+    const float factor = (2. * radius) / getSprite().getGlobalBounds().height;
+    scaleSprite(mainSprite_,factor, factor);
 }
