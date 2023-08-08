@@ -13,8 +13,6 @@ Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture
     angBreakDecc_ = 30.;
     angConstDecc_ = 15.;
 
-    mass_ = 1.0;
-
     maxHp_ = 5;
     hp_ = maxHp_;
     spriteInit(textures);
@@ -125,3 +123,5 @@ void Player::updateSprites() {
 }
 
 void Player::setNetForce(const sf::Vector2f& netForce) { netForce_ = netForce; }
+
+float Player::getMass() const { return 1.0f; }

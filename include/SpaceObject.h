@@ -11,6 +11,7 @@ public:
                 float radius, float density);
 
     void update();
+    float getMass() const;
 
 private:
     float density_;

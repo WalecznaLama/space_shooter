@@ -17,6 +17,7 @@ add_executable(space_shooter src/main.cpp src/Player.cpp src/Enemy.cpp src/Bulle
         src/SpaceObjectManager.cpp
         src/UIManager.cpp
         src/CollisionManager.cpp
+        src/Missile.cpp
 )
 
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR})

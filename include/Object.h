@@ -30,8 +30,6 @@ public:
     void setIsAlive(bool isAlive);
     bool getIsAlive() const;
 
-    float getMass() const;
-
     sf::FloatRect getBounds() const;
 
     const sf::Sprite& getSprite() const;
@@ -63,7 +61,6 @@ protected:
     sf::Vector2f position_; // pixels
     float rotation_; // deg
 
-    float mass_;
     float radius_; // pixels
 
     bool alive_ = true;

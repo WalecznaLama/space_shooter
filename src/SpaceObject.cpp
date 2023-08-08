@@ -24,3 +24,7 @@ void SpaceObject::update() {
     mainSprite_.setPosition(position_);
     mainSprite_.setRotation(rotation_);
 }
+
+float SpaceObject::getMass() const {
+    return mass_;
+}

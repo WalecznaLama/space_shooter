@@ -1,0 +1,22 @@
+#include "Missile.h"
+
+const float Missile::DEFAULT_RADIUS = 10.;
+const float Missile::DEFAULT_MAX_LIN_VEL = 600.;
+const float Missile::DEFAULT_LIN_ACC = 200.;
+const int Missile::DEFAULT_DAMAGE = 2;
+
+Missile::Missile(const sf::Texture &texture, const sf::Vector2f &initPosition, const sf::Vector2f &spawnOffset,
+                 const sf::Vector2f &initVel, float initRotation) :
+        Projectile(texture, initPosition, spawnOffset, initVel, initRotation, DEFAULT_RADIUS,
+                   DEFAULT_MAX_LIN_VEL, DEFAULT_LIN_ACC, DEFAULT_DAMAGE)
+        {  }
+
+void Missile::update(float deltaTime) {
+    mainSprite_.setPosition(position_);
+    mainSprite_.setRotation(rotation_);
+    calculateLinearVelocity(deltaTime);
+}
+
+void Missile::draw(sf::RenderWindow &window) const {
+    Projectile::draw(window);
+}

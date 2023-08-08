@@ -40,8 +40,7 @@ sf::Vector2f Object::vectorNormalize(const sf::Vector2f& vector) {
 }
 
 sf::Vector2f Object::calculateLinearAcceleration(sf::Vector2f accelerationDirection, float deltaTime) const {
-    float actualAcceleration = linAcc_  / mass_;
-    return accelerationDirection * actualAcceleration * deltaTime;
+    return accelerationDirection * linAcc_ * deltaTime;
 }
 
 void Object::scaleSprite(sf::Sprite &sprite, const sf::Vector2f &factor) { sprite.scale(factor); }
@@ -59,8 +58,6 @@ void Object::spriteInit(const sf::Texture &texture) {
     mainSprite_.setPosition(position_);
     mainSprite_.setRotation(rotation_);
 }
-
-float Object::getMass() const { return mass_; }
 
 sf::Vector2f Object::calculateLinearAccDirection() const {
     return sf::Vector2f(sinf(rotation_ * M_PI / 180.0f), -cosf(rotation_ * M_PI / 180.0f));
