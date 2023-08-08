@@ -36,7 +36,7 @@ sf::Vector2f Object::vectorNormalize(const sf::Vector2f& vector) {
     else            return sf::Vector2f(0.f, 0.f);
 }
 
-sf::Vector2f Object::calculateForceDirection() const {
+sf::Vector2f Object::calculateLinAccDirection() const {
     return sf::Vector2f(sinf(rotation_ * M_PI / 180.0f), -cosf(rotation_ * M_PI / 180.0f));
 }
 
@@ -66,10 +66,10 @@ void Object::calculateLinearVelocity(float deltaTime) {
 
     calculateAngularVelocity(deltaTime);
 
-    sf::Vector2f _engineForceDirection = calculateForceDirection();
-    sf::Vector2f _deltaEngineForce = calculateAcceleration(_engineForceDirection, deltaTime); // force from space engine
+    sf::Vector2f _linAccDirection = calculateLinAccDirection();
+    sf::Vector2f _deltaLinAccForce = calculateAcceleration(_linAccDirection, deltaTime); // force from space engine
 
-    linVel_ += _deltaEngineForce;
+    linVel_ += _deltaLinAccForce;
     if (vectorLength(linVel_) > maxLinVel_) linVel_ = vectorNormalize(linVel_) * maxLinVel_;
 }
 
@@ -85,6 +85,3 @@ void Object::updateMainSpritePosition() {
 
 void Object::setLinearAcceleration(float newAcc) { linAcc_ = newAcc; }
 float Object::getLinearAcceleration() const { return linAcc_; }
-
-
-

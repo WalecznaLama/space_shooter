@@ -9,6 +9,9 @@ Game::Game()
 {
     setGui();
 
+    playerBulletSpawnOffset_ = {0, -40};
+    enemyBulletSpawnOffset_ = {0, -30};
+
     playerBulletSpeed_ = 50;
     enemyBulletSpeed_ = 50;
     powerupSpeed_ = 0.4f;
@@ -17,10 +20,13 @@ Game::Game()
 
     sf::Vector2f vel = {0., 0.};
     sf::Vector2f pos = {1700., 1700.};
-    spaceObjects_.emplace_back(std::make_shared<Planet>(assets_.planetTexture, pos, vel,
-                                                        0.0, 200.));
+//    spaceObjects_.emplace_back(std::make_shared<Planet>(assets_.planetTexture, pos, vel,
+//                                                        0.0, 200.));
+
+    powerups_.emplace_back(pos, 0., assets_.powerupTexture);
 
     cameraAcceleration_ = 0.01f;
+
 }
 
 void Game::run() {
@@ -104,13 +110,13 @@ void Game::updateBullets(float deltaTime) {
 }
 
 void Game::updatePowerups(float deltaTime) {
-    static sf::Clock powerupSpawnClock;
-    sf::Time elapsed_enemy = powerupSpawnClock.getElapsedTime();
-    if (elapsed_enemy.asSeconds() >= 3.0f) {  // every 3 seconds spawn enemy
-        // TODO
-        powerups_.emplace_back(randomSpawnPoint(), 90., assets_.powerupTexture);
-        powerupSpawnClock.restart();
-    }
+//    static sf::Clock powerupSpawnClock;
+//    sf::Time elapsed_enemy = powerupSpawnClock.getElapsedTime();
+//    if (elapsed_enemy.asSeconds() >= 3.0f) {  // every 3 seconds spawn enemy
+//        // TODO
+//        powerups_.emplace_back(randomSpawnPoint(), 90., assets_.powerupTexture);
+//        powerupSpawnClock.restart();
+//    }
 
     for (int i = powerups_.size() - 1; i >= 0; --i) {
         Powerup& powerup = powerups_[i];
@@ -159,7 +165,9 @@ void Game::updatePlayer(float deltaTime) {
     bool _user_shoot = (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)
                         || sf::Joystick::isButtonPressed(0, 0));
     if (_user_shoot && player_->canShoot(shootTimePlayer_))
-        playerBullets_.emplace_back(player_->getPosition(),player_->getRotation(),
+        playerBullets_.emplace_back(player_->getPosition(),
+                                    playerBulletSpawnOffset_,
+                                    player_->getRotation(),
                                     assets_.playerBulletTexture);
 }
 
@@ -207,8 +215,8 @@ void Game::updateEnemies(float deltaTime) {
         }
 
         if (enemy.canShoot(shootTimeEnemy_) and enemy.getIsAlive())
-            enemyBullets_.emplace_back(enemy.getPosition(),enemy.getSprite().getRotation(),
-                                       assets_.enemyBulletTexture);
+            enemyBullets_.emplace_back(enemy.getPosition(), enemyBulletSpawnOffset_,
+                                       enemy.getSprite().getRotation(),assets_.enemyBulletTexture);
 
         if (!enemy.getIsAlive()) enemies_.erase(enemies_.begin() + i);
     }

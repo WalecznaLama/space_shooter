@@ -39,7 +39,7 @@ protected:
     void calculateAngularVelocity(float deltaTime);
     static sf::Vector2f vectorNormalize(const sf::Vector2f& vector);
     static float vectorLength(const sf::Vector2f& vec);
-    sf::Vector2f calculateForceDirection() const;
+    sf::Vector2f calculateLinAccDirection() const;
     sf::Vector2f calculateAcceleration(sf::Vector2f accelerationDirection, float deltaTime) const;
     static void scaleSprite( sf::Sprite& sprite, const sf::Vector2f &factor);
     static void scaleSprite( sf::Sprite& sprite, float factorX, float factorY);

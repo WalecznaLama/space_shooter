@@ -46,6 +46,9 @@ private:
     sf::Sprite backgroundSprite_;
     sf::Sprite heartSprite_;
 
+    sf::Vector2f playerBulletSpawnOffset_;
+    sf::Vector2f enemyBulletSpawnOffset_;
+
     sf::Text fpsText_;
     sf::Text killCounterText_;
     sf::Text finalScreenText_;

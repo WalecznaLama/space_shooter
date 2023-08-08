@@ -9,6 +9,9 @@ Enemy::Enemy(sf::Vector2f spawn_point, const sf::Texture& texture) {
     maxAngVel_ = 50.;
     maxAngAcc_ = 100.;
 
+    kp_ = 5.0f;
+    ki_ = 1.0f;
+
     mass_ = 1.0;
 
     maxHp_ = 2;
