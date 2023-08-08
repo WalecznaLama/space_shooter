@@ -102,7 +102,8 @@ void Player::draw(sf::RenderWindow& window) const {
 }
 
 void Player::updateSprites() {
-    updateMainSpritePosition();
+    mainSprite_.setPosition(position_);
+    mainSprite_.setRotation(rotation_);
 
     // Ustaw pozycje płomieni silnika
     sf::Vector2f flameDisplacement(0.f, 0.f); // wektor przesunięcia płomieni

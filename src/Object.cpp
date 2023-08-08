@@ -39,10 +39,7 @@ sf::Vector2f Object::vectorNormalize(const sf::Vector2f& vector) {
     else            return sf::Vector2f(0.f, 0.f);
 }
 
-
-
-/// acceleration 0-1
-sf::Vector2f Object::calculateAcceleration(sf::Vector2f accelerationDirection, float deltaTime) const {
+sf::Vector2f Object::calculateLinearAcceleration(sf::Vector2f accelerationDirection, float deltaTime) const {
     float actualAcceleration = linAcc_  / mass_;
     return accelerationDirection * actualAcceleration * deltaTime;
 }
@@ -53,26 +50,27 @@ void Object::scaleSprite(sf::Sprite &sprite, float factorX, float factorY) {spri
 void Object::spriteInit(const std::map<std::string, sf::Texture> &textures) {
     for (const auto& texturePair : textures)   addSprite(texturePair.first, texturePair.second);
     mainSprite_ = sprites_["main"];
-    updateMainSpritePosition();
+    mainSprite_.setPosition(position_);
+    mainSprite_.setRotation(rotation_);
 }
 void Object::spriteInit(const sf::Texture &texture) {
     addSprite("main", texture);
     mainSprite_ = sprites_["main"];
-    updateMainSpritePosition();
+    mainSprite_.setPosition(position_);
+    mainSprite_.setRotation(rotation_);
 }
 
 float Object::getMass() const { return mass_; }
 
-sf::Vector2f Object::calculateLinAccDirection() const {
+sf::Vector2f Object::calculateLinearAccDirection() const {
     return sf::Vector2f(sinf(rotation_ * M_PI / 180.0f), -cosf(rotation_ * M_PI / 180.0f));
 }
 
 void Object::calculateLinearVelocity(float deltaTime) {
-    calculateAngularVelocity(deltaTime);
-    sf::Vector2f _linAccDirection = calculateLinAccDirection();
-    sf::Vector2f _deltaLinAccForce = calculateAcceleration(_linAccDirection, deltaTime); // force from space engine
+    sf::Vector2f _linAccDirection = calculateLinearAccDirection();
+    sf::Vector2f _deltaLinAcc = calculateLinearAcceleration(_linAccDirection, deltaTime); // force from space engine
 
-    linVel_ += _deltaLinAccForce;
+    linVel_ += _deltaLinAcc;
     if (vectorLength(linVel_) > maxLinVel_) linVel_ = vectorNormalize(linVel_) * maxLinVel_;
 }
 
@@ -81,10 +79,6 @@ void Object::calculateAngularVelocity(float deltaTime) {
     angVel_ = std::clamp(angVel_, -maxAngVel_, maxAngVel_);
 }
 
-void Object::updateMainSpritePosition() {
-    mainSprite_.setPosition(position_);
-    mainSprite_.setRotation(rotation_);
-}
 
 void Object::setLinearAcceleration(float newAcc) { linAcc_ = newAcc; }
 float Object::getLinearAcceleration() const { return linAcc_; }

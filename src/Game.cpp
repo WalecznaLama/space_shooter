@@ -3,9 +3,10 @@
 // TODO grid
 Game::Game()
         : window_("Space Shooter", sf::Vector2u(1280, 720)), // Initialize GameWindow with a title and size
-          grid_(3000, 3000),
+          grid_(1000, 1000),
           assets_(),
-          player_(std::make_shared<Player>(sf::Vector2f(1500, 1500), assets_.playerTextures_))
+          player_(std::make_shared<Player>(sf::Vector2f(1500, 1500), assets_.playerTextures_)),
+          enemyManager_(assets_, grid_)
 {
     setGui();
 
@@ -13,12 +14,11 @@ Game::Game()
     enemyBulletSpawnOffset_ = {0, -30};
 
     shootTimePlayer_ = 0.2f;
-    shootTimeEnemy_ = 10.0f;
 
     sf::Vector2f vel = {0., 0.};
     sf::Vector2f pos = {1700., 1700.};
-//    spaceObjects_.emplace_back(std::make_shared<Planet>(assets_.planetTexture, pos, vel,
-//                                                        0.0, 200.));
+    spaceObjects_.emplace_back(std::make_shared<Planet>(assets_.planetTexture, pos, vel,
+                                                        0.0, 200.));
 
     powerups_.emplace_back(pos, 0., assets_.powerupTexture);
 
@@ -38,7 +38,7 @@ void Game::update() {
     float elapsed = updateClock_.getElapsedTime().asSeconds();
 
     updatePlayer(elapsed);
-//    updateEnemies(elapsed);
+    enemyManager_.update(player_->getPosition(), elapsed);
     updateGui(elapsed);
     updateSpaceObjects(elapsed);
 
@@ -57,8 +57,7 @@ void Game::render() {
     for (const Powerup& powerup : powerups_)     powerup.draw(window_.getRenderWindow());
     for (const Bullet& bullet : playerBullets_)  bullet.draw(window_.getRenderWindow());
     for (const Bullet& bullet : enemyBullets_)   bullet.draw(window_.getRenderWindow());
-    for (const Enemy& enemy : enemies_)          enemy.draw(window_.getRenderWindow());
-
+    enemyManager_.render(window_.getRenderWindow());
     for (const auto& spaceObjectPtr : spaceObjects_)
         window_.draw(spaceObjectPtr->getSprite());
 
@@ -186,57 +185,6 @@ void Game::updatePlayer(float deltaTime) {
                                     assets_.playerBulletTexture);
 }
 
-void Game::updateEnemies(float deltaTime) {
-    static sf::Clock enemySpawnClock;
-    sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
-    if (elapsed_enemy.asSeconds() >= 5.0f) {  // every 5 seconds spawn enemy
-        enemies_.emplace_back(randomSpawnPoint(), assets_.enemyTexture);
-        enemySpawnClock.restart();
-    }
-
-    for (int i = enemies_.size() - 1; i >= 0; --i) {
-        Enemy& enemy = enemies_[i];
-
-        enemy.update(player_->getPosition(), deltaTime);
-
-        sf::Vector2f displacement = enemy.getLinearVelocity() * deltaTime; // calculate how far should move
-        sf::Vector2f newPosition = enemy.getPosition() + displacement; // calculate new position
-        float angDisplacement = enemy.getAngularVelocity() * deltaTime;
-        float newRotation = enemy.getRotation() + angDisplacement;
-
-        // check if the enemy's new bounding box collides with anything
-        bool collidesWithSomething = false;
-
-        for (auto& bullet : playerBullets_) {
-            // Oblicz odległość między graczem a wrogiem
-            sf::Vector2f diff = bullet.getPosition() - enemy.getPosition();
-            float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
-
-            // Sprawdź, czy odległość jest mniejsza lub równa sumie promieni
-            float _sum_radius = bullet.getRadius() + enemy.getRadius();
-            if (distance < _sum_radius) {
-                collidesWithSomething = true;
-                enemy.setIsAlive(false);
-                bullet.setIsAlive(false);
-                killCounter_++;
-                break;
-            }
-        }
-
-        // if the enemy's new position is inside the game area and doesn't collide with anything, move the player
-        if (!collidesWithSomething && grid_.isInside(newPosition.x, newPosition.y)) {
-            enemy.setPosition(newPosition);
-            enemy.setRotation(newRotation);
-        }
-
-        if (enemy.canShoot(shootTimeEnemy_) and enemy.getIsAlive())
-            enemyBullets_.emplace_back(enemy.getPosition(), enemyBulletSpawnOffset_,
-                                       enemy.getSprite().getRotation(),assets_.enemyBulletTexture);
-
-        if (!enemy.getIsAlive()) enemies_.erase(enemies_.begin() + i);
-    }
-}
-
 void Game::updateGui(float deltaTime) {
     float fps = 1.f / deltaTime;
     fpsText_.setString("FPS: " + std::to_string(static_cast<int>(fps)));
@@ -244,7 +192,7 @@ void Game::updateGui(float deltaTime) {
 //    debugText_.setString("X: " + std::to_string(spaceObjectsNetForce_.x) + '\n' +
 //                         "Y: " + std::to_string(spaceObjectsNetForce_.y));
 
-    debugText_.setString("X: " + std::to_string( powerups_[0].getAngularAcceleration()));
+    debugText_.setString("X: " + std::to_string( powerups_[0].getRotation()));
 
     float hp_percent = player_->getHp() * 1. / player_->getMaxHp();
     heartSprite_.setTextureRect(sf::IntRect(0, 0,
@@ -252,21 +200,7 @@ void Game::updateGui(float deltaTime) {
                                             heartSprite_.getTexture()->getSize().y));
 }
 
-sf::Vector2f Game::randomSpawnPoint() {
-    std::random_device rd;  // (seed)
-    std::mt19937 gen(rd());  // generator liczb pseudolosowych
 
-    std::uniform_real_distribution<> distr(0, 2 * M_PI);  // rozkład jednostajny od 0 do 2*pi
-    std::uniform_real_distribution<> distrRadius(200, 600);  // rozkład jednostajny od 200 do 600
-
-    float spawnRadius = distrRadius(gen);  // radius of the spawn circle around the player
-    float spawnAngle = distr(gen);  // random angle
-
-    // calculate the spawn point
-    float _x = player_->getPosition().x + spawnRadius * std::cos(spawnAngle);
-    float _y = player_->getPosition().y + spawnRadius * std::sin(spawnAngle);
-    return {_x, _y};
-}
 
 bool Game::getPlayerCollision() {
     bool collidesWithSomething = false;
@@ -278,22 +212,6 @@ bool Game::getPlayerCollision() {
         float _sum_radius = player_->getRadius() + spaceObjectPtr->getRadius();
         if (distance < _sum_radius) {
             collidesWithSomething = true;
-            break;
-        }
-    }
-
-    for (auto& enemy : enemies_) {
-        // Oblicz odległość między graczem a wrogiem
-        sf::Vector2f diff = player_->getPosition() - enemy.getPosition();
-        float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
-
-        // Sprawdź, czy odległość jest mniejsza lub równa sumie promieni kara co sekunde
-        float _sum_radius = player_->getRadius() + enemy.getRadius();
-        if (distance < _sum_radius && collisionTimer_.getElapsedTime().asSeconds() > 1.0f) {
-            collidesWithSomething = true;
-            enemy.setDamage(1);
-            player_->setDamage(1);
-            collisionTimer_.restart();
             break;
         }
     }

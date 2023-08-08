@@ -11,6 +11,7 @@ public:
 
 private:
     float moveFrequency_;
+    float initRotation_;
 };
 
 

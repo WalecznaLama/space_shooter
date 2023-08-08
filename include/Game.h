@@ -5,6 +5,12 @@
 #include "AssetManager.h"
 #include "Window.h"
 #include "Planet.h"
+#include "ProjectileManager.h"
+#include "EnemyManager.h"
+#include "PowerupManager.h"
+#include "SpaceObjectManager.h"
+#include "UIManager.h"
+#include "CollisionManager.h"
 
 #include <algorithm>
 class Game {
@@ -18,7 +24,6 @@ private:
     void gameOver();
 
     void updatePlayer(float deltaTime);
-    void updateEnemies(float deltaTime);
     void updateSpaceObjects(float deltaTime);
     void updateBullets(float deltaTime);
     void updatePowerups(float deltaTime);
@@ -28,14 +33,13 @@ private:
     void calculateCameraPosition();
     void setGui();
 
-    sf::Vector2f randomSpawnPoint();
     sf::Clock updateClock_;
 
     Window window_;
     Grid grid_;
     AssetManager assets_;
+    EnemyManager enemyManager_;
     std::shared_ptr<Player> player_;
-    std::vector<Enemy> enemies_;
     std::vector<Bullet> playerBullets_;
     std::vector<Bullet> enemyBullets_;
     std::vector<Powerup> powerups_;
@@ -57,7 +61,6 @@ private:
     sf::Clock collisionTimer_;
 
     float shootTimePlayer_;
-    float shootTimeEnemy_;
     float cameraAcceleration_;
     uint killCounter_;
 };

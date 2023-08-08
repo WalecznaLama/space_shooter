@@ -51,7 +51,6 @@ private:
     std::vector<Bullet*> enemyBullets_;
     std::vector<Planet*> planets_;
     std::vector<SpaceObject*> spaceObjects_;
-//    Planet* planet_;
 };
 
 

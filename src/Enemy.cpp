@@ -21,7 +21,8 @@ Enemy::Enemy(sf::Vector2f spawn_point, const sf::Texture& texture) :
 }
 
 void Enemy::update(const sf::Vector2f& playerPosition, float deltaTime) {
-    updateMainSpritePosition();
+    mainSprite_.setPosition(position_);
+    mainSprite_.setRotation(rotation_);
 
     sf::Vector2f direction = playerPosition - position_; // Compute direction from enemy to player
     float targetAngle = std::atan2(direction.y, direction.x); // Compute angle to player
@@ -37,6 +38,7 @@ void Enemy::update(const sf::Vector2f& playerPosition, float deltaTime) {
     if (angleDifference < -180.0f) angleDifference += 360.0f;
 
     angAcc_ = pidController_.pidOutput(angleDifference, deltaTime);
+    calculateAngularVelocity(deltaTime);
 
     calculateLinearVelocity(deltaTime);
 

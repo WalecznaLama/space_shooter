@@ -20,7 +20,9 @@ Bullet::Bullet(const sf::Vector2f& position, const sf::Vector2f& spawnOffset, co
 }
 
 void Bullet::update(float deltaTime) {
-    updateMainSpritePosition();
+    mainSprite_.setPosition(position_);
+    mainSprite_.setRotation(rotation_);
+    calculateAngularVelocity(deltaTime);
     calculateLinearVelocity(deltaTime);
 }
 

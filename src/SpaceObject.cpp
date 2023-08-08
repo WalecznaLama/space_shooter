@@ -20,4 +20,7 @@ float SpaceObject::calculateMass(float radius)  {
     mass_ = volume * density_;
 }
 
-void SpaceObject::update() { updateMainSpritePosition(); }
+void SpaceObject::update() {
+    mainSprite_.setPosition(position_);
+    mainSprite_.setRotation(rotation_);
+}

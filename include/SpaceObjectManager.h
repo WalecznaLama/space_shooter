@@ -1,0 +1,14 @@
+//
+// Created by rav on 08.08.23.
+//
+
+#ifndef SPACE_SHOOTER_SPACEOBJECTMANAGER_H
+#define SPACE_SHOOTER_SPACEOBJECTMANAGER_H
+
+
+class SpaceObjectManager {
+
+};
+
+
+#endif //SPACE_SHOOTER_SPACEOBJECTMANAGER_H
