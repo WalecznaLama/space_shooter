@@ -14,6 +14,8 @@ Bullet::Bullet(const sf::Vector2f& position, const sf::Vector2f& spawnOffset, co
     maxLinVel_ = 600.;
     linAcc_ = 200.;
     mass_ = 0.1;
+
+    radius_ = 5;
     spriteInit(texture);
 }
 
@@ -21,3 +23,5 @@ void Bullet::update(float deltaTime) {
     updateMainSpritePosition();
     calculateLinearVelocity(deltaTime);
 }
+
+void Bullet::draw(sf::RenderWindow &window) const {  window.draw(mainSprite_); }

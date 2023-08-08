@@ -12,9 +12,6 @@ Game::Game()
     playerBulletSpawnOffset_ = {0, -40};
     enemyBulletSpawnOffset_ = {0, -30};
 
-    playerBulletSpeed_ = 50;
-    enemyBulletSpeed_ = 50;
-    powerupSpeed_ = 0.4f;
     shootTimePlayer_ = 0.2f;
     shootTimeEnemy_ = 10.0f;
 
@@ -41,7 +38,7 @@ void Game::update() {
     float elapsed = updateClock_.getElapsedTime().asSeconds();
 
     updatePlayer(elapsed);
-    updateEnemies(elapsed);
+//    updateEnemies(elapsed);
     updateGui(elapsed);
     updateSpaceObjects(elapsed);
 
@@ -121,8 +118,26 @@ void Game::updatePowerups(float deltaTime) {
     for (int i = powerups_.size() - 1; i >= 0; --i) {
         Powerup& powerup = powerups_[i];
         powerup.update(deltaTime);
+
+        sf::Vector2f linDisplacement = powerup.getLinearVelocity() * deltaTime;
+        sf::Vector2f newPosition = powerup.getPosition() + linDisplacement;
+        float angDisplacement = powerup.getAngularVelocity() * deltaTime;
+        float newRotation = powerup.getRotation() + angDisplacement;
+        powerup.setPosition(newPosition);
+        powerup.setRotation(newRotation);
+
+        sf::Vector2f diff = player_->getPosition() - powerup.getPosition();
+        float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+
+        float _sum_radius = player_->getRadius() + powerup.getRadius();
+        if (distance < _sum_radius) {
+            player_->setLinearAcceleration( player_->getLinearAcceleration() * 1.2 );
+            powerup.setIsAlive(false);
+            break;
+        }
+
         // remove off screen
-        if (grid_.isInside(powerup.getPosition()) or !powerup.getIsAlive())
+        if (!grid_.isInside(powerup.getPosition()) or !powerup.getIsAlive())
             powerups_.erase(powerups_.begin() + i);
     }
 }
@@ -229,7 +244,7 @@ void Game::updateGui(float deltaTime) {
 //    debugText_.setString("X: " + std::to_string(spaceObjectsNetForce_.x) + '\n' +
 //                         "Y: " + std::to_string(spaceObjectsNetForce_.y));
 
-    debugText_.setString("X: " + std::to_string(playerBullets_.size()));
+    debugText_.setString("X: " + std::to_string( powerups_[0].getAngularAcceleration()));
 
     float hp_percent = player_->getHp() * 1. / player_->getMaxHp();
     heartSprite_.setTextureRect(sf::IntRect(0, 0,
@@ -295,22 +310,6 @@ bool Game::getPlayerCollision() {
                 collidesWithSomething = true;
                 player_->setDamage(1);
                 bullet.setIsAlive(false);
-                break;
-            }
-        }
-    }
-
-    // Check collision with powerups
-    if (!collidesWithSomething) {
-        for (auto& powerup : powerups_) {
-            sf::Vector2f diff = player_->getPosition() - powerup.getPosition();
-            float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
-
-            float _sum_radius = player_->getRadius() + powerup.getRadius();
-            if (distance < _sum_radius) {
-                collidesWithSomething = true;
-                player_->setLinearAcceleration( player_->getLinearAcceleration() * 1.2 );
-                powerup.setIsAlive(false);
                 break;
             }
         }

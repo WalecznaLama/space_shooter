@@ -1,0 +1,10 @@
+#ifndef SPACE_SHOOTER_PROJECTILE_H
+#define SPACE_SHOOTER_PROJECTILE_H
+
+
+class Projectile {
+
+};
+
+
+#endif //SPACE_SHOOTER_PROJECTILE_H

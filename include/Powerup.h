@@ -1,12 +1,13 @@
 #ifndef SPACE_SHOOTER_POWERUP_H
 #define SPACE_SHOOTER_POWERUP_H
 
-#include "PassiveObject.h"
+#include "Object.h"
 
-class Powerup : public PassiveObject {
+class Powerup : public Object {
 public:
     Powerup(const sf::Vector2f& position, const float& initRotation, const sf::Texture& texture);
-    void update(float deltaTime) override;
+    void update(float deltaTime);
+    void draw(sf::RenderWindow& window) const;
 
 private:
     float moveFrequency_;

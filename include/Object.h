@@ -21,6 +21,10 @@ public:
     void setAngularVelocity(float newVelocity);
     float getAngularVelocity() const;
 
+    void setAngularAcceleration(float newAcceleration);
+    float getAngularAcceleration() const;
+
+
     void setRadius(float newRadius);
     float getRadius() const;
 
@@ -31,10 +35,10 @@ public:
 
     sf::FloatRect getBounds() const;
 
-    void addSprite(const std::string&, const sf::Texture& texture);
     const sf::Sprite& getSprite() const;
 
 protected:
+    void addSprite(const std::string&, const sf::Texture& texture);
     void calculateLinearVelocity(float deltaTime);
     void calculateAngularVelocity(float deltaTime);
     static sf::Vector2f vectorNormalize(const sf::Vector2f& vector);

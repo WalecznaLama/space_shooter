@@ -56,9 +56,6 @@ private:
 
     sf::Clock collisionTimer_;
 
-    float playerBulletSpeed_;
-    float enemyBulletSpeed_;
-    float powerupSpeed_;
     float shootTimePlayer_;
     float shootTimeEnemy_;
     float cameraAcceleration_;

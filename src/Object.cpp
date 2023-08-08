@@ -12,6 +12,9 @@ sf::Vector2f Object::getLinearVelocity() const { return linVel_; }
 void Object::setAngularVelocity(float newVelocity) { angVel_ = newVelocity; }
 float Object::getAngularVelocity() const { return angVel_; }
 
+void Object::setAngularAcceleration(float newAcceleration) { angAcc_ = newAcceleration; }
+float Object::getAngularAcceleration() const { return angAcc_; }
+
 void Object::setRadius(float collisionRadius) { radius_ = collisionRadius; }
 float Object::getRadius() const { return radius_; }
 
@@ -36,9 +39,7 @@ sf::Vector2f Object::vectorNormalize(const sf::Vector2f& vector) {
     else            return sf::Vector2f(0.f, 0.f);
 }
 
-sf::Vector2f Object::calculateLinAccDirection() const {
-    return sf::Vector2f(sinf(rotation_ * M_PI / 180.0f), -cosf(rotation_ * M_PI / 180.0f));
-}
+
 
 /// acceleration 0-1
 sf::Vector2f Object::calculateAcceleration(sf::Vector2f accelerationDirection, float deltaTime) const {
@@ -62,10 +63,12 @@ void Object::spriteInit(const sf::Texture &texture) {
 
 float Object::getMass() const { return mass_; }
 
+sf::Vector2f Object::calculateLinAccDirection() const {
+    return sf::Vector2f(sinf(rotation_ * M_PI / 180.0f), -cosf(rotation_ * M_PI / 180.0f));
+}
+
 void Object::calculateLinearVelocity(float deltaTime) {
-
     calculateAngularVelocity(deltaTime);
-
     sf::Vector2f _linAccDirection = calculateLinAccDirection();
     sf::Vector2f _deltaLinAccForce = calculateAcceleration(_linAccDirection, deltaTime); // force from space engine
 

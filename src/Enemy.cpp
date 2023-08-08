@@ -1,16 +1,16 @@
 #include "Enemy.h"
 
-Enemy::Enemy(sf::Vector2f spawn_point, const sf::Texture& texture) {
+
+Enemy::Enemy(sf::Vector2f spawn_point, const sf::Texture& texture) :
+        pidController_(5.0, 2.0, 0.0, maxAngAcc_)
+{
     position_ = spawn_point;
 
     radius_ = 10;
     linAcc_ = 100.;
     maxLinVel_ = 200.;
     maxAngVel_ = 50.;
-    maxAngAcc_ = 100.;
-
-    kp_ = 5.0f;
-    ki_ = 1.0f;
+    maxAngAcc_ = 300.;
 
     mass_ = 1.0;
 
@@ -36,19 +36,7 @@ void Enemy::update(const sf::Vector2f& playerPosition, float deltaTime) {
     if (angleDifference > 180.0f) angleDifference -= 360.0f;
     if (angleDifference < -180.0f) angleDifference += 360.0f;
 
-    // Część proporcjonalna
-    float proportional = kp_ * angleDifference;
-
-    // Część integralna
-    integral_ += angleDifference * deltaTime;
-    float integralPart = ki_ * integral_;
-
-    // Oblicz całkowite przyspieszenie kątowe
-    angAcc_ = proportional + integralPart;
-
-    // Ogranicz przyspieszenie kątowe do maxAngAcc_
-    if (angAcc_ > maxAngAcc_) angAcc_ = maxAngAcc_;
-    if (angAcc_ < -maxAngAcc_) angAcc_ = -maxAngAcc_;
+    angAcc_ = pidController_.pidOutput(angleDifference, deltaTime);
 
     calculateLinearVelocity(deltaTime);
 
