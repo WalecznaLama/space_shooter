@@ -11,8 +11,8 @@ public:
     static const float DEFAULT_LIN_ACC;
     static const int DEFAULT_DAMAGE;
 
-    Missile(const sf::Texture &texture, const sf::Vector2f& initPosition, const sf::Vector2f& spawnOffset,
-            const sf::Vector2f& initVel, float initRotation);
+    Missile(const sf::Texture &texture, const sf::Vector2f& initPos, const sf::Vector2f& spawnOffset,
+            const sf::Vector2f& initVel, float initRot);
     void update(float deltaTime) override;
     void draw(sf::RenderWindow& window) const override;
 };

@@ -3,26 +3,28 @@
 
 #include <SFML/Graphics.hpp>
 #include <cmath>
-
+/*
+ * Lin - linear; Ang - angular; Vel - velocity; Acc - acceleration; Rot - rotation; Pos - position
+ */
 class Object {
 public:
-    void setPosition(const sf::Vector2f& newPosition);
-    sf::Vector2f getPosition() const;
+    void setPos(const sf::Vector2f& newPosition);
+    sf::Vector2f getPos() const;
 
-    void setRotation(float newRotation);
-    float getRotation() const;
+    void setRot(float newRot);
+    float getRot() const;
 
-    void setLinearVelocity(const sf::Vector2f& newVelocity);
-    sf::Vector2f getLinearVelocity() const;
+    void setLinVel(const sf::Vector2f& newVel);
+    sf::Vector2f getLinVel() const;
 
-    void setLinearAcceleration(float newAcc);
-    float getLinearAcceleration() const;
+    void setLinAcc(float newAcc);
+    float getLinAcc() const;
 
-    void setAngularVelocity(float newVelocity);
-    float getAngularVelocity() const;
+    void setAngVel(float newVel);
+    float getAngVel() const;
 
-    void setAngularAcceleration(float newAcceleration);
-    float getAngularAcceleration() const;
+    void setAngAcc(float newAcc);
+    float getAngAcc() const;
 
     void setRadius(float newRadius);
     float getRadius() const;
@@ -36,12 +38,12 @@ public:
 
 protected:
     void addSprite(const std::string&, const sf::Texture& texture);
-    void calculateLinearVelocity(float deltaTime);
-    void calculateAngularVelocity(float deltaTime);
+    void calculateLinVel(float deltaTime);
+    void calculateAngVel(float deltaTime);
     static sf::Vector2f vectorNormalize(const sf::Vector2f& vector);
     static float vectorLength(const sf::Vector2f& vec);
-    sf::Vector2f calculateLinearAccDirection() const;
-    sf::Vector2f calculateLinearAcceleration(sf::Vector2f accelerationDirection, float deltaTime) const;    static void scaleSprite(sf::Sprite& sprite, const sf::Vector2f &factor);
+    sf::Vector2f calculateLinAccDirection() const;
+    sf::Vector2f calculateLinAcc(sf::Vector2f accDirection, float deltaTime) const;    static void scaleSprite(sf::Sprite& sprite, const sf::Vector2f &factor);
     static void scaleSprite( sf::Sprite& sprite, float factorX, float factorY);
     void spriteInit(const std::map<std::string, sf::Texture> &textures);
     void spriteInit(const sf::Texture& texture);
@@ -58,8 +60,8 @@ protected:
     float maxAngVel_; // deg / s
     float maxAngAcc_; // deg / s^s
 
-    sf::Vector2f position_; // pixels
-    float rotation_; // deg
+    sf::Vector2f pos_; // pixels
+    float rot_; // deg
 
     float radius_; // pixels
 

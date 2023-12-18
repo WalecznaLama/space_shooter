@@ -1,7 +1,7 @@
 #include "Player.h"
 
 Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture> &textures){
-    position_ = spawn_point;
+    pos_ = spawn_point;
 
     radius_ = 10;
     maxLinAcc_ = 100.;
@@ -13,6 +13,8 @@ Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture
     angBreakDecc_ = 30.;
     angConstDecc_ = 15.;
 
+    mass_ = 1.0;
+
     maxHp_ = 5;
     hp_ = maxHp_;
     spriteInit(textures);
@@ -23,7 +25,7 @@ void Player::update(float deltaTime, const sf::Vector2f& netForce) {
     sf::Vector2f _userInput = getInput(); // Linear + Angular acc
     linAcc_ = _userInput.x * maxLinAcc_;
     angAcc_ = _userInput.y * maxAngAcc_;
-    updateVelocity(deltaTime);
+    updateVel(deltaTime);
     if (vectorLength(linVel_) > maxLinVel_) linVel_ = vectorNormalize(linVel_) * maxLinVel_;
     updateSprites();
     if (hp_ == 0) alive_ = false;
@@ -69,15 +71,15 @@ sf::Vector2f Player::getInput() {
 }
 
 
-void Player::updateVelocity(float deltaTime) {
+void Player::updateVel(float deltaTime) {
     // Linear
-    calculateLinearVelocity(deltaTime);
+    calculateLinVel(deltaTime);
     sf::Vector2f _deltaNetForce = netForce_ * deltaTime; // force from space objects
     sf::Vector2f _deltaDecFroce= calculateDeceleration(linConstDecc_, deltaTime); // constant deceleration
     linVel_ += (_deltaNetForce + _deltaDecFroce);
 
     // Angular
-    calculateAngularVelocity(deltaTime);
+    calculateAngVel(deltaTime);
     int angVelSign = getSign(int(angVel_));
     float _sgnDecelerationVel =  angVelSign * (angConstDecc_ * deltaTime);
     angVel_ -=_sgnDecelerationVel;
@@ -100,28 +102,26 @@ void Player::draw(sf::RenderWindow& window) const {
 }
 
 void Player::updateSprites() {
-    mainSprite_.setPosition(position_);
-    mainSprite_.setRotation(rotation_);
+    mainSprite_.setPosition(pos_);
+    mainSprite_.setRotation(rot_);
 
     // Ustaw pozycje płomieni silnika
     sf::Vector2f flameDisplacement(0.f, 0.f); // wektor przesunięcia płomieni
-    float rotationRadians = rotation_ * M_PI / 180.0f; // konwersja stopni na radiany
+    float rotRadians = rot_ * M_PI / 180.0f; // konwersja stopni na radiany
 
     // Oblicz nowy wektor przesunięcia na podstawie rotacji statku
     sf::Vector2f rotatedFlameDisplacement(
-            flameDisplacement.x * cos(rotationRadians) - flameDisplacement.y * sin(rotationRadians),
-            flameDisplacement.x * sin(rotationRadians) + flameDisplacement.y * cos(rotationRadians)
+            flameDisplacement.x * cos(rotRadians) - flameDisplacement.y * sin(rotRadians),
+            flameDisplacement.x * sin(rotRadians) + flameDisplacement.y * cos(rotRadians)
     );
     // Dodaj obliczony wektor przesunięcia do pozycji statku, aby uzyskać nową pozycję płomieni
-    sf::Vector2f flamePosition = position_ + rotatedFlameDisplacement;
-    sprites_["engine_on"].setPosition(flamePosition);
-    sprites_["boost"].setPosition(flamePosition);
+    sf::Vector2f flamePos = pos_ + rotatedFlameDisplacement;
+    sprites_["engine_on"].setPosition(flamePos);
+    sprites_["boost"].setPosition(flamePos);
 
     // Ustaw rotację płomieni silnika na tę samą, co statek
-    sprites_["engine_on"].setRotation(rotation_);
-    sprites_["boost"].setRotation(rotation_);
+    sprites_["engine_on"].setRotation(rot_);
+    sprites_["boost"].setRotation(rot_);
 }
 
 void Player::setNetForce(const sf::Vector2f& netForce) { netForce_ = netForce; }
-
-float Player::getMass() const { return 1.0f; }

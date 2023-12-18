@@ -11,7 +11,6 @@ class Cell {
 public:
     Cell()
             : player_(nullptr), enemies_(), playerBullets_(), enemyBullets_() {}
-//    , planet_(nullptr)
     // Player
     bool hasPlayer() const;
     Player* getPlayer() const;

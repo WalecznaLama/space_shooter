@@ -2,27 +2,27 @@
 
 const float SpaceObject::G_ = 100.f;
 
-SpaceObject::SpaceObject (const sf::Texture &texture, const sf::Vector2f& initPosition,
-                          const sf::Vector2f& initVelocity, const float initRotation,
+SpaceObject::SpaceObject (const sf::Texture &texture, const sf::Vector2f& initPos,
+                          const sf::Vector2f& initVel, const float initRot,
                           const float radius, const float density)
         :  density_(density) {
-    position_ = initPosition;
-    linVel_ = initVelocity;
-    rotation_ = initRotation;
+    pos_ = initPos;
+    linVel_ = initVel;
+    rot_ = initRot;
     radius_ = radius;
 
-    calculateMass(radius);
+    mass_ = calculateMass(radius);
     spriteInit(texture);
 }
 
 float SpaceObject::calculateMass(float radius)  {
     float volume = (4. / 3.) * M_PI * std::pow(radius, 3);
-    mass_ = volume * density_;
+    return volume * density_;
 }
 
 void SpaceObject::update() {
-    mainSprite_.setPosition(position_);
-    mainSprite_.setRotation(rotation_);
+    mainSprite_.setPosition(pos_);
+    mainSprite_.setRotation(rot_);
 }
 
 float SpaceObject::getMass() const {

@@ -1,18 +1,18 @@
 #include "Projectile.h"
 
-Projectile::Projectile(const sf::Texture &texture, const sf::Vector2f& initPosition, const sf::Vector2f& spawnOffset,
-                       const sf::Vector2f& initVel, float initRotation, float radius, float maxLinVel, float linAcc,
+Projectile::Projectile(const sf::Texture &texture, const sf::Vector2f& initPos, const sf::Vector2f& spawnOffset,
+                       const sf::Vector2f& initVel, float initRot, float radius, float maxLinVel, float linAcc,
                        int damage,float angVel, float angAcc, float maxAngVel, float maxAngAcc) {
-    init(initPosition, spawnOffset, initVel, initRotation, radius, maxLinVel,
+    init(initPos, spawnOffset, initVel, initRot, radius, maxLinVel,
          linAcc, damage, angVel, angAcc, maxAngVel, maxAngAcc);
     spriteInit(texture);
 }
 
-Projectile::Projectile(const std::map<std::string, sf::Texture> &textures, const sf::Vector2f &initPosition,
-                       const sf::Vector2f &spawnOffset, const sf::Vector2f &initVel, float initRotation, float radius,
+Projectile::Projectile(const std::map<std::string, sf::Texture> &textures, const sf::Vector2f &initPos,
+                       const sf::Vector2f &spawnOffset, const sf::Vector2f &initVel, float initRot, float radius,
                        float maxLinVel, float linAcc, int damage, float angVel, float angAcc, float maxAngVel,
                        float maxAngAcc) {
-    init(initPosition, spawnOffset, initVel, initRotation, radius, maxLinVel,
+    init(initPos, spawnOffset, initVel, initRot, radius, maxLinVel,
          linAcc, damage, angVel, angAcc, maxAngVel, maxAngAcc);
     spriteInit(textures);
 }
@@ -21,18 +21,18 @@ void Projectile::draw(sf::RenderWindow &window) const { window.draw(mainSprite_)
 
 int Projectile::getDamage() const { return damage_; }
 
-void Projectile::init(const sf::Vector2f& initPosition, const sf::Vector2f& spawnOffset,
-                      const sf::Vector2f& initVel, float initRotation, float radius, float maxLinVel, float linAcc,
+void Projectile::init(const sf::Vector2f& initPos, const sf::Vector2f& spawnOffset,
+                      const sf::Vector2f& initVel, float initRot, float radius, float maxLinVel, float linAcc,
                       int damage, float angVel,float angAcc, float maxAngVel, float maxAngAcc) {
-    position_ = initPosition;
-    rotation_ = initRotation;
-    float _rotRad = rotation_ * (M_PI / 180.);
+    pos_ = initPos;
+    rot_ = initRot;
+    float _rotRad = rot_ * (M_PI / 180.);
 
     float offsetX = spawnOffset.x * cosf(_rotRad) - spawnOffset.y * sinf(_rotRad);
     float offsetY = spawnOffset.x * sinf(_rotRad) + spawnOffset.y * cosf(_rotRad);
 
-    position_.x += offsetX;
-    position_.y += offsetY;
+    pos_.x += offsetX;
+    pos_.y += offsetY;
 
     damage_ = damage;
 

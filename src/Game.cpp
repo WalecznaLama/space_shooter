@@ -3,10 +3,9 @@
 // TODO grid
 Game::Game()
         : window_("Space Shooter", sf::Vector2u(1280, 720)), // Initialize GameWindow with a title and size
-          grid_(1000, 1000),
+          grid_(3000, 3000),
           assets_(),
-          player_(std::make_shared<Player>(sf::Vector2f(1500, 1500), assets_.playerTextures_)),
-          enemyManager_(assets_, grid_)
+          player_(std::make_shared<Player>(sf::Vector2f(1500, 1500), assets_.playerTextures_))
 {
     setGui();
 
@@ -14,6 +13,7 @@ Game::Game()
     enemyBulletSpawnOffset_ = {0, -30};
 
     shootTimePlayer_ = 0.2f;
+    shootTimeEnemy_ = 10.0f;
 
     sf::Vector2f vel = {0., 0.};
     sf::Vector2f pos = {1700., 1700.};
@@ -22,7 +22,7 @@ Game::Game()
 
     powerups_.emplace_back(pos, 0., assets_.powerupTexture);
 
-    cameraAcceleration_ = 0.01f;
+    cameraAcc_ = 0.01f;
 
 }
 
@@ -38,15 +38,15 @@ void Game::update() {
     float elapsed = updateClock_.getElapsedTime().asSeconds();
 
     updatePlayer(elapsed);
-    enemyManager_.update(player_->getPosition(), elapsed);
+//    updateEnemies(elapsed);
     updateGui(elapsed);
     updateSpaceObjects(elapsed);
 
     updateBullets(elapsed);
     updatePowerups(elapsed);
 
-    calculateCameraPosition();
-    window_.updateView(cameraPosition_);
+    calculateCameraPos();
+    window_.updateView(cameraPos_);
     if (!player_->getIsAlive()) gameOver();
     updateClock_.restart();
 }
@@ -57,7 +57,8 @@ void Game::render() {
     for (const Powerup& powerup : powerups_)     powerup.draw(window_.getRenderWindow());
     for (const Bullet& bullet : playerBullets_)  bullet.draw(window_.getRenderWindow());
     for (const Bullet& bullet : enemyBullets_)   bullet.draw(window_.getRenderWindow());
-    enemyManager_.render(window_.getRenderWindow());
+    for (const Enemy& enemy : enemies_)          enemy.draw(window_.getRenderWindow());
+
     for (const auto& spaceObjectPtr : spaceObjects_)
         window_.draw(spaceObjectPtr->getSprite());
 
@@ -73,7 +74,7 @@ void Game::render() {
 
 void Game::gameOver() {
     finalScreenText_.setString("Game Over!\nFinal Score: " + std::to_string(killCounter_));
-    finalScreenText_.setPosition(cameraPosition_);
+    finalScreenText_.setPosition(cameraPos_);
     while (window_.isOpen()) {
         window_.processEvents();
         window_.clear();
@@ -87,20 +88,20 @@ void Game::updateBullets(float deltaTime) {
         Bullet& bullet = playerBullets_[i];
         bullet.update(deltaTime);
 
-        sf::Vector2f linDisplacement = bullet.getLinearVelocity() * deltaTime;
-        sf::Vector2f newPosition = bullet.getPosition() + linDisplacement;
-        bullet.setPosition(newPosition);
-        if (!grid_.isInside(bullet.getPosition()) or !bullet.getIsAlive())
+        sf::Vector2f linDisplacement = bullet.getLinVel() * deltaTime;
+        sf::Vector2f newPos = bullet.getPos() + linDisplacement;
+        bullet.setPos(newPos);
+        if (!grid_.isInside(bullet.getPos()) or !bullet.getIsAlive())
             playerBullets_.erase(playerBullets_.begin() + i);
     }
 
     for (int i = enemyBullets_.size() - 1; i >= 0; --i) {
         Bullet &bullet = enemyBullets_[i];
         bullet.update(deltaTime);
-        sf::Vector2f linDisplacement = bullet.getLinearVelocity() * deltaTime;
-        sf::Vector2f newPosition = bullet.getPosition() + linDisplacement;
-        bullet.setPosition(newPosition);
-        if (!grid_.isInside(bullet.getPosition()) or !bullet.getIsAlive())
+        sf::Vector2f linDisplacement = bullet.getLinVel() * deltaTime;
+        sf::Vector2f newPos = bullet.getPos() + linDisplacement;
+        bullet.setPos(newPos);
+        if (!grid_.isInside(bullet.getPos()) or !bullet.getIsAlive())
             enemyBullets_.erase(enemyBullets_.begin() + i);
     }
 }
@@ -118,25 +119,25 @@ void Game::updatePowerups(float deltaTime) {
         Powerup& powerup = powerups_[i];
         powerup.update(deltaTime);
 
-        sf::Vector2f linDisplacement = powerup.getLinearVelocity() * deltaTime;
-        sf::Vector2f newPosition = powerup.getPosition() + linDisplacement;
-        float angDisplacement = powerup.getAngularVelocity() * deltaTime;
-        float newRotation = powerup.getRotation() + angDisplacement;
-        powerup.setPosition(newPosition);
-        powerup.setRotation(newRotation);
+        sf::Vector2f linDisplacement = powerup.getLinVel() * deltaTime;
+        sf::Vector2f newPos = powerup.getPos() + linDisplacement;
+        float angDisplacement = powerup.getAngVel() * deltaTime;
+        float newRot = powerup.getRot() + angDisplacement;
+        powerup.setPos(newPos);
+        powerup.setRot(newRot);
 
-        sf::Vector2f diff = player_->getPosition() - powerup.getPosition();
+        sf::Vector2f diff = player_->getPos() - powerup.getPos();
         float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
 
         float _sum_radius = player_->getRadius() + powerup.getRadius();
         if (distance < _sum_radius) {
-            player_->setLinearAcceleration( player_->getLinearAcceleration() * 1.2 );
+            player_->setLinAcc( player_->getLinAcc() * 1.2 );
             powerup.setIsAlive(false);
             break;
         }
 
         // remove off screen
-        if (!grid_.isInside(powerup.getPosition()) or !powerup.getIsAlive())
+        if (!grid_.isInside(powerup.getPos()) or !powerup.getIsAlive())
             powerups_.erase(powerups_.begin() + i);
     }
 }
@@ -147,42 +148,93 @@ void Game::updatePlayer(float deltaTime) {
     // check if the player's new bounding box collides with anything
     bool collidesWithSomething = getPlayerCollision();
 
-    sf::Vector2f linDisplacement = player_->getLinearVelocity() * deltaTime; // calculate how far the player should move
-    sf::Vector2f newPosition = player_->getPosition() + linDisplacement; // calculate the player's new position
-    float angDisplacement = player_->getAngularVelocity() * deltaTime;
-    float newRotation = player_->getRotation() + angDisplacement;
+    sf::Vector2f linDisplacement = player_->getLinVel() * deltaTime; // calculate how far the player should move
+    sf::Vector2f newPos = player_->getPos() + linDisplacement; // calculate the player's new position
+    float angDisplacement = player_->getAngVel() * deltaTime;
+    float newRot = player_->getRot() + angDisplacement;
 
     // Jeśli nowa pozycja jest wewnątrz gry i nie koliduje z niczym
 //    if (grid_.isInside(newPosition) && !grid_.getCell(newPosition.x, newPosition.y).isOccupiedEnemy()) {
-    if (grid_.isInside(newPosition) && !collidesWithSomething) {
+    if (grid_.isInside(newPos) && !collidesWithSomething) {
         // Znajdź starą komórkę, w której znajduje się gracz
-        Cell& oldCell = grid_.getCell(player_->getPosition().x, player_->getPosition().y);
+        Cell& oldCell = grid_.getCell(player_->getPos().x, player_->getPos().y);
         // Zaznacz starą komórkę jako pustą
         oldCell.setPlayer(nullptr);
 
         // Ustaw nową pozycję gracza
-        player_->setPosition(newPosition);
-        player_->setRotation(newRotation);
+        player_->setPos(newPos);
+        player_->setRot(newRot);
 
         // Znajdź nową komórkę, w której znajduje się gracz
-        Cell& newCell = grid_.getCell(newPosition.x, newPosition.y);
+        Cell& newCell = grid_.getCell(newPos.x, newPos.y);
         // Zaznacz nową komórkę jako zajętą przez gracza
         newCell.setPlayer(player_.get());
     }
         // Jeśli nowa pozycja jest poza grą lub koliduje z czymś, zatrzymaj gracza
     else {
-        sf::Vector2f _zero_velocity = sf::Vector2f (0.f,0.f);
-        player_->setLinearVelocity(_zero_velocity);
+        sf::Vector2f _zero_vel = sf::Vector2f (0.f,0.f);
+        player_->setLinVel(_zero_vel);
     }
 
     // Shoot on Space and A
     bool _user_shoot = (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)
                         || sf::Joystick::isButtonPressed(0, 0));
     if (_user_shoot && player_->canShoot(shootTimePlayer_))
-        playerBullets_.emplace_back(player_->getPosition(),
+        playerBullets_.emplace_back(player_->getPos(),
                                     playerBulletSpawnOffset_,
-                                    player_->getRotation(),
+                                    player_->getRot(),
                                     assets_.playerBulletTexture);
+}
+
+void Game::updateEnemies(float deltaTime) {
+    static sf::Clock enemySpawnClock;
+    sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
+    if (elapsed_enemy.asSeconds() >= 5.0f) {  // every 5 seconds spawn enemy
+        enemies_.emplace_back(randomSpawnPoint(), assets_.enemyTexture);
+        enemySpawnClock.restart();
+    }
+
+    for (int i = enemies_.size() - 1; i >= 0; --i) {
+        Enemy& enemy = enemies_[i];
+
+        enemy.update(player_->getPos(), deltaTime);
+
+        sf::Vector2f displacement = enemy.getLinVel() * deltaTime; // calculate how far should move
+        sf::Vector2f newPos = enemy.getPos() + displacement; // calculate new position
+        float angDisplacement = enemy.getAngVel() * deltaTime;
+        float newRot = enemy.getRot() + angDisplacement;
+
+        // check if the enemy's new bounding box collides with anything
+        bool collidesWithSomething = false;
+
+        for (auto& bullet : playerBullets_) {
+            // Oblicz odległość między graczem a wrogiem
+            sf::Vector2f diff = bullet.getPos() - enemy.getPos();
+            float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+
+            // Sprawdź, czy odległość jest mniejsza lub równa sumie promieni
+            float _sum_radius = bullet.getRadius() + enemy.getRadius();
+            if (distance < _sum_radius) {
+                collidesWithSomething = true;
+                enemy.setIsAlive(false);
+                bullet.setIsAlive(false);
+                killCounter_++;
+                break;
+            }
+        }
+
+        // if the enemy's new position is inside the game area and doesn't collide with anything, move the player
+        if (!collidesWithSomething && grid_.isInside(newPos.x, newPos.y)) {
+            enemy.setPos(newPos);
+            enemy.setRot(newRot);
+        }
+
+        if (enemy.canShoot(shootTimeEnemy_) and enemy.getIsAlive())
+            enemyBullets_.emplace_back(enemy.getPos(), enemyBulletSpawnOffset_,
+                                       enemy.getSprite().getRotation(),assets_.enemyBulletTexture);
+
+        if (!enemy.getIsAlive()) enemies_.erase(enemies_.begin() + i);
+    }
 }
 
 void Game::updateGui(float deltaTime) {
@@ -192,7 +244,7 @@ void Game::updateGui(float deltaTime) {
 //    debugText_.setString("X: " + std::to_string(spaceObjectsNetForce_.x) + '\n' +
 //                         "Y: " + std::to_string(spaceObjectsNetForce_.y));
 
-    debugText_.setString("X: " + std::to_string( powerups_[0].getRotation()));
+//    debugText_.setString("X: " + std::to_string( powerups_[0].getAngAcc()));
 
     float hp_percent = player_->getHp() * 1. / player_->getMaxHp();
     heartSprite_.setTextureRect(sf::IntRect(0, 0,
@@ -200,13 +252,27 @@ void Game::updateGui(float deltaTime) {
                                             heartSprite_.getTexture()->getSize().y));
 }
 
+sf::Vector2f Game::randomSpawnPoint() {
+    std::random_device rd;  // (seed)
+    std::mt19937 gen(rd());  // generator liczb pseudolosowych
 
+    std::uniform_real_distribution<> distr(0, 2 * M_PI);  // rozkład jednostajny od 0 do 2*pi
+    std::uniform_real_distribution<> distrRadius(200, 600);  // rozkład jednostajny od 200 do 600
+
+    float spawnRadius = distrRadius(gen);  // radius of the spawn circle around the player
+    float spawnAngle = distr(gen);  // random angle
+
+    // calculate the spawn point
+    float _x = player_->getPos().x + spawnRadius * std::cos(spawnAngle);
+    float _y = player_->getPos().y + spawnRadius * std::sin(spawnAngle);
+    return {_x, _y};
+}
 
 bool Game::getPlayerCollision() {
     bool collidesWithSomething = false;
 
     for (const auto& spaceObjectPtr : spaceObjects_){
-        sf::Vector2f diff = player_->getPosition() - spaceObjectPtr->getPosition();
+        sf::Vector2f diff = player_->getPos() - spaceObjectPtr->getPos();
         float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
 
         float _sum_radius = player_->getRadius() + spaceObjectPtr->getRadius();
@@ -216,11 +282,27 @@ bool Game::getPlayerCollision() {
         }
     }
 
+    for (auto& enemy : enemies_) {
+        // Oblicz odległość między graczem a wrogiem
+        sf::Vector2f diff = player_->getPos() - enemy.getPos();
+        float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+
+        // Sprawdź, czy odległość jest mniejsza lub równa sumie promieni kara co sekunde
+        float _sum_radius = player_->getRadius() + enemy.getRadius();
+        if (distance < _sum_radius && collisionTimer_.getElapsedTime().asSeconds() > 1.0f) {
+            collidesWithSomething = true;
+            enemy.setDamage(1);
+            player_->setDamage(1);
+            collisionTimer_.restart();
+            break;
+        }
+    }
+
     // Check collision with enemy bullets
     if (!collidesWithSomething) {
         for (auto& bullet : enemyBullets_) {
             // Oblicz odległość między graczem a wrogiem
-            sf::Vector2f diff = player_->getPosition() - bullet.getPosition();
+            sf::Vector2f diff = player_->getPos() - bullet.getPos();
             float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
 
             float _sum_radius = player_->getRadius() + bullet.getRadius();
@@ -237,17 +319,17 @@ bool Game::getPlayerCollision() {
 }
 
 
-void Game::calculateCameraPosition() {
-    sf::Vector2f direction = player_->getPosition() - cameraPosition_;
+void Game::calculateCameraPos() {
+    sf::Vector2f direction = player_->getPos() - cameraPos_;
     // move the camera towards the player with a certain acceleration
-    cameraPosition_ += direction * cameraAcceleration_;
+    cameraPos_ += direction * cameraAcc_;
 }
 
 void Game::updateSpaceObjects(float deltaTime) {
     spaceObjectsNetForce_ = {0.f, 0.f};
     for (const auto& spaceObjectPtr : spaceObjects_){
         spaceObjectPtr->update();
-        sf::Vector2f direction = spaceObjectPtr->getPosition() - player_->getPosition() ;
+        sf::Vector2f direction = spaceObjectPtr->getPos() - player_->getPos() ;
         float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
 
         if (distance == 0.0f) continue; // Aby uniknąć dzielenia przez zero
@@ -263,7 +345,7 @@ void Game::updateSpaceObjects(float deltaTime) {
 }
 
 void Game::setGui() {
-    cameraPosition_ = player_->getPosition();
+    cameraPos_ = player_->getPos();
 
     // set the texture to the sprite_
     backgroundSprite_.setTexture(assets_.backgroundTexture);

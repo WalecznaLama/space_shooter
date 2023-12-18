@@ -6,7 +6,7 @@
 class Bullet : public Object {
 
 public:
-    Bullet(const sf::Vector2f& position, const sf::Vector2f& spawnOffset, const float& initRotation, const sf::Texture& texture);
+    Bullet(const sf::Vector2f& position, const sf::Vector2f& spawnOffset, const float& initRot, const sf::Texture& texture);
     void update(float deltaTime);
     void draw(sf::RenderWindow& window) const;
 };

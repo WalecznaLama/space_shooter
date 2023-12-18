@@ -7,7 +7,7 @@ class SpaceObject : public Object{
 public:
     static const float G_;
     SpaceObject(const sf::Texture &texture, const sf::Vector2f& initPosition,
-                const sf::Vector2f& initVelocity, float initRotation,
+                const sf::Vector2f& initVel, float initRot,
                 float radius, float density);
 
     void update();
@@ -15,6 +15,7 @@ public:
 
 private:
     float density_;
+    float mass_;
     float calculateMass(float radius);
 };
 

@@ -24,3 +24,5 @@ void Entity::setMaxHp(int hp) { maxHp_ = hp; }
 int Entity::getMaxHp() const { return maxHp_; }
 
 void Entity::setDamage(int damage) { hp_ = std::max(0, hp_ - damage); }
+
+float Entity::getMass() const { return mass_; }

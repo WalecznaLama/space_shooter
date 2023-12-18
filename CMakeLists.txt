@@ -9,15 +9,7 @@ add_executable(space_shooter src/main.cpp src/Player.cpp src/Enemy.cpp src/Bulle
                              src/AssetManager.cpp src/Powerup.cpp src/Entity.cpp
                              src/Grid.cpp src/Cell.cpp src/Window.cpp
                              src/SpaceObject.cpp src/Planet.cpp src/Object.cpp
-        src/PIDController.cpp
-        src/Projectile.cpp
-        src/ProjectileManager.cpp
-        src/EnemyManager.cpp
-        src/PowerupManager.cpp
-        src/SpaceObjectManager.cpp
-        src/UIManager.cpp
-        src/CollisionManager.cpp
-        src/Missile.cpp
+                             src/PIDController.cpp src/Projectile.cpp src/Missile.cpp
 )
 
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR})

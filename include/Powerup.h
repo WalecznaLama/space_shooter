@@ -5,13 +5,13 @@
 
 class Powerup : public Object {
 public:
-    Powerup(const sf::Vector2f& position, const float& initRotation, const sf::Texture& texture);
+    Powerup(const sf::Vector2f& position, const float& initRot, const sf::Texture& texture);
     void update(float deltaTime);
     void draw(sf::RenderWindow& window) const;
 
 private:
     float moveFrequency_;
-    float initRotation_;
+    float initRot_;
 };
 
 

@@ -32,7 +32,7 @@ private:
     sf::Vector2f getInput();
     sf::Vector2f calculateDeceleration(float deceleration,float deltaTime);
 
-    void updateVelocity(float deltaTime);
+    void updateVel(float deltaTime);
 };
 
 #endif //SPACE_SHOOTER_PLAYER_H
