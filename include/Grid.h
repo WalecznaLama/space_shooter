@@ -9,7 +9,7 @@ public:
     Cell& getCell(int x, int y);
     void setCell(int x, int y, const Cell& cell);
     bool isInside(int x, int y) const;
-    bool isInside(sf::Vector2f position) const;
+    bool isInside(sf::Vector2f pos) const;
     static const int PIXELS_PER_CELL;
 
 private:

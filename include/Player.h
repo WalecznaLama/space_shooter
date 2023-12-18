@@ -13,7 +13,6 @@ public:
     void update(float deltaTime, const sf::Vector2f& netForce);
     void updateSprites();
     void setNetForce(const sf::Vector2f& netForce);
-    float getMass() const;
 
 private:
     float angBreakDecc_; // deg / s^2

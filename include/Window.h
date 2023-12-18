@@ -12,7 +12,7 @@ public:
     void processEvents();
 
     // Update the view to follow the given position
-    void updateView(const sf::Vector2f& position);
+    void updateView(const sf::Vector2f& pos);
 
     void setUiView();
 

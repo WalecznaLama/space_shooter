@@ -6,7 +6,7 @@
 class SpaceObject : public Object{
 public:
     static const float G_;
-    SpaceObject(const sf::Texture &texture, const sf::Vector2f& initPosition,
+    SpaceObject(const sf::Texture &texture, const sf::Vector2f& initPos,
                 const sf::Vector2f& initVel, float initRot,
                 float radius, float density);
 

@@ -9,46 +9,46 @@ void EnemyManager::update(const sf::Vector2f& playerPosition, float deltaTime) {
     static sf::Clock enemySpawnClock;
     sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
     if (elapsed_enemy.asSeconds() > spawnTime_) {
-       addEnemy(Enemy(randomSpawnPoint(playerPosition), assetManager_.enemyTexture));
+       addEnemy(Enemy(randomSpawnPoint(playerPos), assetManager_.enemyTexture));
        enemySpawnClock.restart();
     }
 
     for (auto it = enemies_.begin(); it != enemies_.end(); /* pusta sekcja inkrementacji */) {
         auto& enemyPtr = *it;
-        enemyPtr->update(playerPosition, deltaTime);
+        enemyPtr->update(playerPos, deltaTime);
         if (!enemyPtr->getIsAlive()) {
             // Usuń wroga z komórki siatki
-            Cell& oldCell = grid_.getCell(enemyPtr->getPosition().x, enemyPtr->getPosition().y);
+            Cell& oldCell = grid_.getCell(enemyPtr->getPos().x, enemyPtr->getPos().y);
             oldCell.removeEnemy(enemyPtr.get());
 
             // Usuń wroga z wektora
             it = enemies_.erase(it);
         } else {
             ++it; // Ręcznie inkrementujemy iterator, jeśli nie usuwamy elementu
-            sf::Vector2f displacement = enemyPtr->getLinearVelocity() * deltaTime; // calculate how far should move
-            sf::Vector2f newPosition = enemyPtr->getPosition() + displacement; // calculate new position
-            float angDisplacement = enemyPtr->getAngularVelocity() * deltaTime;
-            float newRotation = enemyPtr->getRotation() + angDisplacement;
+            sf::Vector2f displacement = enemyPtr->getLinVel() * deltaTime; // calculate how far should move
+            sf::Vector2f newPos = enemyPtr->getPos() + displacement; // calculate new position
+            float angDisplacement = enemyPtr->getAngVel() * deltaTime;
+            float newRot = enemyPtr->getRot() + angDisplacement;
 
             // check if the enemy's new bounding box collides with anything
-            if (grid_.isInside(newPosition)) {
+            if (grid_.isInside(newPos)) {
                 // Znajdź starą komórkę
-                Cell& oldCell = grid_.getCell(enemyPtr->getPosition().x, enemyPtr->getPosition().y);
+                Cell& oldCell = grid_.getCell(enemyPtr->getPos().x, enemyPtr->getPos().y);
                 // Zaznacz starą komórkę jako pustą
                 oldCell.removeEnemy(enemyPtr.get());
 
-                enemyPtr->setPosition(newPosition);
-                enemyPtr->setRotation(newRotation);
+                enemyPtr->setPosition(newPos);
+                enemyPtr->setRotation(newRot);
 
                 // Znajdź nową komórkę
-                Cell& newCell = grid_.getCell(newPosition.x, newPosition.y);
+                Cell& newCell = grid_.getCell(newPos.x, newPos.y);
                 // Zaznacz nową komórkę jako zajętą
                 newCell.addEnemy(enemyPtr.get());
             }
                 // Jeśli nowa pozycja jest poza grą lub koliduje z czymś, zatrzymaj
             else {
-                sf::Vector2f _zero_velocity = sf::Vector2f (0.f,0.f);
-                enemyPtr->setLinearVelocity(_zero_velocity);
+                sf::Vector2f _zero_vel = sf::Vector2f (0.f,0.f);
+                enemyPtr->setLinVel(_zero_vel);
             }
         }
     }
@@ -64,7 +64,7 @@ void EnemyManager::render(sf::RenderWindow &window) const {
     }
 }
 
-sf::Vector2f EnemyManager::randomSpawnPoint(const sf::Vector2f& playerPosition) {
+sf::Vector2f EnemyManager::randomSpawnPoint(const sf::Vector2f& playerPos) {
     std::random_device rd;  // (seed)
     std::mt19937 gen(rd());  // generator liczb pseudolosowych
 
@@ -75,7 +75,7 @@ sf::Vector2f EnemyManager::randomSpawnPoint(const sf::Vector2f& playerPosition) 
     float spawnAngle = distr(gen);  // random angle
 
     // calculate the spawn point
-    float _x = playerPosition.x + spawnRadius * std::cos(spawnAngle);
-    float _y = playerPosition.y + spawnRadius * std::sin(spawnAngle);
+    float _x = playerPos.x + spawnRadius * std::cos(spawnAngle);
+    float _y = playerPos.y + spawnRadius * std::sin(spawnAngle);
     return {_x, _y};
 }

@@ -8,7 +8,7 @@
  */
 class Object {
 public:
-    void setPos(const sf::Vector2f& newPosition);
+    void setPos(const sf::Vector2f& newPos);
     sf::Vector2f getPos() const;
 
     void setRot(float newRot);
