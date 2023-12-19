@@ -4,8 +4,10 @@ EnemyManager::EnemyManager(const AssetManager& assetManager, Grid& grid)
                             : assetManager_(assetManager),  grid_(grid){
     shootTimeEnemy_ = 10.0f;
     spawnTime_ = 5.0f;
+    enemyBulletSpawnOffset_ = {0, -30};
 }
-void EnemyManager::update(const sf::Vector2f& playerPosition, float deltaTime) {
+// TODO to projectiles
+void EnemyManager::update(const sf::Vector2f& playerPos, std::vector<Bullet>& bullets, float deltaTime) {
     static sf::Clock enemySpawnClock;
     sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
     if (elapsed_enemy.asSeconds() > spawnTime_) {
@@ -37,8 +39,8 @@ void EnemyManager::update(const sf::Vector2f& playerPosition, float deltaTime) {
                 // Zaznacz starą komórkę jako pustą
                 oldCell.removeEnemy(enemyPtr.get());
 
-                enemyPtr->setPosition(newPos);
-                enemyPtr->setRotation(newRot);
+                enemyPtr->setPos(newPos);
+                enemyPtr->setRot(newRot);
 
                 // Znajdź nową komórkę
                 Cell& newCell = grid_.getCell(newPos.x, newPos.y);
@@ -50,6 +52,12 @@ void EnemyManager::update(const sf::Vector2f& playerPosition, float deltaTime) {
                 sf::Vector2f _zero_vel = sf::Vector2f (0.f,0.f);
                 enemyPtr->setLinVel(_zero_vel);
             }
+
+            // Bullets
+            if (enemyPtr->canShoot(shootTimeEnemy_) and enemyPtr->getIsAlive())
+                bullets.emplace_back(enemyPtr->getPos(), enemyBulletSpawnOffset_,
+                                     enemyPtr->getRot(),assetManager_.enemyBulletTexture);
+
         }
     }
 }

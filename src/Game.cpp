@@ -5,12 +5,13 @@ Game::Game()
         : window_("Space Shooter", sf::Vector2u(1280, 720)), // Initialize GameWindow with a title and size
           grid_(3000, 3000),
           assets_(),
-          player_(std::make_shared<Player>(sf::Vector2f(1500, 1500), assets_.playerTextures_))
+          player_(std::make_shared<Player>(sf::Vector2f(1500, 1500), assets_.playerTextures_)),
+          enemyManager_(assets_, grid_)
 {
     setGui();
 
     playerBulletSpawnOffset_ = {0, -40};
-    enemyBulletSpawnOffset_ = {0, -30};
+
 
     shootTimePlayer_ = 0.2f;
     shootTimeEnemy_ = 10.0f;
@@ -24,6 +25,7 @@ Game::Game()
 
     cameraAcc_ = 0.01f;
 
+    killCounter_ = 0;
 }
 
 void Game::run() {
@@ -38,7 +40,7 @@ void Game::update() {
     float elapsed = updateClock_.getElapsedTime().asSeconds();
 
     updatePlayer(elapsed);
-//    updateEnemies(elapsed);
+    enemyManager_.update(player_->getPos(), enemyBullets_, elapsed);
     updateGui(elapsed);
     updateSpaceObjects(elapsed);
 
@@ -57,7 +59,8 @@ void Game::render() {
     for (const Powerup& powerup : powerups_)     powerup.draw(window_.getRenderWindow());
     for (const Bullet& bullet : playerBullets_)  bullet.draw(window_.getRenderWindow());
     for (const Bullet& bullet : enemyBullets_)   bullet.draw(window_.getRenderWindow());
-    for (const Enemy& enemy : enemies_)          enemy.draw(window_.getRenderWindow());
+//    for (const Enemy& enemy : enemies_)          enemy.draw(window_.getRenderWindow());
+    enemyManager_.render(window_.getRenderWindow());
 
     for (const auto& spaceObjectPtr : spaceObjects_)
         window_.draw(spaceObjectPtr->getSprite());
@@ -186,56 +189,56 @@ void Game::updatePlayer(float deltaTime) {
                                     assets_.playerBulletTexture);
 }
 
-void Game::updateEnemies(float deltaTime) {
-    static sf::Clock enemySpawnClock;
-    sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
-    if (elapsed_enemy.asSeconds() >= 5.0f) {  // every 5 seconds spawn enemy
-        enemies_.emplace_back(randomSpawnPoint(), assets_.enemyTexture);
-        enemySpawnClock.restart();
-    }
-
-    for (int i = enemies_.size() - 1; i >= 0; --i) {
-        Enemy& enemy = enemies_[i];
-
-        enemy.update(player_->getPos(), deltaTime);
-
-        sf::Vector2f displacement = enemy.getLinVel() * deltaTime; // calculate how far should move
-        sf::Vector2f newPos = enemy.getPos() + displacement; // calculate new position
-        float angDisplacement = enemy.getAngVel() * deltaTime;
-        float newRot = enemy.getRot() + angDisplacement;
-
-        // check if the enemy's new bounding box collides with anything
-        bool collidesWithSomething = false;
-
-        for (auto& bullet : playerBullets_) {
-            // Oblicz odległość między graczem a wrogiem
-            sf::Vector2f diff = bullet.getPos() - enemy.getPos();
-            float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
-
-            // Sprawdź, czy odległość jest mniejsza lub równa sumie promieni
-            float _sum_radius = bullet.getRadius() + enemy.getRadius();
-            if (distance < _sum_radius) {
-                collidesWithSomething = true;
-                enemy.setIsAlive(false);
-                bullet.setIsAlive(false);
-                killCounter_++;
-                break;
-            }
-        }
-
-        // if the enemy's new position is inside the game area and doesn't collide with anything, move the player
-        if (!collidesWithSomething && grid_.isInside(newPos.x, newPos.y)) {
-            enemy.setPos(newPos);
-            enemy.setRot(newRot);
-        }
-
-        if (enemy.canShoot(shootTimeEnemy_) and enemy.getIsAlive())
-            enemyBullets_.emplace_back(enemy.getPos(), enemyBulletSpawnOffset_,
-                                       enemy.getSprite().getRotation(),assets_.enemyBulletTexture);
-
-        if (!enemy.getIsAlive()) enemies_.erase(enemies_.begin() + i);
-    }
-}
+//void Game::updateEnemies(float deltaTime) {
+//    static sf::Clock enemySpawnClock;
+//    sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
+//    if (elapsed_enemy.asSeconds() >= 5.0f) {  // every 5 seconds spawn enemy
+//        enemies_.emplace_back(randomSpawnPoint(), assets_.enemyTexture);
+//        enemySpawnClock.restart();
+//    }
+//
+//    for (int i = enemies_.size() - 1; i >= 0; --i) {
+//        Enemy& enemy = enemies_[i];
+//
+//        enemy.update(player_->getPos(), deltaTime);
+//
+//        sf::Vector2f displacement = enemy.getLinVel() * deltaTime; // calculate how far should move
+//        sf::Vector2f newPos = enemy.getPos() + displacement; // calculate new position
+//        float angDisplacement = enemy.getAngVel() * deltaTime;
+//        float newRot = enemy.getRot() + angDisplacement;
+//
+//        // check if the enemy's new bounding box collides with anything
+//        bool collidesWithSomething = false;
+//
+//        for (auto& bullet : playerBullets_) {
+//            // Oblicz odległość między graczem a wrogiem
+//            sf::Vector2f diff = bullet.getPos() - enemy.getPos();
+//            float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+//
+//            // Sprawdź, czy odległość jest mniejsza lub równa sumie promieni
+//            float _sum_radius = bullet.getRadius() + enemy.getRadius();
+//            if (distance < _sum_radius) {
+//                collidesWithSomething = true;
+//                enemy.setIsAlive(false);
+//                bullet.setIsAlive(false);
+//                killCounter_++;
+//                break;
+//            }
+//        }
+//
+//        // if the enemy's new position is inside the game area and doesn't collide with anything, move the player
+//        if (!collidesWithSomething && grid_.isInside(newPos.x, newPos.y)) {
+//            enemy.setPos(newPos);
+//            enemy.setRot(newRot);
+//        }
+//        // Bullets
+//        if (enemy.canShoot(shootTimeEnemy_) and enemy.getIsAlive())
+//            enemyBullets_.emplace_back(enemy.getPos(), enemyBulletSpawnOffset_,
+//                                       enemy.getRot(),assets_.enemyBulletTexture);
+//
+//        if (!enemy.getIsAlive()) enemies_.erase(enemies_.begin() + i);
+//    }
+//}
 
 void Game::updateGui(float deltaTime) {
     float fps = 1.f / deltaTime;

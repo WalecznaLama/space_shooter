@@ -3,10 +3,11 @@
 
 #include "Grid.h"
 #include "AssetManager.h"
+#include "EnemyManager.h"
 #include "Window.h"
 #include "Planet.h"
-
 #include <algorithm>
+
 class Game {
 public:
     Game();
@@ -34,6 +35,7 @@ private:
     Window window_;
     Grid grid_;
     AssetManager assets_;
+    EnemyManager enemyManager_;
     std::shared_ptr<Player> player_;
     std::vector<Enemy> enemies_;
     std::vector<Bullet> playerBullets_;
@@ -47,7 +49,6 @@ private:
     sf::Sprite heartSprite_;
 
     sf::Vector2f playerBulletSpawnOffset_;
-    sf::Vector2f enemyBulletSpawnOffset_;
 
     sf::Text fpsText_;
     sf::Text killCounterText_;
