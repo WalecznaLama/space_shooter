@@ -15,8 +15,8 @@ float Object::getAngVel() const { return angVel_; }
 void Object::setAngAcc(float newAcc) { angAcc_ = newAcc; }
 float Object::getAngAcc() const { return angAcc_; }
 
-void Object::setRadius(float collisionRadius) { radius_ = collisionRadius; }
-float Object::getRadius() const { return radius_; }
+void Object::setRadius(int collisionRadius) { radius_ = collisionRadius; }
+int Object::getRadius() const { return radius_; }
 
 void Object::setIsAlive(bool isAlive) { alive_ = isAlive; }
 bool Object::getIsAlive() const { return alive_; }

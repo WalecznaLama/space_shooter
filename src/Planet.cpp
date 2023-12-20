@@ -4,7 +4,7 @@ const float Planet::DEFAULT_DENSITY = 0.0005f;
 //const float Planet::DEFAULT_DENSITY = 0.002f;
 
 Planet::Planet(const sf::Texture &texture, const sf::Vector2f &position, const sf::Vector2f &vel,
-               const float rot, const float radius) :
+               const float rot, const int radius) :
         SpaceObject(texture, position, vel,
                     rot, radius, DEFAULT_DENSITY) {
 

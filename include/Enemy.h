@@ -8,8 +8,9 @@
 
 class Enemy  : public Entity {
 public:
-    Enemy(sf::Vector2f spawn_point, const sf::Texture& texture);
+    Enemy(sf::Vector2i spawn_point, const sf::Texture& texture);
     void update(const sf::Vector2f& playerPos, float deltaTime);
+    sf::Clock collisionTimer_;
 
 private:
     PIDController pidController_;

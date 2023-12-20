@@ -19,17 +19,14 @@ private:
     void gameOver();
 
     void updatePlayer(float deltaTime);
-    void updateEnemies(float deltaTime);
     void updateSpaceObjects(float deltaTime);
     void updateBullets(float deltaTime);
     void updatePowerups(float deltaTime);
     void updateGui(float deltaTime);
 
-    bool isPlayerCollision();
     void calculateCameraPos();
     void setGui();
 
-    sf::Vector2f randomSpawnPoint();
     sf::Clock updateClock_;
 
     Window window_;
@@ -58,7 +55,6 @@ private:
     sf::Clock collisionTimer_;
 
     float shootTimePlayer_;
-    float shootTimeEnemy_;
     float cameraAcc_;
     uint killCounter_;
 };

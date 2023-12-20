@@ -18,34 +18,47 @@ void EnemyManager::update(const sf::Vector2f& playerPos, std::vector<Bullet>& bu
     for (auto it = enemies_.begin(); it != enemies_.end(); /* pusta sekcja inkrementacji */) {
         auto& enemyPtr = *it;
         enemyPtr->update(playerPos, deltaTime);
+        auto oldCells = grid_.getCircleCells(enemyPtr->getPos(),
+                                             enemyPtr->getRadius());
         if (!enemyPtr->getIsAlive()) {
             // Usuń wroga z komórki siatki
-            Cell& oldCell = grid_.getCell(enemyPtr->getPos());
-            oldCell.clear_cell();
-
+            for(auto& cell : oldCells) cell->clear_cell();
             // Usuń wroga z wektora
             it = enemies_.erase(it);
         } else {
             ++it; // Ręcznie inkrementujemy iterator, jeśli nie usuwamy elementu
             sf::Vector2f displacement = enemyPtr->getLinVel() * deltaTime; // calculate how far should move
             sf::Vector2f newPos = enemyPtr->getPos() + displacement; // calculate new position
-            float angDisplacement = enemyPtr->getAngVel() * deltaTime;
-            float newRot = enemyPtr->getRot() + angDisplacement;
 
+            bool collidesWithSomething = false;
+            auto newCells = grid_.getCircleCells(newPos, enemyPtr->getRadius());
+
+            for (auto &cell : oldCells){
+                if (cell->hasEnemyBullet()){
+                    int damage = 2; // TODO int damage = grid_.getCell(newPos).getEnemyBullet().get_damage()
+                    auto bulletCell = cell->getPlayerBullet();
+                    bulletCell->setIsAlive(false);
+                    enemyPtr->setDamage(damage);
+                    break;
+                }
+                if (cell->hasEnemy() && enemyPtr->collisionTimer_.getElapsedTime().asMilliseconds() > 1000){ // TODO const
+                    collidesWithSomething = true;
+                    int damage = 1;
+                    auto enemyCell = cell->getEnemy();
+                    enemyCell->setDamage(damage);
+                    enemyPtr->collisionTimer_.restart();
+                    break;
+                }
+            }
             // check if the enemy's new bounding box collides with anything
-            if (grid_.isInside(newPos)) {
-                // Znajdź starą komórkę
-                Cell& oldCell = grid_.getCell(enemyPtr->getPos());
-                // Zaznacz starą komórkę jako pustą
-                oldCell.clear_cell();
-
+            if (!newCells.empty() || !collidesWithSomething) {
+                float angDisplacement = enemyPtr->getAngVel() * deltaTime;
+                float newRot = enemyPtr->getRot() + angDisplacement;
                 enemyPtr->setPos(newPos);
                 enemyPtr->setRot(newRot);
 
-                // Znajdź nową komórkę
-                Cell& newCell = grid_.getCell(newPos);
-                // Zaznacz nową komórkę jako zajętą
-                newCell.setEnemy(enemyPtr.get());
+                for (auto &oCell : oldCells) oCell->clear_cell();
+                for (auto &nCell : newCells) nCell->setEnemy(enemyPtr.get());
             }
                 // Jeśli nowa pozycja jest poza grą lub koliduje z czymś, zatrzymaj
             else {
@@ -57,7 +70,6 @@ void EnemyManager::update(const sf::Vector2f& playerPos, std::vector<Bullet>& bu
             if (enemyPtr->canShoot(shootTimeEnemy_) and enemyPtr->getIsAlive())
                 bullets.emplace_back(enemyPtr->getPos(), enemyBulletSpawnOffset_,
                                      enemyPtr->getRot(),assetManager_.enemyBulletTexture);
-
         }
     }
 }
@@ -72,7 +84,7 @@ void EnemyManager::render(sf::RenderWindow &window) const {
     }
 }
 
-sf::Vector2f EnemyManager::randomSpawnPoint(const sf::Vector2f& playerPos) {
+sf::Vector2i EnemyManager::randomSpawnPoint(const sf::Vector2f& playerPos) {
     std::random_device rd;  // (seed)
     std::mt19937 gen(rd());  // generator liczb pseudolosowych
 
@@ -83,8 +95,8 @@ sf::Vector2f EnemyManager::randomSpawnPoint(const sf::Vector2f& playerPos) {
     float spawnAngle = distr(gen);  // random angle
 
     // calculate the spawn point
-    float _x = playerPos.x + spawnRadius * std::cos(spawnAngle);
-    float _y = playerPos.y + spawnRadius * std::sin(spawnAngle);
+    int _x = playerPos.x + spawnRadius * std::cos(spawnAngle);
+    int _y = playerPos.y + spawnRadius * std::sin(spawnAngle);
     return {_x, _y};
 }
 

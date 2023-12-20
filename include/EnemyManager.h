@@ -25,7 +25,7 @@ private:
     sf::Vector2f enemyBulletSpawnOffset_;
     std::vector<std::shared_ptr<Enemy>> enemies_;
 
-    static sf::Vector2f randomSpawnPoint(const sf::Vector2f& playerPos);
+    static sf::Vector2i randomSpawnPoint(const sf::Vector2f& playerPos);
 };
 
 

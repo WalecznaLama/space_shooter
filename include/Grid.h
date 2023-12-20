@@ -8,8 +8,7 @@ class Grid {
 public:
     Grid(int width, int height);
     Cell& getCell(sf::Vector2f position);
-    std::vector<std::shared_ptr<Cell>> getCellsOnRadius(sf::Vector2f position, int radius);
-    void setCell(sf::Vector2f position, const Cell& cell);
+    std::vector<std::shared_ptr<Cell>> getCircleCells(sf::Vector2f position_offset, int radius);
     bool isInside(sf::Vector2f position) const;
     static const int PIXELS_PER_CELL;
 
@@ -19,7 +18,6 @@ private:
     std::vector<std::vector<Cell>> cells_;
 
     static const int SAMPLE_RATE_CIRCLE;
-    static std::vector<sf::Vector2i> circleCells(int radius);
 };
 
 #endif //SPACE_SHOOTER_GRID_H

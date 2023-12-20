@@ -6,10 +6,10 @@
 class Projectile : public Object {
 public:
     Projectile(const sf::Texture &texture, const sf::Vector2f& initPos, const sf::Vector2f& spawnOffset,
-               const sf::Vector2f& initVel, float initRot, float radius, float maxLinVel, float linAcc,
+               const sf::Vector2f& initVel, float initRot, int radius, float maxLinVel, float linAcc,
                int damage, float angVel=0.,float angAcc=0., float maxAngVel=0., float maxAngAcc=0.);
     Projectile(const std::map<std::string, sf::Texture> &textures, const sf::Vector2f& initPos,
-               const sf::Vector2f& spawnOffset,const sf::Vector2f& initVel, float initRot, float radius,
+               const sf::Vector2f& spawnOffset,const sf::Vector2f& initVel, float initRot, int radius,
                float maxLinVel, float linAcc,int damage,
                float angVel=0.,float angAcc=0., float maxAngVel=0., float maxAngAcc=0.);
     virtual void update(float deltaTime) = 0;
@@ -18,7 +18,7 @@ public:
 
 private:
     void init(const sf::Vector2f& initPos, const sf::Vector2f& spawnOffset,
-              const sf::Vector2f& initVel, float initRot, float radius, float maxLinVel, float linAcc,
+              const sf::Vector2f& initVel, float initRot, int radius, float maxLinVel, float linAcc,
               int damage, float angVel,float angAcc, float maxAngVel, float maxAngAcc);
     int damage_;
 };

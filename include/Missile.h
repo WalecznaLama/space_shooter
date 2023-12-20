@@ -6,7 +6,7 @@
 
 class Missile : public Projectile {
 public:
-    static const float DEFAULT_RADIUS;
+    static const int DEFAULT_RADIUS;
     static const float DEFAULT_MAX_LIN_VEL;
     static const float DEFAULT_LIN_ACC;
     static const int DEFAULT_DAMAGE;

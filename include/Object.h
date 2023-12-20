@@ -26,8 +26,8 @@ public:
     void setAngAcc(float newAcc);
     float getAngAcc() const;
 
-    void setRadius(float newRadius);
-    float getRadius() const;
+    void setRadius(int newRadius);
+    int getRadius() const;
 
     void setIsAlive(bool isAlive);
     bool getIsAlive() const;
@@ -63,7 +63,7 @@ protected:
     sf::Vector2f pos_; // pixels // TODO to uint?
     float rot_; // deg
 
-    float radius_; // pixels
+    int radius_; // pixels
 
     bool alive_ = true;
 

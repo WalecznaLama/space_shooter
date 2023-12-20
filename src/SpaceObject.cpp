@@ -4,7 +4,7 @@ const float SpaceObject::G_ = 100.f;
 
 SpaceObject::SpaceObject (const sf::Texture &texture, const sf::Vector2f& initPos,
                           const sf::Vector2f& initVel, const float initRot,
-                          const float radius, const float density)
+                          const int radius, const float density)
         :  density_(density) {
     pos_ = initPos;
     linVel_ = initVel;
@@ -15,7 +15,7 @@ SpaceObject::SpaceObject (const sf::Texture &texture, const sf::Vector2f& initPo
     spriteInit(texture);
 }
 
-float SpaceObject::calculateMass(float radius)  {
+float SpaceObject::calculateMass(int radius)  {
     float volume = (4. / 3.) * M_PI * std::pow(radius, 3);
     return volume * density_;
 }

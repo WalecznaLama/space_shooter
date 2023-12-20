@@ -1,6 +1,6 @@
 #include "Missile.h"
 
-const float Missile::DEFAULT_RADIUS = 10.;
+const int Missile::DEFAULT_RADIUS = 10.;
 const float Missile::DEFAULT_MAX_LIN_VEL = 600.;
 const float Missile::DEFAULT_LIN_ACC = 200.;
 const int Missile::DEFAULT_DAMAGE = 2;

@@ -1,10 +1,10 @@
 #include "Enemy.h"
 
 
-Enemy::Enemy(sf::Vector2f spawn_point, const sf::Texture& texture) :
+Enemy::Enemy(sf::Vector2i spawn_point, const sf::Texture& texture) :
         pidController_(5.0, 2.0, 0.0, maxAngAcc_)
 {
-    pos_ = spawn_point;
+    pos_ = sf::Vector2f(spawn_point);
 
     radius_ = 10;
     linAcc_ = 100.;

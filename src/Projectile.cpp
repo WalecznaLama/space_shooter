@@ -1,7 +1,7 @@
 #include "Projectile.h"
 
 Projectile::Projectile(const sf::Texture &texture, const sf::Vector2f& initPos, const sf::Vector2f& spawnOffset,
-                       const sf::Vector2f& initVel, float initRot, float radius, float maxLinVel, float linAcc,
+                       const sf::Vector2f& initVel, float initRot, int radius, float maxLinVel, float linAcc,
                        int damage,float angVel, float angAcc, float maxAngVel, float maxAngAcc) {
     init(initPos, spawnOffset, initVel, initRot, radius, maxLinVel,
          linAcc, damage, angVel, angAcc, maxAngVel, maxAngAcc);
@@ -9,7 +9,7 @@ Projectile::Projectile(const sf::Texture &texture, const sf::Vector2f& initPos, 
 }
 
 Projectile::Projectile(const std::map<std::string, sf::Texture> &textures, const sf::Vector2f &initPos,
-                       const sf::Vector2f &spawnOffset, const sf::Vector2f &initVel, float initRot, float radius,
+                       const sf::Vector2f &spawnOffset, const sf::Vector2f &initVel, float initRot, int radius,
                        float maxLinVel, float linAcc, int damage, float angVel, float angAcc, float maxAngVel,
                        float maxAngAcc) {
     init(initPos, spawnOffset, initVel, initRot, radius, maxLinVel,
@@ -22,7 +22,7 @@ void Projectile::draw(sf::RenderWindow &window) const { window.draw(mainSprite_)
 int Projectile::getDamage() const { return damage_; }
 
 void Projectile::init(const sf::Vector2f& initPos, const sf::Vector2f& spawnOffset,
-                      const sf::Vector2f& initVel, float initRot, float radius, float maxLinVel, float linAcc,
+                      const sf::Vector2f& initVel, float initRot, int radius, float maxLinVel, float linAcc,
                       int damage, float angVel,float angAcc, float maxAngVel, float maxAngAcc) {
     pos_ = initPos;
     rot_ = initRot;
