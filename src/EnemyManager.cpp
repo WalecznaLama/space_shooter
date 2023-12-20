@@ -20,8 +20,8 @@ void EnemyManager::update(const sf::Vector2f& playerPos, std::vector<Bullet>& bu
         enemyPtr->update(playerPos, deltaTime);
         if (!enemyPtr->getIsAlive()) {
             // Usuń wroga z komórki siatki
-            Cell& oldCell = grid_.getCell(enemyPtr->getPos().x, enemyPtr->getPos().y);
-            oldCell.removeEnemy(enemyPtr.get());
+            Cell& oldCell = grid_.getCell(enemyPtr->getPos());
+            oldCell.clear_cell();
 
             // Usuń wroga z wektora
             it = enemies_.erase(it);
@@ -35,17 +35,17 @@ void EnemyManager::update(const sf::Vector2f& playerPos, std::vector<Bullet>& bu
             // check if the enemy's new bounding box collides with anything
             if (grid_.isInside(newPos)) {
                 // Znajdź starą komórkę
-                Cell& oldCell = grid_.getCell(enemyPtr->getPos().x, enemyPtr->getPos().y);
+                Cell& oldCell = grid_.getCell(enemyPtr->getPos());
                 // Zaznacz starą komórkę jako pustą
-                oldCell.removeEnemy(enemyPtr.get());
+                oldCell.clear_cell();
 
                 enemyPtr->setPos(newPos);
                 enemyPtr->setRot(newRot);
 
                 // Znajdź nową komórkę
-                Cell& newCell = grid_.getCell(newPos.x, newPos.y);
+                Cell& newCell = grid_.getCell(newPos);
                 // Zaznacz nową komórkę jako zajętą
-                newCell.addEnemy(enemyPtr.get());
+                newCell.setEnemy(enemyPtr.get());
             }
                 // Jeśli nowa pozycja jest poza grą lub koliduje z czymś, zatrzymaj
             else {
@@ -86,4 +86,8 @@ sf::Vector2f EnemyManager::randomSpawnPoint(const sf::Vector2f& playerPos) {
     float _x = playerPos.x + spawnRadius * std::cos(spawnAngle);
     float _y = playerPos.y + spawnRadius * std::sin(spawnAngle);
     return {_x, _y};
+}
+
+bool EnemyManager::isCollision() {
+    return false;
 }

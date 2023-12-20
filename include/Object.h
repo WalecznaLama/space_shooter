@@ -60,7 +60,7 @@ protected:
     float maxAngVel_; // deg / s
     float maxAngAcc_; // deg / s^s
 
-    sf::Vector2f pos_; // pixels
+    sf::Vector2f pos_; // pixels // TODO to uint?
     float rot_; // deg
 
     float radius_; // pixels

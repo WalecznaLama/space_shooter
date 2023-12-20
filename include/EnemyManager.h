@@ -16,7 +16,7 @@ public:
     void update(const sf::Vector2f&  playerPos, std::vector<Bullet>& bullets, float deltaTime);
     void addEnemy(const Enemy& enemy);
     void render(sf::RenderWindow &window) const;
-
+    bool isCollision();
 private:
     const AssetManager& assetManager_;
     Grid& grid_;

@@ -4,38 +4,36 @@ bool Cell::hasPlayer() const { return player_ != nullptr; }
 Player *Cell::getPlayer() const  { return player_; }
 void Cell::setPlayer(Player *player) { player_ = player; }
 
-bool Cell::hasEnemies() const { return !enemies_.empty(); }
-const std::vector<Enemy *> &Cell::getEnemies() const  { return enemies_; }
-void Cell::addEnemy(Enemy *enemy) { enemies_.push_back(enemy); }
-void Cell::removeEnemy(Enemy* enemy) { enemies_.erase(std::remove(enemies_.begin(), enemies_.end(),
-                                                                  enemy), enemies_.end()); }
-// Player Bullets
-bool Cell::hasPlayerBullets() const { return !playerBullets_.empty(); }
-const std::vector<Bullet*>& Cell::getPlayerBullets() const { return playerBullets_; }
-void Cell::addPlayerBullet(Bullet* bullet) { playerBullets_.push_back(bullet); }
-void Cell::removePlayerBullet(Bullet* bullet) { playerBullets_.erase(std::remove(playerBullets_.begin(),
-                                                                                 playerBullets_.end(),bullet),
-                                                                     playerBullets_.end()); }
+bool Cell::hasEnemy() const { return enemy_ != nullptr; }
+Enemy *Cell::getEnemy() const  { return enemy_; }
+void Cell::setEnemy(Enemy *enemy) { enemy_ = enemy; }
+
+// Player Bullet
+bool Cell::hasPlayerBullet() const { return playerBullet_ != nullptr; }
+Bullet *Cell::getPlayerBullet() const  { return playerBullet_; }
+void Cell::setPlayerBullet(Bullet *bullet) { playerBullet_ = bullet; }
+
 // Enemy Bullets
-bool Cell::hasEnemyBullets() const { return !enemyBullets_.empty(); }
-const std::vector<Bullet*>& Cell::getEnemyBullets() const { return enemyBullets_; }
-void Cell::addEnemyBullet(Bullet* bullet) { enemyBullets_.push_back(bullet); }
-void Cell::removeEnemyBullet(Bullet* bullet) { enemyBullets_.erase(std::remove(enemyBullets_.begin(),
-                                                                               enemyBullets_.end(), bullet),
-                                                                   enemyBullets_.end()); }
+bool Cell::hasEnemyBullet() const { return enemyBullet_ != nullptr; }
+Bullet *Cell::getEnemyBullet() const  { return enemyBullet_; }
+void Cell::setEnemyBullet(Bullet *bullet) { enemyBullet_ = bullet; }
 
-bool Cell::hasSpaceObjects() const { return !spaceObjects_.empty(); }
-const std::vector<SpaceObject *> &Cell::getSpaceObjects() const { return spaceObjects_; }
-void Cell::addSpaceObject(SpaceObject *spaceObject) { spaceObjects_.push_back(spaceObject); }
+bool Cell::hasSpaceObject() const { return spaceObject_ != nullptr; }
+SpaceObject *Cell::getSpaceObject() const  { return spaceObject_; }
+void Cell::setSpaceObject(SpaceObject *spaceObject) { spaceObject_ = spaceObject; }
 
-void Cell::removeSpaceObject(SpaceObject *spaceObject) { spaceObjects_.erase(std::remove(spaceObjects_.begin(),
-                                                                                         spaceObjects_.end(),
-                                                                                         spaceObject),
-                                                                             spaceObjects_.end()); }
-
-bool Cell::isOccupied() const {
-    return hasPlayer() || hasEnemies() || hasPlayerBullets() || hasEnemyBullets() || hasSpaceObjects();
+void Cell::clear_cell(){
+    player_ = nullptr;
+    enemy_ = nullptr;
+    playerBullet_ = nullptr;
+    enemyBullet_ = nullptr;
+//    planet_ = nullptr;
+    spaceObject_ = nullptr;
 }
 
-bool Cell::isOccupiedEnemy() const { return hasEnemies() || hasEnemyBullets(); }
+bool Cell::isOccupied() const {
+    return hasPlayer() || hasEnemy() || hasPlayerBullet() || hasEnemyBullet() || hasSpaceObject();
+}
+
+bool Cell::isOccupiedEnemy() const { return hasEnemy() || hasEnemyBullet(); }
 

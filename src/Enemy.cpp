@@ -12,7 +12,7 @@ Enemy::Enemy(sf::Vector2f spawn_point, const sf::Texture& texture) :
     maxAngVel_ = 50.;
     maxAngAcc_ = 300.;
 
-    mass_ = 1.0;
+    mass_ = 1.;
 
     maxHp_ = 2;
     hp_ = maxHp_;
@@ -37,7 +37,7 @@ void Enemy::update(const sf::Vector2f& playerPos, float deltaTime) {
     if (angleDifference > 180.0f) angleDifference -= 360.0f;
     if (angleDifference < -180.0f) angleDifference += 360.0f;
 
-    angAcc_ = pidController_.pidOutput(angleDifference, deltaTime);
+    angVel_ = pidController_.pidOutput(angleDifference, deltaTime);
 
     calculateLinVel(deltaTime);
 

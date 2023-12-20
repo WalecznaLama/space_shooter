@@ -65,9 +65,7 @@ sf::Vector2f Object::calculateLinAccDirection() const {
 
 void Object::calculateLinVel(float deltaTime) {
     sf::Vector2f _linAccDirection = calculateLinAccDirection();
-    sf::Vector2f _deltaLinAcc = calculateLinAcc(_linAccDirection, deltaTime); // force from space engine
-
-    linVel_ += _deltaLinAcc;
+    linVel_ += calculateLinAcc(_linAccDirection, deltaTime); // force from space engine;
     if (vectorLength(linVel_) > maxLinVel_) linVel_ = vectorNormalize(linVel_) * maxLinVel_;
 }
 

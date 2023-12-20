@@ -25,7 +25,7 @@ private:
     void updatePowerups(float deltaTime);
     void updateGui(float deltaTime);
 
-    bool getPlayerCollision();
+    bool isPlayerCollision();
     void calculateCameraPos();
     void setGui();
 
