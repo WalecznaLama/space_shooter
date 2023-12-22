@@ -8,15 +8,10 @@ Game::Game()
           projectileManager_(assets_, grid_),
           enemyManager_(assets_, projectileManager_, grid_),
           playerManager_(assets_, projectileManager_, grid_),
+          powerupManager_(assets_, grid_),
           spaceObjectManager_(assets_, grid_)
 {
     setGui();
-
-    sf::Vector2f vel = {0., 0.};
-    sf::Vector2f pos = {1700., 1700.};
-    spaceObjectManager_.addSpaceObject(pos, vel, SpaceObjectManager::planet, 200);
-
-    powerups_.emplace_back(pos, 0., assets_.powerupTexture);
     cameraAcc_ = 0.01f;
     killCounter_ = 0;
 }
@@ -33,12 +28,11 @@ void Game::update() {
     float elapsed = updateClock_.getElapsedTime().asSeconds();
 
     sf::Vector2f spaceObjectsNetForce = spaceObjectManager_.update(playerManager_.player_->getPos());
+    projectileManager_.update(elapsed);
     playerManager_.update(spaceObjectsNetForce, elapsed);
     enemyManager_.update(playerManager_.player_->getPos(), elapsed);
+    powerupManager_.update(playerManager_.player_->getPos(), elapsed);
     updateGui(elapsed);
-
-    projectileManager_.update(elapsed);
-    updatePowerups(elapsed);
 
     calculateCameraPos();
     window_.updateView(cameraPos_);
@@ -49,7 +43,7 @@ void Game::update() {
 void Game::render() {
     window_.clear();
     window_.draw(backgroundSprite_);  // draw the background
-    for (const Powerup& powerup : powerups_)     powerup.draw(window_.getRenderWindow());
+    powerupManager_.render(window_.getRenderWindow());
     projectileManager_.render(window_.getRenderWindow());
     enemyManager_.render(window_.getRenderWindow());
     playerManager_.render(window_.getRenderWindow());
@@ -70,42 +64,6 @@ void Game::gameOver() {
         window_.clear();
         window_.draw(finalScreenText_);
         window_.display();
-    }
-}
-
-void Game::updatePowerups(float deltaTime) {
-//    static sf::Clock powerupSpawnClock;
-//    sf::Time elapsed_enemy = powerupSpawnClock.getElapsedTime();
-//    if (elapsed_enemy.asSeconds() >= 3.0f) {  // every 3 seconds spawn enemy
-//        // TODO
-//        powerups_.emplace_back(randomSpawnPoint(), 90., assets_.powerupTexture);
-//        powerupSpawnClock.restart();
-//    }
-
-    for (int i = powerups_.size() - 1; i >= 0; --i) {
-        Powerup& powerup = powerups_[i];
-        powerup.update(deltaTime);
-
-        sf::Vector2f linDisplacement = powerup.getLinVel() * deltaTime;
-        sf::Vector2f newPos = powerup.getPos() + linDisplacement;
-        float angDisplacement = powerup.getAngVel() * deltaTime;
-        float newRot = powerup.getRot() + angDisplacement;
-        powerup.setPos(newPos);
-        powerup.setRot(newRot);
-
-        sf::Vector2f diff = playerManager_.player_->getPos() - powerup.getPos();
-        float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
-
-        float _sum_radius = playerManager_.player_->getRadius() + powerup.getRadius();
-        if (distance < _sum_radius) {
-            playerManager_.player_->setLinAcc( playerManager_.player_->getLinAcc() * 1.2 );
-            powerup.setIsAlive(false);
-            break;
-        }
-
-        // remove off screen
-        auto newCells = grid_.getCircleCells(newPos, powerup.getRadius());
-        if (!newCells.empty() or !powerup.getIsAlive()) powerups_.erase(powerups_.begin() + i);
     }
 }
 

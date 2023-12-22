@@ -1,9 +1,9 @@
 #include "Powerup.h"
 
-Powerup::Powerup(const sf::Vector2f& pos, const float& initRot, const sf::Texture& texture) {
+Powerup::Powerup(const sf::Vector2i spawn_point, const float& initRot, const sf::Texture& texture) {
     initRot_ = initRot;
     rot_ = initRot_;
-    pos_ = pos;
+    pos_ = sf::Vector2f(spawn_point);;
     maxLinVel_ = 80.;
     maxLinAcc_ = 50.;
     maxAngVel_ = 100;

@@ -12,7 +12,6 @@ public:
     void update(const sf::Vector2f&  playerPos, float deltaTime);
     void addEnemy(const Enemy& enemy);
     void render(sf::RenderWindow &window) const;
-    bool isCollision();
 
 private:
     const AssetManager& assetManager_;
@@ -22,7 +21,7 @@ private:
     float spawnTime_;
     std::vector<std::shared_ptr<Enemy>> enemies_;
 
-    static sf::Vector2i randomSpawnPoint(const sf::Vector2f& playerPos);
+    sf::Vector2i randomSpawnPoint(const sf::Vector2f& playerPos);
 };
 
 

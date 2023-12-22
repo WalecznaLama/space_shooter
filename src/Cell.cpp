@@ -22,12 +22,16 @@ bool Cell::hasSpaceObject() const { return spaceObject_ != nullptr; }
 SpaceObject *Cell::getSpaceObject() const  { return spaceObject_; }
 void Cell::setSpaceObject(SpaceObject *spaceObject) { spaceObject_ = spaceObject; }
 
+bool Cell::hasPowerup() const { return powerup_ != nullptr; }
+Powerup *Cell::getPowerup() const { return powerup_; }
+void Cell::setPowerup(Powerup *powerup) { powerup_ = powerup; }
+
 void Cell::clear_cell(){
     player_ = nullptr;
     enemy_ = nullptr;
     playerBullet_ = nullptr;
     enemyBullet_ = nullptr;
-//    planet_ = nullptr;
+    powerup_ = nullptr;
     spaceObject_ = nullptr;
 }
 
@@ -36,4 +40,9 @@ bool Cell::isOccupied() const {
 }
 
 bool Cell::isOccupiedEnemy() const { return hasEnemy() || hasEnemyBullet(); }
+
+bool Cell::isPlayerProjectileCollide() const {
+    return hasEnemy() || hasEnemyBullet() || hasSpaceObject();
+}
+
 

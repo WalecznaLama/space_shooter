@@ -6,8 +6,8 @@
 #include "PlayerManager.h"
 #include "ProjectileManager.h"
 #include "SpaceObjectManager.h"
+#include "PowerupManager.h"
 #include "Window.h"
-#include "Planet.h"
 #include <algorithm>
 
 class Game {
@@ -20,7 +20,6 @@ private:
     void render();
     void gameOver();
 
-    void updatePowerups(float deltaTime);
     void updateGui(float deltaTime);
 
     void calculateCameraPos();
@@ -33,9 +32,9 @@ private:
     AssetManager assets_;
     EnemyManager enemyManager_;
     ProjectileManager projectileManager_;
+    PowerupManager powerupManager_;
     SpaceObjectManager spaceObjectManager_;
     PlayerManager playerManager_;
-    std::vector<Powerup> powerups_;
 
     sf::Vector2f cameraPos_;
     sf::Sprite backgroundSprite_;

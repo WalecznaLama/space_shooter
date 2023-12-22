@@ -17,60 +17,33 @@ void EnemyManager::update(const sf::Vector2f& playerPos, float deltaTime) {
     for (auto it = enemies_.begin(); it != enemies_.end(); /* pusta sekcja inkrementacji */) {
         auto& enemyPtr = *it;
         enemyPtr->update(playerPos, deltaTime);
-        auto oldCells = grid_.getCircleCells(enemyPtr->getPos(),
-                                             enemyPtr->getRadius());
+        sf::Vector2f displacement = enemyPtr->getLinVel() * deltaTime; // calculate how far should move
+        sf::Vector2f newPos = enemyPtr->getPos() + displacement; // calculate new position
+        auto oldCell = grid_.getCell(enemyPtr->getPos());
         if (!enemyPtr->getIsAlive()) {
             // Usuń wroga z komórki siatki
-            for(auto& cell : oldCells) cell->clear_cell();
+            oldCell.clear_cell();
             // Usuń wroga z wektora
             it = enemies_.erase(it);
-        } else {
+        } else if (grid_.isInside(newPos)){
             ++it; // Ręcznie inkrementujemy iterator, jeśli nie usuwamy elementu
-            sf::Vector2f displacement = enemyPtr->getLinVel() * deltaTime; // calculate how far should move
-            sf::Vector2f newPos = enemyPtr->getPos() + displacement; // calculate new position
-
-            bool collidesWithSomething = false;
-            auto newCells = grid_.getCircleCells(newPos, enemyPtr->getRadius());
-
-            for (auto &cell : oldCells){
-                if (cell->hasEnemyBullet()){
-                    int damage = 2; // TODO int damage = grid_.getCell(newPos).getEnemyBullet().get_damage()
-                    auto bulletCell = cell->getPlayerBullet();
-                    bulletCell->setIsAlive(false);
-                    enemyPtr->setDamage(damage);
-                    break;
-                }
-                if (cell->hasEnemy() && enemyPtr->collisionTimer_.getElapsedTime().asMilliseconds() > 1000){ // TODO const
-                    collidesWithSomething = true;
-                    int damage = 1;
-                    auto enemyCell = cell->getEnemy();
-                    enemyCell->setDamage(damage);
-                    enemyPtr->collisionTimer_.restart();
-                    break;
-                }
-            }
-
-            // check if the enemy's new bounding box collides with anything
-            if (newCells.empty() || collidesWithSomething) {
-                sf::Vector2f _zero_vel = sf::Vector2f (0.f,0.f);
-                enemyPtr->setLinVel(_zero_vel);
-            }
-                // Jeśli nowa pozycja jest poza grą lub koliduje z czymś, zatrzymaj
-            else {
-                float angDisplacement = enemyPtr->getAngVel() * deltaTime;
-                float newRot = enemyPtr->getRot() + angDisplacement;
-                enemyPtr->setPos(newPos);
-                enemyPtr->setRot(newRot);
-
-                for (auto &oCell : oldCells) oCell->clear_cell();
-                for (auto &nCell : newCells) nCell->setEnemy(enemyPtr.get());
-            }
-
-            // Bullets
-            if (enemyPtr->canShoot(shootTimeEnemy_) and enemyPtr->getIsAlive())
-                projectileManager_.addProjectile(enemyPtr->getPos(), enemyPtr->getRot(),
-                                                 false, ProjectileManager::bullet);
+            auto newCell = grid_.getCell(newPos);
+            float angDisplacement = enemyPtr->getAngVel() * deltaTime;
+            float newRot = enemyPtr->getRot() + angDisplacement;
+            enemyPtr->setPos(newPos);
+            enemyPtr->setRot(newRot);
+            oldCell.clear_cell();
+            newCell.setEnemy(enemyPtr.get());
+        } else{
+            ++it; // Ręcznie inkrementujemy iterator, jeśli nie usuwamy elementu
+            enemyPtr->setLinVel({0.f,0.f});
         }
+
+        // Bullets
+        if (enemyPtr->canShoot(shootTimeEnemy_) and enemyPtr->getIsAlive())
+            projectileManager_.addProjectile(enemyPtr->getPos(), enemyPtr->getRot(),
+                                             false, ProjectileManager::bullet);
+
     }
 }
 
@@ -87,17 +60,18 @@ sf::Vector2i EnemyManager::randomSpawnPoint(const sf::Vector2f& playerPos) {
     std::mt19937 gen(rd());  // generator liczb pseudolosowych
 
     std::uniform_real_distribution<> distr(0, 2 * M_PI);  // rozkład jednostajny od 0 do 2*pi
-    std::uniform_real_distribution<> distrRadius(200, 600);  // rozkład jednostajny od 200 do 600
 
-    float spawnRadius = distrRadius(gen);  // radius of the spawn circle around the player
+    float spawnRadius = 150;  // radius of the spawn circle around the player TODO
     float spawnAngle = distr(gen);  // random angle
 
     // calculate the spawn point
     int _x = playerPos.x + spawnRadius * std::cos(spawnAngle);
     int _y = playerPos.y + spawnRadius * std::sin(spawnAngle);
-    return {_x, _y};
-}
+    auto grid_size = grid_.getSizePixels();
+    _x = std::min(_x, grid_size.x-1);
+    _x = std::max(_x, 1);
 
-bool EnemyManager::isCollision() {
-    return false;
+    _y = std::min(_y, grid_size.y-1);
+    _y = std::max(_y, 1);
+    return {_x, _y};
 }

@@ -12,8 +12,8 @@ add_executable(space_shooter src/main.cpp src/Player.cpp src/Enemy.cpp src/Bulle
                              src/PIDController.cpp src/Projectile.cpp src/Missile.cpp
         src/EnemyManager.cpp
         src/ProjectileManager.cpp
+        src/PowerupManager.cpp
         src/PlayerManager.cpp
-        include/PlayerManager.h
         src/SpaceObjectManager.cpp
 )
 

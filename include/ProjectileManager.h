@@ -11,7 +11,7 @@ public:
     void update(float deltaTime);
     void render(sf::RenderWindow &window) const;
     enum projectileType {bullet, missile};
-    void addProjectile(const sf::Vector2f& pos, float rot, bool is_players, int type); // ToDO enum
+    void addProjectile(const sf::Vector2f& pos, float rot, bool is_players, int type);
 
 private:
     const AssetManager& assetManager_;

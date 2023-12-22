@@ -8,8 +8,9 @@ class Grid {
 public:
     Grid(int width, int height);
     Cell& getCell(sf::Vector2f position);
-    std::vector<std::shared_ptr<Cell>> getCircleCells(sf::Vector2f position_offset, int radius);
     bool isInside(sf::Vector2f position) const;
+    sf::Vector2i getSize() const;
+    sf::Vector2i getSizePixels() const;
     static const int PIXELS_PER_CELL;
 
 private:

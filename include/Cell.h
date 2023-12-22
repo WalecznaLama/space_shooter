@@ -36,17 +36,23 @@ public:
     SpaceObject* getSpaceObject() const;
     void setSpaceObject(SpaceObject* spaceObject);
 
+    // Powerup
+    bool hasPowerup() const;
+    Powerup* getPowerup() const;
+    void setPowerup(Powerup* powerup);
+
     void clear_cell();
 
     bool isOccupied() const;
     bool isOccupiedEnemy() const;
+    bool isPlayerProjectileCollide() const;
 
 private:
     Player* player_;
     Enemy* enemy_;
     Bullet* playerBullet_;
     Bullet* enemyBullet_;
-//    Planet* planet_;
+    Powerup* powerup_;
     SpaceObject* spaceObject_;
 };
 

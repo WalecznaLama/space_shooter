@@ -4,6 +4,9 @@ SpaceObjectManager::SpaceObjectManager(const AssetManager &assetManager, Grid &g
         grid_(grid),
         assetManager_(assetManager) {
 
+    sf::Vector2f vel = {0., 0.};
+    sf::Vector2f pos = {1700., 1700.};
+    addSpaceObject(pos, vel, SpaceObjectManager::planet, 200);
 }
 
 sf::Vector2f SpaceObjectManager::update(const sf::Vector2f& playerPos) {
@@ -33,5 +36,16 @@ void SpaceObjectManager::render(sf::RenderWindow &window) const {
 
 void SpaceObjectManager::addSpaceObject(const sf::Vector2f &pos, const sf::Vector2f& vel,
                                         int type, int radius, float rot) {
-    spaceObjects_.emplace_back(std::make_shared<Planet>(assetManager_.planetTexture, pos, vel, rot, radius));
+    switch (type) {
+        case SpaceObjectManager::planet:
+            spaceObjects_.emplace_back(std::make_shared<Planet>(assetManager_.planetTexture,
+                                                                pos, vel, rot, radius));
+            break;
+            case SpaceObjectManager::black_hole:
+                // black_hole
+                break;
+        default:
+            break;
+
+    }
 }

@@ -1,7 +1,6 @@
 #include "Grid.h"
 
 const int Grid::PIXELS_PER_CELL = 3;
-const int Grid::SAMPLE_RATE_CIRCLE = 6;
 
 Grid::Grid(int width, int height)
         : width_(width), height_(height) {
@@ -10,35 +9,27 @@ Grid::Grid(int width, int height)
 }
 
 Cell& Grid::getCell(sf::Vector2f position) {
-    auto [x, y] = position;
-    return cells_[y/PIXELS_PER_CELL][x/PIXELS_PER_CELL];
-}
+    auto _position = sf::Vector2i(position);
+    int y_pos = _position.y/PIXELS_PER_CELL;
+    int x_pos = _position.x/PIXELS_PER_CELL;
 
-std::vector<std::shared_ptr<Cell>> Grid::getCircleCells(sf::Vector2f position_offset, int radius) {
-    std::vector<sf::Vector2i> cell_poses;
-    std::vector<std::shared_ptr<Cell>> cells;
-    double thetaStep = 2 * M_PI / SAMPLE_RATE_CIRCLE;
-    for (int i = 0; i < SAMPLE_RATE_CIRCLE; ++i) {
-        double theta = i * thetaStep;
-        int x = std::round(radius * cos(theta)) + position_offset.x;
-        x /= PIXELS_PER_CELL;
-        int y = std::round(radius * sin(theta)) + position_offset.y;
-        y /= PIXELS_PER_CELL;
+    x_pos = std::min(x_pos, width_);
+    x_pos = std::max(x_pos, 0);
+    y_pos = std::min(y_pos, height_);
+    y_pos = std::max(y_pos, 0);
 
-        if (y < 1 || y > height_ - 1 || x < 1 || x > width_- 1) {  // if not in borders
-            return {};
-        }
-
-        sf::Vector2i pose = {x, y};
-        if (std::find(cell_poses.begin(), cell_poses.end(),pose) == cell_poses.end()){ // find if pose exists current in vector
-            cell_poses.emplace_back(pose);
-            cells.emplace_back(std::make_shared<Cell>(cells_[pose.y][pose.x]));
-        }
-    }
-    return cells;
+    return cells_[y_pos][x_pos];
 }
 
 bool Grid::isInside(sf::Vector2f position) const {
     auto [x, y] = position;
     return x > 0 && y > 0 && x < width_*PIXELS_PER_CELL && y < height_*PIXELS_PER_CELL;
+}
+
+sf::Vector2i Grid::getSize() const {
+    return { width_, height_ };
+}
+
+sf::Vector2i Grid::getSizePixels() const {
+    return { width_*PIXELS_PER_CELL, height_*PIXELS_PER_CELL };
 }
