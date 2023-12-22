@@ -14,7 +14,7 @@ Bullet::Bullet(const sf::Vector2f& pos, const sf::Vector2f& spawnOffset, const f
     maxLinVel_ = 600.;
     linAcc_ = 200.;
 
-    radius_ = 5;
+    radius_ = 10;
     spriteInit(texture);
 }
 

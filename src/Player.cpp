@@ -3,7 +3,7 @@
 Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture> &textures){
     pos_ = spawn_point;
 
-    radius_ = 50;
+    radius_ = 30;
     maxLinAcc_ = 100.;
     maxAngAcc_ = 300.;
     linBreakDecc_ = 80.;
@@ -12,8 +12,6 @@ Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture
     maxAngVel_ = 180.;
     angBreakDecc_ = 30.;
     angConstDecc_ = 15.;
-
-    mass_ = 1.0;
 
     maxHp_ = 5;
     hp_ = maxHp_;

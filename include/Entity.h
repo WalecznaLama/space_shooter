@@ -19,15 +19,12 @@ public:
     void setMaxHp(int hp);
     int getMaxHp() const;
 
-    float getMass() const;
-
 protected:
     sf::Clock shootClock_;
-    sf::Clock updateClock_;
+//    sf::Clock updateClock_;
     bool firstShotFired_;
     int hp_;
     int maxHp_;
-    float mass_;
 
 };
 

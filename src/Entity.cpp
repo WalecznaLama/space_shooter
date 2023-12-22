@@ -4,7 +4,7 @@ bool Entity::canShoot(float time_to_shoot){
     sf::Time elapsed = shootClock_.getElapsedTime();
     float interval;
 
-    if (!firstShotFired_)  interval = time_to_shoot / 10.f;
+    if (!firstShotFired_)  interval = time_to_shoot / 10.f; // TODO const
     else    interval = time_to_shoot;
 
     if (elapsed.asSeconds() >= interval) {
@@ -23,6 +23,7 @@ int Entity::getHp() const { return hp_; }
 void Entity::setMaxHp(int hp) { maxHp_ = hp; }
 int Entity::getMaxHp() const { return maxHp_; }
 
-void Entity::setDamage(int damage) { hp_ = std::max(0, hp_ - damage); }
-
-float Entity::getMass() const { return mass_; }
+void Entity::setDamage(int damage) {
+    hp_ = std::max(0, hp_ - damage);
+    if (hp_ == 0) setIsAlive(false);
+}

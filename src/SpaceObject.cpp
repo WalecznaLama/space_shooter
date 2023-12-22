@@ -28,3 +28,7 @@ void SpaceObject::update() {
 float SpaceObject::getMass() const {
     return mass_;
 }
+
+void SpaceObject::draw(sf::RenderWindow &window) const {
+    window.draw(mainSprite_);
+}

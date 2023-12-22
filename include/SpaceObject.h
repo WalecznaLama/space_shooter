@@ -12,6 +12,7 @@ public:
 
     void update();
     float getMass() const;
+    void draw(sf::RenderWindow& window) const;
 
 private:
     float density_;

@@ -1,13 +1,12 @@
 #include "EnemyManager.h"
 
-EnemyManager::EnemyManager(const AssetManager& assetManager, Grid& grid)
-                            : assetManager_(assetManager),  grid_(grid){
+EnemyManager::EnemyManager(const AssetManager& assetManager, ProjectileManager& projectileManager, Grid& grid)
+                            : assetManager_(assetManager), grid_(grid), projectileManager_(projectileManager){
     shootTimeEnemy_ = 10.0f;
     spawnTime_ = 5.0f;
-    enemyBulletSpawnOffset_ = {0, -30};
 }
 // TODO to projectiles
-void EnemyManager::update(const sf::Vector2f& playerPos, std::vector<Bullet>& bullets, float deltaTime) {
+void EnemyManager::update(const sf::Vector2f& playerPos, float deltaTime) {
     static sf::Clock enemySpawnClock;
     sf::Time elapsed_enemy = enemySpawnClock.getElapsedTime();
     if (elapsed_enemy.asSeconds() > spawnTime_) {
@@ -50,8 +49,14 @@ void EnemyManager::update(const sf::Vector2f& playerPos, std::vector<Bullet>& bu
                     break;
                 }
             }
+
             // check if the enemy's new bounding box collides with anything
-            if (!newCells.empty() || !collidesWithSomething) {
+            if (newCells.empty() || collidesWithSomething) {
+                sf::Vector2f _zero_vel = sf::Vector2f (0.f,0.f);
+                enemyPtr->setLinVel(_zero_vel);
+            }
+                // Jeśli nowa pozycja jest poza grą lub koliduje z czymś, zatrzymaj
+            else {
                 float angDisplacement = enemyPtr->getAngVel() * deltaTime;
                 float newRot = enemyPtr->getRot() + angDisplacement;
                 enemyPtr->setPos(newPos);
@@ -60,16 +65,11 @@ void EnemyManager::update(const sf::Vector2f& playerPos, std::vector<Bullet>& bu
                 for (auto &oCell : oldCells) oCell->clear_cell();
                 for (auto &nCell : newCells) nCell->setEnemy(enemyPtr.get());
             }
-                // Jeśli nowa pozycja jest poza grą lub koliduje z czymś, zatrzymaj
-            else {
-                sf::Vector2f _zero_vel = sf::Vector2f (0.f,0.f);
-                enemyPtr->setLinVel(_zero_vel);
-            }
 
             // Bullets
             if (enemyPtr->canShoot(shootTimeEnemy_) and enemyPtr->getIsAlive())
-                bullets.emplace_back(enemyPtr->getPos(), enemyBulletSpawnOffset_,
-                                     enemyPtr->getRot(),assetManager_.enemyBulletTexture);
+                projectileManager_.addProjectile(enemyPtr->getPos(), enemyPtr->getRot(),
+                                                 false, ProjectileManager::bullet);
         }
     }
 }
@@ -79,9 +79,7 @@ void EnemyManager::addEnemy(const Enemy &enemy) {
 }
 
 void EnemyManager::render(sf::RenderWindow &window) const {
-    for (const auto& enemyPtr : enemies_){
-        enemyPtr->draw(window);
-    }
+    for (const auto& enemyPtr : enemies_) enemyPtr->draw(window);
 }
 
 sf::Vector2i EnemyManager::randomSpawnPoint(const sf::Vector2f& playerPos) {
