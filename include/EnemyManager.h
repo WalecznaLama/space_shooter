@@ -13,13 +13,13 @@ public:
     void addEnemy(const Enemy& enemy);
     void render(sf::RenderWindow &window) const;
 
+    std::vector<std::shared_ptr<Enemy>> enemies_;
 private:
     const AssetManager& assetManager_;
     ProjectileManager& projectileManager_;
     Grid& grid_;
     float shootTimeEnemy_;
     float spawnTime_;
-    std::vector<std::shared_ptr<Enemy>> enemies_;
 
     sf::Vector2i randomSpawnPoint(const sf::Vector2f& playerPos);
 };

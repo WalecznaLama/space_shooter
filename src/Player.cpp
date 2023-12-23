@@ -16,6 +16,9 @@ Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture
     maxHp_ = 5;
     hp_ = maxHp_;
     spriteInit(textures);
+
+    sf::FloatRect bounds(10, 20, 20, 40);
+    setBounds(bounds);
 }
 
 void Player::update(float deltaTime, const sf::Vector2f& netForce) {

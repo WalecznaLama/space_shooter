@@ -15,6 +15,9 @@ Enemy::Enemy(sf::Vector2i spawn_point, const sf::Texture& texture) :
     hp_ = maxHp_;
 
     spriteInit(texture);
+
+    sf::FloatRect bounds(10, 20, 20, 40);
+    setBounds(bounds);
 }
 
 void Enemy::update(const sf::Vector2f& playerPos, float deltaTime) {

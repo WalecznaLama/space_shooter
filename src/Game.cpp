@@ -9,7 +9,9 @@ Game::Game()
           enemyManager_(assets_, projectileManager_, grid_),
           playerManager_(assets_, projectileManager_, grid_),
           powerupManager_(assets_, grid_),
-          spaceObjectManager_(assets_, grid_)
+          spaceObjectManager_(assets_, grid_),
+          collisionManager_(playerManager_, enemyManager_, projectileManager_,
+                            spaceObjectManager_, powerupManager_)
 {
     setGui();
     cameraAcc_ = 0.01f;
@@ -27,11 +29,13 @@ void Game::run() {
 void Game::update() {
     float elapsed = updateClock_.getElapsedTime().asSeconds();
 
+    collisionManager_.update();
     sf::Vector2f spaceObjectsNetForce = spaceObjectManager_.update(playerManager_.player_->getPos());
     projectileManager_.update(elapsed);
     playerManager_.update(spaceObjectsNetForce, elapsed);
     enemyManager_.update(playerManager_.player_->getPos(), elapsed);
     powerupManager_.update(playerManager_.player_->getPos(), elapsed);
+
     updateGui(elapsed);
 
     calculateCameraPos();

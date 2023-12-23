@@ -38,6 +38,7 @@ void ProjectileManager::update(float deltaTime) {
         if (grid_.isInside(newPos) && bullet->getIsAlive()){
             auto newCell = grid_.getCell(newPos);
             ++it; // Ręcznie inkrementujemy iterator, jeśli nie usuwamy elementu
+
             bullet->setPos(newPos);
             newCell.setEnemyBullet(bullet.get());
         } else {
@@ -84,5 +85,4 @@ void ProjectileManager::addProjectile(const sf::Vector2f& pos, float rot,
 
         }
     }
-
 }

@@ -13,10 +13,10 @@ public:
     enum spaceObjectType {planet, black_hole};
     void addSpaceObject(const sf::Vector2f& pos, const sf::Vector2f& vel, int type, int radius, float rot=0.f);
 
+    std::vector<std::shared_ptr<SpaceObject>> spaceObjects_;
 private:
     const AssetManager& assetManager_;
     Grid& grid_;
-    std::vector<std::shared_ptr<SpaceObject>> spaceObjects_;
 };
 
 

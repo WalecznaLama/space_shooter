@@ -32,6 +32,7 @@ public:
     void setIsAlive(bool isAlive);
     bool getIsAlive() const;
 
+    void setBounds(sf::FloatRect bounds);
     sf::FloatRect getBounds() const;
 
     const sf::Sprite& getSprite() const;
@@ -66,6 +67,7 @@ protected:
     int radius_; // pixels
 
     bool alive_ = true;
+    sf::FloatRect bounds_;
 
     /// returns -> -1, 0, 1
     template<typename T>

@@ -4,7 +4,7 @@ PowerupManager::PowerupManager(const AssetManager &assetManager, Grid &grid) :
         grid_(grid),
         assetManager_(assetManager),
         spawnAngleRes_(10){
-    spawnTime_ = 3.0f;
+    spawnTime_ = 10.0f;
 }
 
 void PowerupManager::update(const sf::Vector2f& playerPos, float deltaTime) {

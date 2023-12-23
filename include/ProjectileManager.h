@@ -13,11 +13,11 @@ public:
     enum projectileType {bullet, missile};
     void addProjectile(const sf::Vector2f& pos, float rot, bool is_players, int type);
 
+    std::vector<std::shared_ptr<Bullet>> playerBullets_;
+    std::vector<std::shared_ptr<Bullet>> enemyBullets_;
 private:
     const AssetManager& assetManager_;
     Grid& grid_;
-    std::vector<std::shared_ptr<Bullet>> playerBullets_;
-    std::vector<std::shared_ptr<Bullet>> enemyBullets_;
     sf::Vector2f enemyBulletSpawnOffset_;
     sf::Vector2f playerBulletSpawnOffset_;
 };

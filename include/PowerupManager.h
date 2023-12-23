@@ -14,10 +14,10 @@ public:
     enum powerupType {acc1_2, vel1_5};
     void addPowerup(const sf::Vector2i& pos, int type);
 
+    std::vector<std::shared_ptr<Powerup>> powerups_;
 private:
     const AssetManager& assetManager_;
     Grid& grid_;
-    std::vector<std::shared_ptr<Powerup>> powerups_;
     float spawnTime_;
     const int spawnAngleRes_;
     std::vector<float> spawnAngles_;

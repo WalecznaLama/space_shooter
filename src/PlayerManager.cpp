@@ -5,6 +5,7 @@ PlayerManager::PlayerManager(const AssetManager &assetManager, ProjectileManager
                                        assetManager.playerTextures_)),
     assetManager_(assetManager), grid_(grid), projectileManager_(projectileManager) {
     shootTimePlayer_ = 0.2f;
+
     }
 
 void PlayerManager::update(const sf::Vector2f &spaceObjectsNetForce, float deltaTime) {

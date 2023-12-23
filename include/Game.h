@@ -2,11 +2,8 @@
 #define SPACE_SHOOTER_GAME_H
 
 #include "AssetManager.h"
-#include "EnemyManager.h"
-#include "PlayerManager.h"
-#include "ProjectileManager.h"
-#include "SpaceObjectManager.h"
-#include "PowerupManager.h"
+#include "CollisionManager.h"
+
 #include "Window.h"
 #include <algorithm>
 
@@ -34,6 +31,7 @@ private:
     ProjectileManager projectileManager_;
     PowerupManager powerupManager_;
     SpaceObjectManager spaceObjectManager_;
+    CollisionManager collisionManager_;
     PlayerManager playerManager_;
 
     sf::Vector2f cameraPos_;

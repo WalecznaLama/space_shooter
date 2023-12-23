@@ -5,7 +5,7 @@
 
 class Powerup : public Object {
 public:
-    Powerup(const sf::Vector2i spawn_point, const float& initRot, const sf::Texture& texture);
+    Powerup(sf::Vector2i spawn_point, const float& initRot, const sf::Texture& texture);
     void update(float deltaTime);
     void draw(sf::RenderWindow& window) const;
 
