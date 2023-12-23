@@ -41,4 +41,5 @@ void PlayerManager::update(const sf::Vector2f &spaceObjectsNetForce, float delta
 
 void PlayerManager::render(sf::RenderWindow &window) const {
     player_->draw(window);
+//    window.draw();
 }

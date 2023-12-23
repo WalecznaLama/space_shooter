@@ -4,6 +4,7 @@ EnemyManager::EnemyManager(const AssetManager& assetManager, ProjectileManager& 
                             : assetManager_(assetManager), grid_(grid), projectileManager_(projectileManager){
     shootTimeEnemy_ = 10.0f;
     spawnTime_ = 5.0f;
+    killCount_ = 0;
 }
 // TODO to projectiles
 void EnemyManager::update(const sf::Vector2f& playerPos, float deltaTime) {
@@ -21,6 +22,7 @@ void EnemyManager::update(const sf::Vector2f& playerPos, float deltaTime) {
         sf::Vector2f newPos = enemyPtr->getPos() + displacement; // calculate new position
         auto oldCell = grid_.getCell(enemyPtr->getPos());
         if (!enemyPtr->getIsAlive()) {
+            ++killCount_;
             // Usuń wroga z komórki siatki
             oldCell.clear_cell();
             // Usuń wroga z wektora
@@ -75,3 +77,5 @@ sf::Vector2i EnemyManager::randomSpawnPoint(const sf::Vector2f& playerPos) {
     _y = std::max(_y, 1);
     return {_x, _y};
 }
+
+uint EnemyManager::getKillCounter() const { return killCount_; }

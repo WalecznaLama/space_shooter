@@ -44,7 +44,6 @@ private:
     sf::Text debugText_;
 
     float cameraAcc_;
-    uint killCounter_;
 };
 
 #endif //SPACE_SHOOTER_GAME_H

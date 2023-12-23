@@ -13,8 +13,8 @@ Powerup::Powerup(const sf::Vector2i spawn_point, const float& initRot, const sf:
     radius_ = 20;
     spriteInit(texture);
 
-    sf::FloatRect bounds(15, 15, 30, 30);
-    setBounds(bounds);
+//    sf::IntRect bounds(15, 15, 30, 30);
+//    setBounds(bounds);
 }
 
 void Powerup::update(float deltaTime) {

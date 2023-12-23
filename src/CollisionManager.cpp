@@ -22,10 +22,9 @@ void CollisionManager::update() {
     auto _enemies = enemyManager_.enemies_;
     for (auto & bullet : _playerBullets) {
         auto _bounds = bullet->getBounds();
-
         for (auto & enemy : _enemies) {
             if (_bounds.intersects(enemy->getBounds())) {
-                playerManager_.player_->setDamage(2);
+                enemy->setDamage(2);
                 bullet->setIsAlive(false);
             }
         }

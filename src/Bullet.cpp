@@ -17,8 +17,8 @@ Bullet::Bullet(const sf::Vector2f& pos, const sf::Vector2f& spawnOffset, const f
     radius_ = 10;
     spriteInit(texture);
 
-    sf::FloatRect bounds(5, 5, 10, 10);
-    setBounds(bounds);
+//    sf::IntRect bounds(5, 5, 10, 10);
+//    setBounds(bounds);
 }
 
 void Bullet::update(float deltaTime) {

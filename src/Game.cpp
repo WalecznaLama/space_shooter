@@ -15,7 +15,6 @@ Game::Game()
 {
     setGui();
     cameraAcc_ = 0.01f;
-    killCounter_ = 0;
 }
 
 void Game::run() {
@@ -61,7 +60,7 @@ void Game::render() {
 }
 
 void Game::gameOver() {
-    finalScreenText_.setString("Game Over!\nFinal Score: " + std::to_string(killCounter_));
+    finalScreenText_.setString("Game Over!\nFinal Score: " + std::to_string(enemyManager_.getKillCounter()));
     finalScreenText_.setPosition(cameraPos_);
     while (window_.isOpen()) {
         window_.processEvents();
@@ -74,9 +73,9 @@ void Game::gameOver() {
 void Game::updateGui(float deltaTime) {
     float fps = 1.f / deltaTime;
     fpsText_.setString("FPS: " + std::to_string(static_cast<int>(fps)));
-    killCounterText_.setString("Score: " + std::to_string(killCounter_));
-    debugText_.setString("X: " + std::to_string(playerManager_.player_->getPos().x) + '\n' +
-                         "Y: " + std::to_string(playerManager_.player_->getPos().y));
+    killCounterText_.setString("Score: " + std::to_string(enemyManager_.getKillCounter()));
+    debugText_.setString("X: " + std::to_string(int(playerManager_.player_->getPos().x)) + '\n' +
+                         "Y: " + std::to_string(int(playerManager_.player_->getPos().y)));
 
 //    debugText_.setString("X: " + std::to_string( powerups_[0].getAngAcc()));
 

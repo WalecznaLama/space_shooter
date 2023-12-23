@@ -21,8 +21,8 @@ int Object::getRadius() const { return radius_; }
 void Object::setIsAlive(bool isAlive) { alive_ = isAlive; }
 bool Object::getIsAlive() const { return alive_; }
 
-void Object::setBounds(sf::FloatRect bounds) { bounds_ = bounds; }
-sf::FloatRect Object::getBounds() const { return bounds_; }
+//void Object::setBounds(sf::IntRect bounds) { bounds_ = bounds; }
+sf::Rect<float> Object::getBounds() const { return mainSprite_.getGlobalBounds(); }
 
 void Object::addSprite(const std::string& sprite_name, const sf::Texture& texture) {
     sprites_[sprite_name] = sf::Sprite(texture);

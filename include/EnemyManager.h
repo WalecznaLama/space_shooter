@@ -13,6 +13,8 @@ public:
     void addEnemy(const Enemy& enemy);
     void render(sf::RenderWindow &window) const;
 
+    uint getKillCounter() const;
+
     std::vector<std::shared_ptr<Enemy>> enemies_;
 private:
     const AssetManager& assetManager_;
@@ -20,6 +22,7 @@ private:
     Grid& grid_;
     float shootTimeEnemy_;
     float spawnTime_;
+    uint killCount_;
 
     sf::Vector2i randomSpawnPoint(const sf::Vector2f& playerPos);
 };
