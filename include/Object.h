@@ -17,6 +17,12 @@ public:
     void setLinVel(const sf::Vector2f& newVel);
     sf::Vector2f getLinVel() const;
 
+    void setMaxLinVel(float newVel);
+    float getMaxLinVel() const;
+
+    void setMaxLinAcc(float newVel);
+    float getMaxLinAcc() const;
+
     void setLinAcc(float newAcc);
     float getLinAcc() const;
 
@@ -31,9 +37,6 @@ public:
 
     void setIsAlive(bool isAlive);
     bool getIsAlive() const;
-
-//    void setBounds(sf::IntRect bounds);
-    sf::Rect<float> getBounds() const;
 
     const sf::Sprite& getSprite() const;
 

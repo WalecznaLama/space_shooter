@@ -9,6 +9,12 @@ float Object::getRot() const { return rot_; }
 void Object::setLinVel(const sf::Vector2f& vel) { linVel_ = vel; }
 sf::Vector2f Object::getLinVel() const { return linVel_; }
 
+void Object::setMaxLinVel(const float vel) { maxLinVel_ = vel; }
+float Object::getMaxLinVel() const { return maxLinVel_; }
+
+void Object::setMaxLinAcc(const float vel) { maxLinAcc_ = vel; }
+float Object::getMaxLinAcc() const { return maxLinAcc_; }
+
 void Object::setAngVel(float newVel) { angVel_ = newVel; }
 float Object::getAngVel() const { return angVel_; }
 
@@ -20,9 +26,6 @@ int Object::getRadius() const { return radius_; }
 
 void Object::setIsAlive(bool isAlive) { alive_ = isAlive; }
 bool Object::getIsAlive() const { return alive_; }
-
-//void Object::setBounds(sf::IntRect bounds) { bounds_ = bounds; }
-sf::Rect<float> Object::getBounds() const { return mainSprite_.getGlobalBounds(); }
 
 void Object::addSprite(const std::string& sprite_name, const sf::Texture& texture) {
     sprites_[sprite_name] = sf::Sprite(texture);

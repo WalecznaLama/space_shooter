@@ -11,7 +11,6 @@ public:
     PowerupManager(const AssetManager& assetManager, Grid& grid);
     void update(const sf::Vector2f& playerPos, float deltaTime);
     void render(sf::RenderWindow &window) const;
-    enum powerupType {acc1_2, vel1_5};
     void addPowerup(const sf::Vector2i& pos, int type);
 
     std::vector<std::shared_ptr<Powerup>> powerups_;

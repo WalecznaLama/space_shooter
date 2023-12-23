@@ -11,7 +11,7 @@ void PowerupManager::update(const sf::Vector2f& playerPos, float deltaTime) {
     static sf::Clock powerupSpawnClock;
     sf::Time elapsed_enemy = powerupSpawnClock.getElapsedTime();
     if (elapsed_enemy.asSeconds() > spawnTime_) {
-        addPowerup(PowerupManager::randomSpawnPoint(playerPos), PowerupManager::acc1_2);
+        addPowerup(PowerupManager::randomSpawnPoint(playerPos), Powerup::acc1_2);
         powerupSpawnClock.restart();
     }
 
@@ -41,17 +41,16 @@ void PowerupManager::render(sf::RenderWindow &window) const {
 
 void PowerupManager::addPowerup(const sf::Vector2i &pos, int type) {
     switch (type) {
-        case PowerupManager::acc1_2:
-            powerups_.emplace_back(std::make_shared<Powerup>(pos, 90.,
+        case Powerup::acc1_2:
+            powerups_.emplace_back(std::make_shared<Powerup>(pos, 450.,
                                                              assetManager_.powerupTexture));
             break;
-        case PowerupManager::vel1_5:
+        case Powerup::vel1_5:
             // missile
             break;
 
         default:
             break;
-
     }
 }
 
