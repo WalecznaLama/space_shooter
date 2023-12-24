@@ -1,4 +1,4 @@
-#include "Entity.h"
+#include "Entity/Entity.h"
 
 bool Entity::canShoot(float time_to_shoot){
     sf::Time elapsed = shootClock_.getElapsedTime();

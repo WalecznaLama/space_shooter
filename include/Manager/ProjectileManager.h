@@ -2,7 +2,7 @@
 #define SPACE_SHOOTER_PROJECTILEMANAGER_H
 
 #include "Grid.h"
-#include "Bullet.h"
+#include "Projectile/Projectile.h"
 #include "AssetManager.h"
 
 class ProjectileManager {
@@ -10,16 +10,14 @@ public:
     ProjectileManager(const AssetManager& assetManager, Grid& grid);
     void update(float deltaTime);
     void render(sf::RenderWindow &window) const;
-    enum projectileType {bullet, missile};
-    void addProjectile(const sf::Vector2f& pos, float rot, bool is_players, int type);
+    void addProjectile(const sf::Vector2f& initPos,
+                       const sf::Vector2f& initVel, const float& initRot, bool is_players, int type);
 
-    std::vector<std::shared_ptr<Bullet>> playerBullets_;
-    std::vector<std::shared_ptr<Bullet>> enemyBullets_;
+    std::vector<std::shared_ptr<BulletPlayer>> playerBullets_;
+    std::vector<std::shared_ptr<BulletEnemy>> enemyBullets_;
 private:
     const AssetManager& assetManager_;
     Grid& grid_;
-    sf::Vector2f enemyBulletSpawnOffset_;
-    sf::Vector2f playerBulletSpawnOffset_;
 };
 
 

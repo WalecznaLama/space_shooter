@@ -1,4 +1,4 @@
-#include "AssetManager.h"
+#include "Manager/AssetManager.h"
 
 AssetManager::AssetManager() {
     // load textures

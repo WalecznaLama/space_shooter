@@ -1,4 +1,4 @@
-#include "CollisionManager.h"
+#include "Manager/CollisionManager.h"
 
 CollisionManager::CollisionManager(PlayerManager &playerManager, EnemyManager &enemyManager,
                                    ProjectileManager &projectileManager, SpaceObjectManager &spaceObjectManager,
@@ -49,6 +49,15 @@ void CollisionManager::update() {
                 default:
                     break;
             }
+        }
+    }
+
+    auto _spaceObjects = spaceObjectManager_.spaceObjects_;
+    for (auto & spaceObject : _spaceObjects) {
+        auto _bounds = spaceObject->getSprite().getGlobalBounds();
+        if (_bounds.intersects(_playerBounds)) {
+
+            playerManager_.player_->setLinVel({0.f, 0.f});
         }
     }
 }

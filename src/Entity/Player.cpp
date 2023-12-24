@@ -1,4 +1,4 @@
-#include "Player.h"
+#include "Entity/Player.h"
 
 Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture> &textures){
     pos_ = spawn_point;

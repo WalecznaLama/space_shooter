@@ -1,4 +1,4 @@
-#include "Missile.h"
+#include "Projectile/Missile.h"
 
 const int Missile::DEFAULT_RADIUS = 10.;
 const float Missile::DEFAULT_MAX_LIN_VEL = 600.;
@@ -7,8 +7,7 @@ const int Missile::DEFAULT_DAMAGE = 2;
 
 Missile::Missile(const sf::Texture &texture, const sf::Vector2f &initPos, const sf::Vector2f &spawnOffset,
                  const sf::Vector2f &initVel, float initRot) :
-        Projectile(texture, initPos, spawnOffset, initVel, initRot, DEFAULT_RADIUS,
-                   DEFAULT_MAX_LIN_VEL, DEFAULT_LIN_ACC, DEFAULT_DAMAGE)
+        Projectile(texture, initPos, initVel, initRot)
         {  }
 
 void Missile::update(float deltaTime) {

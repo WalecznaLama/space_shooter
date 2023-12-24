@@ -1,4 +1,4 @@
-#include "SpaceObject.h"
+#include "SpaceObject/SpaceObject.h"
 
 const float SpaceObject::G_ = 100.f;
 

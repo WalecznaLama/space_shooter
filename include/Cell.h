@@ -1,10 +1,11 @@
 #ifndef SPACE_SHOOTER_CELL_H
 #define SPACE_SHOOTER_CELL_H
 
-#include "Player.h"
-#include "Enemy.h"
-#include "Bullet.h"
-#include "Planet.h"
+#include "Entity/Player.h"
+#include "Entity/Enemy.h"
+#include "Projectile/BulletPlayer.h"
+#include "Projectile/BulletEnemy.h"
+#include "SpaceObject/Planet.h"
 #include "Powerup.h"
 
 class Cell {
@@ -23,13 +24,13 @@ public:
 
     // Player Bullets
     bool hasPlayerBullet() const;
-    Bullet* getPlayerBullet() const;
-    void setPlayerBullet(Bullet* bullet);
+    BulletPlayer* getPlayerBullet() const;
+    void setPlayerBullet(BulletPlayer* bullet);
 
     // Enemy Bullets
     bool hasEnemyBullet() const;
-    Bullet* getEnemyBullet() const;
-    void setEnemyBullet(Bullet* bullet);
+    BulletEnemy* getEnemyBullet() const;
+    void setEnemyBullet(BulletEnemy* bullet);
 
     // SpaceObject
     bool hasSpaceObject() const;
@@ -50,8 +51,8 @@ public:
 private:
     Player* player_;
     Enemy* enemy_;
-    Bullet* playerBullet_;
-    Bullet* enemyBullet_;
+    BulletPlayer* playerBullet_;
+    BulletEnemy* enemyBullet_;
     Powerup* powerup_;
     SpaceObject* spaceObject_;
 };

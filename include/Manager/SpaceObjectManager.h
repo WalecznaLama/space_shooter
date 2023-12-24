@@ -2,7 +2,7 @@
 #define SPACE_SHOOTER_SPACEOBJECTMANAGER_H
 
 #include "Grid.h"
-#include "Planet.h"
+#include "SpaceObject/Planet.h"
 #include "AssetManager.h"
 
 class SpaceObjectManager {

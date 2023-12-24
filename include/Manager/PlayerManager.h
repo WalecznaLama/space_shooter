@@ -1,10 +1,10 @@
 #ifndef SPACE_SHOOTER_PLAYERMANAGER_H
 #define SPACE_SHOOTER_PLAYERMANAGER_H
 
-#include "Player.h"
+#include "Entity/Player.h"
 #include "ProjectileManager.h"
 #include "Grid.h"
-#include "Bullet.h"
+#include "Projectile/BulletPlayer.h"
 
 class PlayerManager {
 public:

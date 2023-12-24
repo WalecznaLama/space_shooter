@@ -1,4 +1,4 @@
-#include "PlayerManager.h"
+#include "Manager/PlayerManager.h"
 
 PlayerManager::PlayerManager(const AssetManager &assetManager, ProjectileManager &projectileManager, Grid &grid)
     : player_(std::make_shared<Player>(sf::Vector2f(1500, 1500), // todo
@@ -35,8 +35,8 @@ void PlayerManager::update(const sf::Vector2f &spaceObjectsNetForce, float delta
     bool _user_shoot = (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)
                         || sf::Joystick::isButtonPressed(0, 0));
     if (_user_shoot && player_->canShoot(shootTimePlayer_))
-        projectileManager_.addProjectile(player_->getPos(), player_->getRot(),
-                                         true, ProjectileManager::bullet);
+        projectileManager_.addProjectile(player_->getPos(), player_->getLinVel(),player_->getRot(),
+                                         true, Projectile::bullet);
 }
 
 void PlayerManager::render(sf::RenderWindow &window) const {

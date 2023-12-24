@@ -1,13 +1,10 @@
-#include "ProjectileManager.h"
+#include "Manager/ProjectileManager.h"
 
 ProjectileManager::ProjectileManager(const AssetManager& assetManager, Grid& grid) :
                                      grid_(grid),
                                      assetManager_(assetManager) {
-    enemyBulletSpawnOffset_ = {0, -30};
-    playerBulletSpawnOffset_ = {0, -40};
-
 }
-// TODO bullet to projectile
+
 void ProjectileManager::update(float deltaTime) {
     for (auto it = playerBullets_.begin(); it != playerBullets_.end(); /* pusta sekcja inkrementacji */) {
         auto &bullet = *it;
@@ -54,15 +51,17 @@ void ProjectileManager::render(sf::RenderWindow &window) const {
     for (const auto &bullet : enemyBullets_)   bullet->draw(window);
 }
 
-void ProjectileManager::addProjectile(const sf::Vector2f& pos, float rot,
+void ProjectileManager::addProjectile(const sf::Vector2f& initPos,
+                                      const sf::Vector2f& initVel, const float& initRot,
                                       bool is_players, int type){
     if (is_players){
         switch (type) {
-            case ProjectileManager::bullet:
-                playerBullets_.emplace_back(std::make_shared<Bullet>(pos, playerBulletSpawnOffset_,
-                                            rot,assetManager_.playerBulletTexture));
+            case Projectile::bullet:
+                playerBullets_.emplace_back(std::make_shared<BulletPlayer>(assetManager_.playerBulletTexture,
+                                                                           initPos, initVel, initRot));
+
                 break;
-            case ProjectileManager::missile:
+            case Projectile::missile:
                 // missile
                 break;
 
@@ -72,11 +71,11 @@ void ProjectileManager::addProjectile(const sf::Vector2f& pos, float rot,
         }
     } else{
         switch (type) {
-            case 0:
-                enemyBullets_.emplace_back(std::make_shared<Bullet>(pos, enemyBulletSpawnOffset_,
-                                            rot,assetManager_.enemyBulletTexture));
+            case Projectile::bullet:
+                enemyBullets_.emplace_back(std::make_shared<BulletEnemy>(assetManager_.enemyBulletTexture,
+                                                                          initPos, initVel, initRot));
                 break;
-//            case 1:
+//            case Projectile::missile:
 //                // missile
 //                break;
 

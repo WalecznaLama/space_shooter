@@ -1,4 +1,4 @@
-#include "EnemyManager.h"
+#include "Manager/EnemyManager.h"
 
 EnemyManager::EnemyManager(const AssetManager& assetManager, ProjectileManager& projectileManager, Grid& grid)
                             : assetManager_(assetManager), grid_(grid), projectileManager_(projectileManager){
@@ -43,8 +43,9 @@ void EnemyManager::update(const sf::Vector2f& playerPos, float deltaTime) {
 
         // Bullets
         if (enemyPtr->canShoot(shootTimeEnemy_) and enemyPtr->getIsAlive())
-            projectileManager_.addProjectile(enemyPtr->getPos(), enemyPtr->getRot(),
-                                             false, ProjectileManager::bullet);
+            projectileManager_.addProjectile(enemyPtr->getPos(), enemyPtr->getLinVel(),
+                                             enemyPtr->getRot(),
+                                             false, Projectile::bullet);
 
     }
 }

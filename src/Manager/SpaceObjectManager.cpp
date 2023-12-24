@@ -1,4 +1,4 @@
-#include "SpaceObjectManager.h"
+#include "Manager/SpaceObjectManager.h"
 
 SpaceObjectManager::SpaceObjectManager(const AssetManager &assetManager, Grid &grid) :
         grid_(grid),

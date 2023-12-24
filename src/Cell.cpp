@@ -10,13 +10,13 @@ void Cell::setEnemy(Enemy *enemy) { enemy_ = enemy; }
 
 // Player Bullet
 bool Cell::hasPlayerBullet() const { return playerBullet_ != nullptr; }
-Bullet *Cell::getPlayerBullet() const  { return playerBullet_; }
-void Cell::setPlayerBullet(Bullet *bullet) { playerBullet_ = bullet; }
+BulletPlayer *Cell::getPlayerBullet() const  { return playerBullet_; }
+void Cell::setPlayerBullet(BulletPlayer *bullet) { playerBullet_ = bullet; }
 
 // Enemy Bullets
 bool Cell::hasEnemyBullet() const { return enemyBullet_ != nullptr; }
-Bullet *Cell::getEnemyBullet() const  { return enemyBullet_; }
-void Cell::setEnemyBullet(Bullet *bullet) { enemyBullet_ = bullet; }
+BulletEnemy *Cell::getEnemyBullet() const  { return enemyBullet_; }
+void Cell::setEnemyBullet(BulletEnemy *bullet) { enemyBullet_ = bullet; }
 
 bool Cell::hasSpaceObject() const { return spaceObject_ != nullptr; }
 SpaceObject *Cell::getSpaceObject() const  { return spaceObject_; }

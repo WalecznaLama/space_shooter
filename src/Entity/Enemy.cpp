@@ -1,4 +1,4 @@
-#include "Enemy.h"
+#include "Entity/Enemy.h"
 
 Enemy::Enemy(sf::Vector2i spawn_point, const sf::Texture& texture) :
         pidController_(5.0, 2.0, 0.0, maxAngAcc_)
@@ -11,13 +11,10 @@ Enemy::Enemy(sf::Vector2i spawn_point, const sf::Texture& texture) :
     maxAngVel_ = 50.;
     maxAngAcc_ = 300.;
 
-    maxHp_ = 2;
+    maxHp_ = 1;
     hp_ = maxHp_;
 
     spriteInit(texture);
-
-//    sf::IntRect bounds(10, 20, 20, 40);
-//    setBounds(bounds);
 }
 
 void Enemy::update(const sf::Vector2f& playerPos, float deltaTime) {

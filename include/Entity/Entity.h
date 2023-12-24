@@ -1,7 +1,7 @@
 #ifndef SPACE_SHOOTER_ENTITY_H
 #define SPACE_SHOOTER_ENTITY_H
 
-#include "Bullet.h"
+#include "Projectile/BulletPlayer.h"
 #include <map>
 #include <random>
 #include "Object.h"

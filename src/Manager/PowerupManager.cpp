@@ -1,4 +1,4 @@
-#include "PowerupManager.h"
+#include "Manager/PowerupManager.h"
 
 PowerupManager::PowerupManager(const AssetManager &assetManager, Grid &grid) :
         grid_(grid),

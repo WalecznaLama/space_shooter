@@ -1,8 +1,8 @@
 #ifndef SPACE_SHOOTER_GAME_H
 #define SPACE_SHOOTER_GAME_H
 
-#include "AssetManager.h"
-#include "CollisionManager.h"
+#include "Manager/AssetManager.h"
+#include "Manager/CollisionManager.h"
 
 #include "Window.h"
 #include <algorithm>

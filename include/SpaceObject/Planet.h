@@ -1,7 +1,7 @@
 #ifndef SPACE_SHOOTER_PLANET_H
 #define SPACE_SHOOTER_PLANET_H
 
-#include "SpaceObject.h"
+#include "SpaceObject/SpaceObject.h"
 
 class Planet : public SpaceObject {
 public:

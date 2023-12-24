@@ -1,10 +1,10 @@
 #ifndef SPACE_SHOOTER_ENEMYMANAGER_H
 #define SPACE_SHOOTER_ENEMYMANAGER_H
 
-#include "Enemy.h"
+#include "Entity/Enemy.h"
 #include "ProjectileManager.h"
 #include "Grid.h"
-#include "Bullet.h"
+#include "Projectile/BulletPlayer.h"
 
 class EnemyManager {
 public:
