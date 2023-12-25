@@ -4,12 +4,12 @@ Player::Player(sf::Vector2f spawn_point, const std::map<std::string, sf::Texture
     pos_ = spawn_point;
 
     radius_ = 30;
-    maxLinAcc_ = 100.;
+    maxLinAcc_ = 150.;
     maxAngAcc_ = 300.;
     linBreakDecc_ = 80.;
     linConstDecc_ = 10.;
-    maxLinVel_ = 200.;
-    maxAngVel_ = 180.;
+    maxLinVel_ = 300.;
+    maxAngVel_ = 120.;
     angBreakDecc_ = 30.;
     angConstDecc_ = 15.;
 
@@ -98,8 +98,26 @@ sf::Vector2f Player::calculateDeceleration(float deceleration, float deltaTime) 
 
 void Player::draw(sf::RenderWindow& window) const {
     window.draw(mainSprite_);
+//    sf::Transform transform;
+//    transform.translate(0, 30);
     if (boostActive_)  window.draw(sprites_.at("boost"));
     else if (userInput_)  window.draw(sprites_.at("engine_on"));
+
+    // Obliczanie środka sprite'a
+    sf::Rect<float> bounds = {40, 60, 52, 52};
+
+    // Tworzenie prostokąta ograniczającego
+    sf::RectangleShape boundsRect;
+    boundsRect.setSize(sf::Vector2f(bounds.width, bounds.height)); // Połowa rozmiaru sprite'a
+    boundsRect.setPosition(getPos()); // Wyśrodkowanie
+    boundsRect.setFillColor(sf::Color::Transparent);
+    boundsRect.setOutlineColor(sf::Color::Black);
+    boundsRect.setOrigin(mainSprite_.getOrigin());
+    boundsRect.setOutlineThickness(1.f);
+    boundsRect.setRotation(getRot()); // Ustawienie takiej samej rotacji jak sprite
+
+    // Rysowanie prostokąta ograniczającego
+    window.draw(boundsRect);
 }
 
 void Player::updateSprites() {

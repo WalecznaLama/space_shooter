@@ -8,9 +8,23 @@ CollisionManager::CollisionManager(PlayerManager &playerManager, EnemyManager &e
                                    powerupManager_(powerupManager) { }
 
 void CollisionManager::update() {
-    auto _playerBounds = playerManager_.player_->getSprite().getGlobalBounds();
+    sf::Rect<float> _playerBounds = playerManager_.player_->getSprite().getGlobalBounds();
 
-    auto _enemyBullets = projectileManager_.enemyBullets_;
+    // Obliczanie środka sprite'a
+//    sf::Rect<float> bounds = {40, 60, 52, 52};
+//    bounds.
+
+//    // Tworzenie prostokąta ograniczającego
+//    sf::RectangleShape _playerBounds;
+//    _playerBounds.setSize(sf::Vector2f(bounds.width, bounds.height)); // Połowa rozmiaru sprite'a
+//    _playerBounds.setPosition(playerManager_.player_->getPos()); // Wyśrodkowanie
+////    boundsRect.setFillColor(sf::Color::Transparent);
+////    boundsRect.setOutlineColor(sf::Color::Black);
+//    _playerBounds.setOrigin(playerManager_.player_->getSprite().getOrigin());
+////    boundsRect.setOutlineThickness(1.f);
+//    _playerBounds.setRotation(playerManager_.player_->getRot()); // Ustawienie takiej samej rotacji jak sprite
+
+    auto &_enemyBullets = projectileManager_.enemyBullets_;
     for (auto & bullet : _enemyBullets) {
         auto _bounds = bullet->getSprite().getGlobalBounds();
         if (_bounds.intersects(_playerBounds)) {
@@ -18,8 +32,8 @@ void CollisionManager::update() {
             bullet->setIsAlive(false);
         }
     }
-    auto _playerBullets = projectileManager_.playerBullets_;
-    auto _enemies = enemyManager_.enemies_;
+    auto &_playerBullets = projectileManager_.playerBullets_;
+    auto &_enemies = enemyManager_.enemies_;
     for (auto & bullet : _playerBullets) {
         auto _bounds = bullet->getSprite().getGlobalBounds();
         for (auto & enemy : _enemies) {
@@ -52,12 +66,17 @@ void CollisionManager::update() {
         }
     }
 
-    auto _spaceObjects = spaceObjectManager_.spaceObjects_;
-    for (auto & spaceObject : _spaceObjects) {
-        auto _bounds = spaceObject->getSprite().getGlobalBounds();
-        if (_bounds.intersects(_playerBounds)) {
+    auto &_spaceObjects = spaceObjectManager_.spaceObjects_;
+    for (auto& spaceObject : _spaceObjects) {
+        sf::Vector2f centerSpaceObject =spaceObject->getPos();
+        sf::Vector2f centerPlayer = playerManager_.player_->getPos();
 
+        float distance = sqrt(pow(centerSpaceObject.x - centerPlayer.x, 2) +
+                              pow(centerSpaceObject.y - centerPlayer.y, 2));
+
+        if (distance < spaceObject->getRadius() + playerManager_.player_->getRadius()) {
             playerManager_.player_->setLinVel({0.f, 0.f});
+            // Wykryto kolizję
         }
     }
 }

@@ -1,7 +1,7 @@
 #include "Manager/PlayerManager.h"
 
 PlayerManager::PlayerManager(const AssetManager &assetManager, ProjectileManager &projectileManager, Grid &grid)
-    : player_(std::make_shared<Player>(sf::Vector2f(1500, 1500), // todo
+    : player_(std::make_shared<Player>(sf::Vector2f(1200, 1200), // todo
                                        assetManager.playerTextures_)),
     assetManager_(assetManager), grid_(grid), projectileManager_(projectileManager) {
     shootTimePlayer_ = 0.2f;
